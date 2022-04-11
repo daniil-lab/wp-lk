@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { HidePreloader, ShowPreloader } from "Redux/Actions";
 import { GetUserToken } from "Redux/Selectors";
+import { AppDispatch } from "Redux/Store";
 import axios from "Utils/Axios";
 import { API_URL } from "Utils/Config";
 import { ISubscription, ISubscriptionGroup } from "./Interfaces";
@@ -80,9 +82,14 @@ export const useGetSubscriptionGroups = () => {
 export const useGetSubscriptionGroupsById = (id: string) => {
   const [subscriptionGroup, setSubscriptionGroup] =
     useState<ISubscriptionGroup>();
-  const [load, setLoad] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const dispatch = useDispatch<AppDispatch>();
+
   const get = async (): Promise<void> => {
     try {
+      dispatch(ShowPreloader());
+
       const { data } = await axios.get(
         `${API_URL}api/v1/subscription-variant/group/${id}/`
       );
@@ -96,9 +103,11 @@ export const useGetSubscriptionGroupsById = (id: string) => {
           (a: ISubscription, b: ISubscription) => a.price - b.price
         ),
       });
-      setLoad(true);
     } catch (error: any) {
       console.log(error.message);
+    } finally {
+      dispatch(HidePreloader());
+      setIsLoading(false);
     }
   };
   const init = async (): Promise<void> => {
@@ -109,6 +118,6 @@ export const useGetSubscriptionGroupsById = (id: string) => {
   }, []);
   return {
     subscriptionGroup,
-    load,
+    isLoading,
   };
 };

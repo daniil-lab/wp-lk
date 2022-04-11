@@ -17,10 +17,7 @@
   }
 
   &-list {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    height: 35px;
+    max-height: 200px;
     flex: 1;
     overflow: hidden;
     position: relative;

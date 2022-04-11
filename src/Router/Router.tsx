@@ -39,33 +39,35 @@ const Router: React.FunctionComponent<Props> = (props: Props) => {
   }, []);
 
   return (
-    <React.Fragment>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<LoginLayer />} />
-          <Route
-            path="/"
-            element={
-              <RequireAuth>
-                <PersonalAreaLayer />
-              </RequireAuth>
-            }
-          >
-            <Route path="/" element={<Main />} />
-            <Route path="/budget" element={<Budget />} />
-            <Route path="/bonuscards" element={<BonusСards />} />
-            <Route path="/cardscan" element={<CardScan />} />
-            <Route path="/support" element={<Support />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/sub/:id" element={<Sub />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+    <>
+      {load && (
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<LoginLayer />} />
+            <Route
+              path="/"
+              element={
+                <RequireAuth>
+                  <PersonalAreaLayer />
+                </RequireAuth>
+              }
+            >
+              <Route path="/" element={<Main />} />
+              <Route path="/budget" element={<Budget />} />
+              <Route path="/bonuscards" element={<BonusСards />} />
+              <Route path="/cardscan" element={<CardScan />} />
+              <Route path="/support" element={<Support />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/sub/:id" element={<Sub />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      )}
 
       <Preloader show={isPreloader} />
       <Splash {...{ load }} />
       <Toast />
-    </React.Fragment>
+    </>
   );
 };
 
