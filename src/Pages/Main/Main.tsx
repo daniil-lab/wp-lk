@@ -31,7 +31,6 @@ const Main: React.FunctionComponent<Props> = (props: Props) => {
       </h1>
       <div className="app-card">
         <div className="app-card-header">
-          <div className="content-section-title">Операции</div>
           <div
             className="content-section-controll"
             onClick={() => setShowAddOperationModal(true)}
@@ -44,7 +43,6 @@ const Main: React.FunctionComponent<Props> = (props: Props) => {
       </div>
       <div className="app-card">
         <div className="app-card-header">
-          <div className="content-section-title">Балансы</div>
           <div
             className="content-section-controll"
             onClick={() => setShowBillModal(true)}
@@ -57,7 +55,9 @@ const Main: React.FunctionComponent<Props> = (props: Props) => {
       </div>
       <div className="app-card">
         <div className="app-card-header">
-          <div className="content-section-title">Категории</div>
+          <div className="content-section-title">
+            <h1>Категории</h1>
+          </div>
           <div>
             <ContextButton
               button={

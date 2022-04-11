@@ -149,7 +149,7 @@ export interface ISubscription {
 export interface ISubscriptionGroup {
   id: string;
   name: string;
-  variants: ISubscription[]
+  variants: ISubscription[];
 }
 
 export type IFiles = {

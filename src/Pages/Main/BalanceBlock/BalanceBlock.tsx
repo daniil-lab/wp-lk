@@ -18,6 +18,7 @@ const BalanceBlock: React.FC = () => {
       {...{ load: loadBill && loadTinkoffCards && loadSberCards }}
       className="balance-block"
     >
+      <h1 className="balance-block-title">Балансы</h1>
       <BalanceBlockItem
         className="general"
         title="Общий баланс"

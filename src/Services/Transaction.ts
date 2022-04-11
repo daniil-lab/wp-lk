@@ -15,22 +15,23 @@ import {
   ITransaction,
   OperationParamsType,
   UserTranscationsType,
-  TransactionsSorted
+  TransactionsSorted,
 } from "./Interfaces";
 
 import ArrayGroups from "Utils/ArrayGroups";
 
-import Category from "./Category"
-
+import Category from "./Category";
 
 const useGetTransaction = () => {
-  const userId = useSelector(GetUserId)
+  const userId = useSelector(GetUserId);
 
-  const [load, setLoad] = useState<boolean>(false)
+  const [load, setLoad] = useState<boolean>(false);
 
-  const [selectedDate, setSelectedDate] = useState<string[]>([moment().format("YYYY-MM-DD")])
+  const [selectedDate, setSelectedDate] = useState<string[]>([
+    moment().format("YYYY-MM-DD"),
+  ]);
 
-  const [transactions, setTransactions] = useState<TransactionsSorted[]>([])
+  const [transactions, setTransactions] = useState<TransactionsSorted[]>([]);
 
   const filterByDate = (v: TransactionsSorted) => selectedDate.includes(v.date);
 
@@ -43,7 +44,7 @@ const useGetTransaction = () => {
           .reduce((x, y) => x + y.amount, 0)
       )
       .reduce((x, y) => x + y, 0);
-  }, [selectedDate])
+  }, [selectedDate]);
 
   const expenses = useMemo(() => {
     return transactions
@@ -54,12 +55,10 @@ const useGetTransaction = () => {
           .reduce((x, y) => x + y.amount, 0)
       )
       .reduce((x, y) => x + y, 0);
+  }, [selectedDate]);
 
-  }, [selectedDate])
-
-
-  const setDate = (dates: string[]): void => setSelectedDate(dates.map((i) => moment(i).format("YYYY-MM-DD")))
-
+  const setDate = (dates: string[]): void =>
+    setSelectedDate(dates.map((i) => moment(i).format("YYYY-MM-DD")));
 
   const filterdTransactions = useMemo(() => {
     const f = transactions.filter(filterByDate);
@@ -68,21 +67,19 @@ const useGetTransaction = () => {
     else return [];
   }, [selectedDate, transactions]);
 
-
   const prices = useMemo(() => {
-    const f = transactions.find(filterByDate)?.transactions.map((t) => t.amount);
-    if (f) return f;
+    const f = transactions
+      .find(filterByDate)
+      ?.transactions.map((t) => t.amount);
+    if (f) return f as number[] | string[];
     else return [];
   }, [selectedDate, transactions]);
-
-
 
   const sorted = (array: UserTranscationsType[]): TransactionsSorted[] => {
     const sortedTransactionByGroup = ArrayGroups(array);
     const sortedTransactionByDate = sortedTransactionByGroup.sort(
       (x, y) =>
-        <any>moment(y.date).format("L") -
-        <any>moment(x.date).format("L")
+        <any>moment(y.date).format("L") - <any>moment(x.date).format("L")
     );
     return sortedTransactionByDate;
   };
@@ -93,15 +90,15 @@ const useGetTransaction = () => {
         `${API_URL}api/v1/transaction/user/${userId}?page=0&pageSize=100`
       );
       if (res.data.status === 200) {
-        return res.data.data.page
+        return res.data.data.page;
       } else {
         throw new Error(res.data.message);
       }
     } catch (error: any) {
-      console.log(error)
-      return []
+      console.log(error);
+      return [];
     }
-  }
+  };
 
   const getTinkoffTransactions = async (): Promise<ITinkoffTransaction[]> => {
     try {
@@ -109,68 +106,66 @@ const useGetTransaction = () => {
       if (res.data.status === 200) {
         const cards = res.data.data;
 
-        let array: ITinkoffTransaction[] = []
+        let array: ITinkoffTransaction[] = [];
 
         for (let i = 0; i < cards.length; i++) {
           const tr = await axios.get(
             `${API_URL}api/v1/tinkoff/transactions/${cards[i].id}?page=0&pageSize=100`
           );
-          array = [...array, ...tr.data.data.page]
+          array = [...array, ...tr.data.data.page];
         }
-        return array
+        return array;
       } else {
         throw new Error(res.data.message);
       }
-
     } catch (error: any) {
-      console.log(error)
-      return []
+      console.log(error);
+      return [];
     }
-  }
+  };
 
   const get = async (): Promise<void> => {
-    const ordinaryTransactions = await getOrdinaryTransactions()
-    const tinkoffTransactions = await getTinkoffTransactions()
+    const ordinaryTransactions = await getOrdinaryTransactions();
+    const tinkoffTransactions = await getTinkoffTransactions();
 
-    const t: UserTranscationsType[] = []
+    const t: UserTranscationsType[] = [];
 
     for (let i = 0; i < ordinaryTransactions.length; i++) {
-      const transaction = ordinaryTransactions[i]
+      const transaction = ordinaryTransactions[i];
       t.push({
         action: transaction.action,
         category: transaction.category ?? null,
         date: transaction.createAt,
         currency: transaction.currency,
         amount: transaction.sum,
-        title: transaction.bill.name
-      })
+        title: transaction.bill.name,
+      });
     }
 
     for (let i = 0; i < tinkoffTransactions.length; i++) {
-      const transaction = tinkoffTransactions[i]
+      const transaction = tinkoffTransactions[i];
       t.push({
         action: transaction.transactionType,
         category: null,
         date: transaction.date,
         currency: transaction.currency,
         amount: transaction.amount.amount,
-        title: "Tinkoff"
-      })
+        title: "Tinkoff",
+      });
     }
 
-    const sort = sorted(t)
+    const sort = sorted(t);
 
-    setTransactions(sort)
+    setTransactions(sort);
 
-    setLoad(true)
-  }
+    setLoad(true);
+  };
 
-  const init = async (): Promise<void> => await get()
+  const init = async (): Promise<void> => await get();
 
   useEffect(() => {
-    init()
-  }, [])
-
+    init();
+  }, []);
 
   return {
     load,
@@ -180,27 +175,26 @@ const useGetTransaction = () => {
     prices,
     allTransactions: transactions,
     income,
-    expenses
-  }
-}
+    expenses,
+  };
+};
 
 const useGetBudget = () => {
+  const { allTransactions: transactions } = useGetTransaction();
 
-  const { allTransactions: transactions, } = useGetTransaction()
+  const { useGetCategory } = Category;
+  const { categories, load } = useGetCategory();
 
-  const { useGetCategory } = Category
-  const { categories, load } = useGetCategory()
-
-
-  const [selectedMonth, setSelectedMonth] = useState<string>(moment().format("YYYY-MM-DD"))
-
-
+  const [selectedMonth, setSelectedMonth] = useState<string>(
+    moment().format("YYYY-MM-DD")
+  );
 
   const prev = (): void => {
     let currentDate = moment(selectedMonth);
-    setSelectedMonth(moment(currentDate).subtract(1, "months").format("YYYY-MM-DD"))
+    setSelectedMonth(
+      moment(currentDate).subtract(1, "months").format("YYYY-MM-DD")
+    );
   };
-
 
   const next = (): void => {
     let currentDate = moment(selectedMonth);
@@ -213,52 +207,53 @@ const useGetBudget = () => {
     ) {
       futureMonth = futureMonth.add(1, "d");
     }
-    setSelectedMonth(futureMonth.format("YYYY-MM-DD"))
+    setSelectedMonth(futureMonth.format("YYYY-MM-DD"));
   };
 
-
-
-
   const expenses = useMemo(() => {
+    const f = transactions
+      .filter(
+        (transaction) =>
+          transaction.date.split("-")[1] === selectedMonth.split("-")[1] &&
+          transaction.date.split("-")[0] === selectedMonth.split("-")[0]
+      )
+      .map((t) => t.transactions);
 
-    const f = transactions.filter(transaction => transaction.date.split("-")[1] === selectedMonth.split("-")[1] && transaction.date.split("-")[0] === selectedMonth.split("-")[0]).map(t => t.transactions)
+    const merged = f.flat(1);
 
-    const merged = f.flat(1)
+    const exp = merged.filter(
+      (t) => t.action === "WITHDRAW" || t.action === "SPEND"
+    );
 
-    const exp = merged.filter(t => t.action === "WITHDRAW" || t.action === "SPEND")
-
-    const amount = exp.length > 0 ? exp.map(item => item.amount).reduce((prev, next) => prev + next) : 0
+    const amount =
+      exp.length > 0
+        ? exp.map((item) => item.amount).reduce((prev, next) => prev + next)
+        : 0;
 
     console.log({
       array: exp,
-      amount
-    })
+      amount,
+    });
 
-    return "expenses"
-  }, [selectedMonth])
+    return "expenses";
+  }, [selectedMonth]);
 
   useEffect(() => {
     if (load) {
-      console.log("categories", categories)
+      console.log("categories", categories);
     }
-  }, [load])
-
-
-
+  }, [load]);
 
   return {
     selectedMonth,
     expenses,
     prev,
-    next
-  }
-}
-
+    next,
+  };
+};
 
 const useAddOperation = (OperationParams: OperationParamsType) => {
-
   const OperationAdd = async (): Promise<void> => {
-
     const {
       bill,
       operationType,
@@ -272,22 +267,22 @@ const useAddOperation = (OperationParams: OperationParamsType) => {
     const data =
       operationType === "WITHDRAW"
         ? {
-          amount: summ,
-          cents: 0,
-          description: description,
-          categoryId: selectedCategory?.id,
-          lon: location![1],
-          lat: location![0],
-          placeName: "string",
-          time: `${date}T16:23:25.356Z`,
-        }
+            amount: summ,
+            cents: 0,
+            description: description,
+            categoryId: selectedCategory?.id,
+            lon: location![1],
+            lat: location![0],
+            placeName: "string",
+            time: `${date}T16:23:25.356Z`,
+          }
         : {
-          amount: summ,
-          cents: 0,
-          description: description,
-          categoryId: selectedCategory?.id,
-          time: `${date}T16:23:25.356Z`,
-        };
+            amount: summ,
+            cents: 0,
+            description: description,
+            categoryId: selectedCategory?.id,
+            time: `${date}T16:23:25.356Z`,
+          };
 
     try {
       const url =
@@ -308,11 +303,8 @@ const useAddOperation = (OperationParams: OperationParamsType) => {
   return { OperationAdd };
 };
 
-
-
-
 export default {
   useGetTransaction,
   useAddOperation,
-  useGetBudget
-}
+  useGetBudget,
+};

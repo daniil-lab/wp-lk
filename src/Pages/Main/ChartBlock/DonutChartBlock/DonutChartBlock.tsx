@@ -29,7 +29,7 @@ const DonutChartBlock: React.FunctionComponent<Props> = (props: Props) => {
           cy="21"
           r="15"
           fill="transparent"
-          stroke="rgba(255, 255, 255, 0.25)"
+          stroke="rgba(255, 255, 255, 1)"
           strokeWidth="7"
         ></circle>
         {chartData.map((p, i) => {
@@ -68,7 +68,7 @@ const DonutChartBlock: React.FunctionComponent<Props> = (props: Props) => {
                 fill="#F0187B"
               />
             </svg>
-            -{props.expenses} ₽
+            {props.expenses} ₽
           </h4>
         </div>
       </div>

@@ -13,6 +13,7 @@ interface Props {
 }
 
 const CategoryItem: React.FunctionComponent<Props> = (props: Props) => {
+  console.log(props.icon);
   return (
     <div className="category-item">
       <div

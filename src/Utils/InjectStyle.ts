@@ -1,6 +1,6 @@
 const InjectStyle = (style: string) => {
   const styleElement: HTMLStyleElement = document.createElement("style");
-  let styleSheet = null;
+  let styleSheet: CSSStyleSheet | null = null;
 
   document.head.appendChild(styleElement);
 

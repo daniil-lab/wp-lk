@@ -1,10 +1,16 @@
 .chart-block-history {
-  background-color: rgba(255, 255, 255, 0.3);
   border-radius: 14px;
-  border: 1px solid var(--theme-bg-color);
   cursor: pointer;
   overflow-x: hidden;
   overflow-y: auto;
-  height: 322px;
   padding: 10px 0;
+  &-info span {
+    display: block;
+  }
+  &-item-subtitle {
+    color: #9c9aa8;
+  }
+  &-item-title {
+    text-transform: capitalize;
+  }
 }

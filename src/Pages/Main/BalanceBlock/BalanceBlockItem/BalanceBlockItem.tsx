@@ -21,12 +21,14 @@ const BalanceBlockItem: React.FunctionComponent<Props> = ({
 }: Props) => {
   return (
     <div className={`balance-block-item ${className}`}>
-      <img src={icon || WalletBalanceIcon} alt="Wallet icon" width={20} />
-      <div>
-        <span>{title}</span>
-        <span className="balance-block-item-subtitle">{subtitle ?? ""}</span>
+      <div className="balance-block-item-title">
+        <img src={icon || WalletBalanceIcon} alt="Wallet icon" width={20} />
+        <span className="balance-block-item-title-text">{title}</span>
+        {subtitle && (
+          <span className="balance-block-item-subtitle">{subtitle ?? ""}</span>
+        )}
       </div>
-      <span className="balance-block-item-amount">{price}</span>
+      <span className="balance-block-item-amount">{price} ₽</span>
     </div>
   );
 };
