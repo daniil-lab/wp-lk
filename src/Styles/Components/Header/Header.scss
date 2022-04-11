@@ -1,0 +1,19 @@
+.header {
+  grid-area: header;
+  height: 80px;
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  &__avatar {
+    border-radius: 50%;
+    & img {
+      width: 60px;
+      height: 60px;
+    }
+  }
+  &__icons {
+    display: flex;
+    margin-right: 50px;
+  }
+}

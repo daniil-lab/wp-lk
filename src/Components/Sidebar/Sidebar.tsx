@@ -41,7 +41,6 @@ const Sidebar: React.FunctionComponent<Props> = (props: Props) => {
       ))}
       <div className="sidebar__hr" />
       {Routes.supportRouters.map((route, index) => {
-        console.log(props.activeRoute, route.path);
         return (
           <SidebarRoute
             key={index}

@@ -144,6 +144,12 @@ textarea {
   padding: 20px;
 }
 
+*,
+*::after,
+*::before {
+  box-sizing: border-box;
+}
+
 // @font-face {
 //   font-family: "Montserrat Regular";
 //   src: local("Montserrat Regular"),

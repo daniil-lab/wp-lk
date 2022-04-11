@@ -10,6 +10,7 @@ const initialState: IUserState = {
 export default (state: IUserState = initialState, action: UserActionType) => {
   switch (action.type) {
     case SET_USER: {
+      console.log(action);
       return {
         ...state,
         ...action.payload,
