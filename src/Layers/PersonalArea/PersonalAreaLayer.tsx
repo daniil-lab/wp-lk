@@ -5,18 +5,20 @@ import Routes from "Utils/Routes";
 import Sidebar from "Components/Sidebar/Sidebar";
 
 import "Styles/Layers/PersonalArea/PersonalAreaLayer.scss";
-
+import WalletSideImage from "../../Static/Images/wallet-side.svg";
 interface Props {}
 
 const PersonalAreaLayer: React.FunctionComponent<Props> = (props: Props) => {
   const location = useLocation();
 
-  const [activeRoute, setActiveRoute] = useState<number>(0);
+  const [activeRoute, setActiveRoute] = useState<string | null>(null);
 
   useMemo(() => {
-    Routes.dashboardRoutes.forEach((route, idx) => {
-      if (location.pathname.includes(route.path)) setActiveRoute(idx);
-    });
+    [...Routes.dashboardRoutes, ...Routes.supportRouters].forEach(
+      (route, idx) => {
+        if (location.pathname.includes(route.path)) setActiveRoute(route.path);
+      }
+    );
   }, [location.pathname]);
 
   return (
@@ -25,6 +27,9 @@ const PersonalAreaLayer: React.FunctionComponent<Props> = (props: Props) => {
         <div className="wrapper">
           <div className="left-side">
             <Sidebar activeRoute={activeRoute} />
+            <div className="left-side__image">
+              <img src={WalletSideImage} aria-hidden="true" alt="" />
+            </div>
           </div>
           <Outlet />
         </div>

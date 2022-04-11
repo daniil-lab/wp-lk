@@ -25,24 +25,27 @@ const dashboardRoutes = [
     icon: BudgetIcon,
     component: Budget,
   },
-  // {
-  //   path: "/bonuscards",
-  //   name: "Бонусные карты",
-  //   icon: BonusСardsIcon,
-  //   component: BonusСards,
-  // },
-  // {
-  //   path: "/cardscan",
-  //   name: "Сканирование чеков",
-  //   icon: CardScanIcon,
-  //   component: CardScan,
-  // },
-  // {
-  //   path: "/support",
-  //   name: "Поддержка",
-  //   icon: SupportIcon,
-  //   component: Support,
-  // },
+  {
+    path: "/bonuscards",
+    name: "Бонусные карты",
+    icon: BonusСardsIcon,
+    component: BonusСards,
+  },
+  {
+    path: "/cardscan",
+    name: "Сканирование чеков",
+    icon: CardScanIcon,
+    component: CardScan,
+  },
+];
+
+const supportRouters = [
+  {
+    path: "/support",
+    name: "Поддержка",
+    icon: SupportIcon,
+    component: Support,
+  },
   {
     path: "/settings",
     name: "Настройки",
@@ -56,4 +59,5 @@ const loginRoutes: any = [];
 export default {
   dashboardRoutes,
   loginRoutes,
+  supportRouters,
 };

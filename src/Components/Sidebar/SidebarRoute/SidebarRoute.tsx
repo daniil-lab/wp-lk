@@ -25,7 +25,7 @@ const SidebarRoute: React.FunctionComponent<RouteProps> = (
   return props.type === "route" ? (
     <div
       onClick={_onClick}
-      className={`sidebar-route ${props.active && "active"}`}
+      className={`sidebar-route ${props.active && "sidebar-route_active"}`}
     >
       <img src={props.icon} alt={props.name} />
       <span>{props.name}</span>
@@ -33,7 +33,7 @@ const SidebarRoute: React.FunctionComponent<RouteProps> = (
   ) : (
     <div
       onClick={_logout}
-      className={`sidebar-route ${props.active && "active"}`}
+      className={`sidebar-route ${props.active && "sidebar-route_active"}`}
     >
       <img src={props.icon} alt={props.name} />
       <span>{props.name}</span>

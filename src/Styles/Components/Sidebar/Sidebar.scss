@@ -6,10 +6,19 @@
     gap: 0px 0px;
     justify-items: center;
     align-items: center;
+    margin-bottom: 30px;
+    margin-top: 10px;
+
     .sidebar-logo {
-      padding: 22px;
       width: 150px;
       height: 77.31px;
     }
+  }
+  &__hr {
+    width: calc(100% - 50px);
+    margin: 15px 0;
+    height: 1px;
+    padding-left: 25px;
+    background-color: #f3f7fb;
   }
 }

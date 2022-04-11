@@ -3,11 +3,7 @@
 
   "compilerOptions": {
     "target": "ESNext",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "strictDomEventTypes": false,
     "noImplicitAny": false,
     "allowJs": true,
@@ -31,11 +27,8 @@
       "Static": ["./src/Static/*"],
       "Layers": ["./src/Layers/*"],
       "Redux": ["./src/Redux/*"],
-      "Services": ["./src/Services/*"],
+      "Services": ["./src/Services/*"]
     }
   },
-  "include": [
-    "src"
-  ],
-
+  "include": ["src"]
 }

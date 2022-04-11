@@ -13,7 +13,7 @@ import { Logout } from "Redux/Actions";
 import Auth from "Services/Auth";
 
 interface Props {
-  activeRoute: number;
+  activeRoute: string | null;
 }
 
 const Sidebar: React.FunctionComponent<Props> = (props: Props) => {
@@ -35,10 +35,24 @@ const Sidebar: React.FunctionComponent<Props> = (props: Props) => {
           path={route.path}
           name={route.name}
           icon={route.icon}
-          active={props.activeRoute === index}
+          active={props.activeRoute === route.path}
           type="route"
         />
       ))}
+      <div className="sidebar__hr" />
+      {Routes.supportRouters.map((route, index) => {
+        console.log(props.activeRoute, route.path);
+        return (
+          <SidebarRoute
+            key={index}
+            path={route.path}
+            name={route.name}
+            icon={route.icon}
+            active={props.activeRoute === route.path}
+            type="route"
+          />
+        );
+      })}
       <div onClick={_logout}>
         <SidebarRoute
           name={"Выйти из аккаунта"}
