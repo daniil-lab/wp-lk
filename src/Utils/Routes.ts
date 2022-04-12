@@ -16,6 +16,7 @@ import WalletSideImage from "../Static/Images/wallet-side.svg";
 import WalletSideSettingsImage from "../Static/Images/wallet-side-settings.svg";
 import WalletSideBudgetImage from "../Static/Images/wallet-side-budget.svg";
 import WalletSideBonusImage from "../Static/Images/wallet-side-bonus.svg";
+import WalletSideSupportImage from "../Static/Images/wallet-side-support.svg";
 
 const dashboardRoutes = [
   {
@@ -53,7 +54,7 @@ const supportRouters = [
     path: "/support",
     name: "Поддержка",
     icon: SupportIcon,
-    sideIcon: WalletSideImage,
+    sideIcon: WalletSideSupportImage,
     component: Support,
   },
   {

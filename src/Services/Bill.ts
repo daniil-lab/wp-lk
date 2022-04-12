@@ -272,7 +272,6 @@ const useTinkoff = (
       if (data.status === 200) {
         setStatus("code");
         setId(data.data.id);
-        
       }
     } catch (error: any) {
       dispatch(

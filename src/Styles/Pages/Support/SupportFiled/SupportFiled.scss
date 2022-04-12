@@ -1,0 +1,10 @@
+.supportFiled {
+  span {
+    font-size: 14px;
+    color: #555555;
+  }
+  &-content {
+    margin-top: 10px;
+    display: flex;
+  }
+}
