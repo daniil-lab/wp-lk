@@ -55,7 +55,7 @@ const Main: React.FunctionComponent<Props> = (props: Props) => {
       </div>
       <div className="app-card">
         <div className="app-card-header">
-          <div className="content-section-title">
+          <div className="content-section-title content-section-category">
             <h1>Категории</h1>
           </div>
           <div>

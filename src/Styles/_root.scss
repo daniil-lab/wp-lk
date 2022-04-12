@@ -83,7 +83,7 @@ input {
   display: inherit;
   &-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     color: white;
   }
 }
@@ -95,6 +95,10 @@ input {
   position: relative;
   bottom: -40px;
   // margin-bottom: 14px;
+}
+.content-section-category {
+  bottom: 20px;
+  flex-grow: 1;
 }
 .content-section-controll {
   display: flex;

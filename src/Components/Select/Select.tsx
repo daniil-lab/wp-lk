@@ -21,7 +21,6 @@ const Select: React.FunctionComponent<Props> = ({
     handler(i);
     toggle(!expand);
   };
-  console.log(data);
   return (
     <div className="select" style={{ width }}>
       <div className="select-wrapper" onClick={() => toggle(!expand)}>

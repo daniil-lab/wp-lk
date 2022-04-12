@@ -30,7 +30,6 @@ const PersonalAreaLayer: React.FunctionComponent<Props> = (props: Props) => {
       }
     );
   }, [location.pathname]);
-  console.log(activeRoute);
   return (
     <div className="personal-area-layer" id="body">
       <div className="app">

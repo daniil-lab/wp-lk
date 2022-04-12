@@ -14,6 +14,7 @@ import CardScanIcon from "Static/icons/sidebar-card-scan.svg";
 
 import WalletSideImage from "../Static/Images/wallet-side.svg";
 import WalletSideSettingsImage from "../Static/Images/wallet-side-settings.svg";
+import WalletSideBudgetImage from "../Static/Images/wallet-side-budget.svg";
 
 const dashboardRoutes = [
   {
@@ -27,7 +28,7 @@ const dashboardRoutes = [
     path: "/budget",
     name: "Бюджет",
     icon: BudgetIcon,
-    sideIcon: WalletSideImage,
+    sideIcon: WalletSideBudgetImage,
     component: Budget,
   },
   {

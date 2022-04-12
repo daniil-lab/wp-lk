@@ -22,16 +22,17 @@ const CircleChart: React.FunctionComponent<Props> = ({
         r="15.9155"
         fill="transparent"
         stroke="#F2F2F2"
-        strokeWidth={7}
+        strokeWidth={4}
         strokeLinecap="round"
       />
       <circle
         cx="25"
         cy="25"
+        className="circleChart"
         r="15.9155"
         fill="transparent"
         stroke={color}
-        strokeWidth={7}
+        strokeWidth={4}
         strokeLinecap="round"
         strokeDasharray={"100 100"}
         strokeDashoffset={strokeDashoffset}
