@@ -173,6 +173,7 @@ export type OperationParamsType = {
   description: string | null;
   location: number[] | null;
   operationType: TransactionType;
+  qr: File | null;
 };
 
 export type UserTranscationsType = {

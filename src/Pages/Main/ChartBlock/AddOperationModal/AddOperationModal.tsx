@@ -1,21 +1,18 @@
-import React, { useEffect, useState } from "react";
-import useGetBaseCategory from "Services/BaseCategory";
-import Category from "Services/Category";
-import { IBaseCategory, TransactionType, IBalances } from "Services/Interfaces";
-import CalendarDark from "Static/icons/calendar-dark.svg";
-import { API_URL } from "Utils/Config";
-import HexToRgbA from "Utils/HexToRgbA";
-import ScanQr from "Static/icons/scan-qr.svg";
 import ContextButton from "Components/ContextButton/ContextButton";
 import DatePicker from "Components/DatePicker/DatePicker";
-import CategoryListModal from "./CategoryListModal/CategoryListModal";
-import BillList from "./BillList/BillList";
-import Bill from "Services/Bill";
 import Modal from "Components/Modal/Modal";
-import MapModal from "./MapModal/MapModal";
-import Transaction from "Services/Transaction";
-import "Styles/Pages/Main/ChartBlock/AddOperationModal/AddOperationModal.scss";
 import Select from "Components/Select/Select";
+import React, { useEffect, useState } from "react";
+import Bill from "Services/Bill";
+import Category from "Services/Category";
+import { IBalances, IBaseCategory, TransactionType } from "Services/Interfaces";
+import Transaction from "Services/Transaction";
+import CalendarDark from "Static/icons/calendar-dark.svg";
+import ScanQr from "Static/icons/scan-qr.svg";
+import "Styles/Pages/Main/ChartBlock/AddOperationModal/AddOperationModal.scss";
+import { API_URL } from "Utils/Config";
+import HexToRgbA from "Utils/HexToRgbA";
+import MapModal from "./MapModal/MapModal";
 
 interface Props {
   onClose: () => void;
@@ -51,6 +48,8 @@ const AddOperationModal: React.FunctionComponent<Props> = ({
 
   const [expand, setExpand] = useState<boolean>(false);
 
+  const [qr, setQr] = useState<File | null>(null);
+
   const onEnter = (v: string[]): void => {
     if (Array.isArray(v)) {
       setDate(v);
@@ -75,11 +74,11 @@ const AddOperationModal: React.FunctionComponent<Props> = ({
     description,
     location,
     operationType,
+    qr,
   });
 
   const _addOperation = async (): Promise<void> => {
-    await OperationAdd();
-    onClose();
+    await OperationAdd(onClose);
   };
 
   useEffect(() => {
@@ -105,7 +104,7 @@ const AddOperationModal: React.FunctionComponent<Props> = ({
       <div className="add-operation-modal-block">
         <span className="add-operation-modal-block-title">Тип операции</span>
         <div className="add-operation-modal-operation-type-container">
-          <label>
+          <label className="checkbox">
             <input
               type="radio"
               name="radio"
@@ -114,7 +113,7 @@ const AddOperationModal: React.FunctionComponent<Props> = ({
             />
             <span>Расход</span>
           </label>
-          <label>
+          <label className="checkbox">
             <input
               type="radio"
               name="radio"
@@ -220,10 +219,15 @@ const AddOperationModal: React.FunctionComponent<Props> = ({
         </div>
       </div>
 
-      <div className="add-operation-modal-scan">
+      <label className="add-operation-modal-scan">
         <img src={ScanQr} alt="Scan qr icon" />
-        <span>Сканировать чек</span>
-      </div>
+        <span>Загрузить чек</span>
+        <input
+          type="file"
+          onChange={(e) => setQr(e.target.files && e.target.files[0])}
+          style={{ display: "none" }}
+        />
+      </label>
 
       <div className="add-operation-modal-controll">
         <button className="button-secondary" onClick={onClose}>

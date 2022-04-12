@@ -1,26 +1,20 @@
-import axios from "Utils/Axios";
-
 import moment from "moment";
-
+import QrScanner from "qr-scanner";
 import { useEffect, useMemo, useState } from "react";
-
-import { useSelector } from "react-redux";
-
-import { GetUserId, GetUpdateOperations } from "Redux/Selectors";
-
+import { useDispatch, useSelector } from "react-redux";
+import { ShowToast } from "Redux/Actions";
+import { GetUserId } from "Redux/Selectors";
+import ArrayGroups from "Utils/ArrayGroups";
+import axios from "Utils/Axios";
 import { API_URL } from "Utils/Config";
-
+import Category from "./Category";
 import {
   ITinkoffTransaction,
   ITransaction,
   OperationParamsType,
-  UserTranscationsType,
   TransactionsSorted,
+  UserTranscationsType,
 } from "./Interfaces";
-
-import ArrayGroups from "Utils/ArrayGroups";
-
-import Category from "./Category";
 
 const useGetTransaction = () => {
   const userId = useSelector(GetUserId);
@@ -253,38 +247,109 @@ const useGetBudget = () => {
 };
 
 const useAddOperation = (OperationParams: OperationParamsType) => {
-  const OperationAdd = async (): Promise<void> => {
-    const {
-      bill,
-      operationType,
-      summ,
-      description,
-      selectedCategory,
-      location,
-      date,
-    } = OperationParams;
-    console.log(selectedCategory);
-    const data =
-      operationType === "WITHDRAW"
-        ? {
-            amount: summ,
-            cents: 0,
-            description: description,
-            categoryId: selectedCategory?.id,
-            lon: location![1],
-            lat: location![0],
-            placeName: "string",
-            time: `${date}T16:23:25.356Z`,
-          }
-        : {
-            amount: summ,
-            cents: 0,
-            description: description,
-            categoryId: selectedCategory?.id,
-            time: `${date}T16:23:25.356Z`,
+  const dispatch = useDispatch();
+
+  const OperationAdd = async (onSuccess: () => void): Promise<void> => {
+    try {
+      const {
+        bill,
+        operationType,
+        summ,
+        description,
+        selectedCategory,
+        location,
+        date,
+        qr,
+      } = OperationParams;
+
+      if (!date) {
+        throw new Error("Укажите дату");
+      }
+
+      if (!summ) {
+        throw new Error("Укажите сумму");
+      }
+
+      if (!location) {
+        throw new Error("Укажите местоположение");
+      }
+
+      if (qr) {
+        try {
+          const { data } = await QrScanner.scanImage(qr, {
+            returnDetailedScanResult: true,
+          });
+
+          const values = new URLSearchParams(data);
+          const t = values.get("t");
+
+          const params = {
+            sum: +(values.get("s") || 0) * 100,
+            fn: values.get("fn"),
+            operationType: values.get("n")?.substring(0, 1),
+            fiscalDocumentId: values.get("i"),
+            fiscalSign: values.get("fp"),
+            rawData: false,
           };
 
-    try {
+          if (t) {
+            const year = +t.substring(0, 4);
+            const month = +t.substring(4, 6);
+            const day = +t.substring(6, 8);
+            const hour = +t.substring(9, 11);
+            const minute = +t.substring(11, 13);
+
+            const date = new Date(year, month, day, hour, minute);
+
+            params["date"] = date;
+          }
+
+          const fns = await axios.get(`${API_URL}api/v1/fns/ticket-info`, {
+            params,
+          });
+
+          if (fns.data.status === 200) {
+            dispatch(
+              ShowToast({
+                text: "Чек загружен",
+                title: "Успешно",
+                type: "success",
+              })
+            );
+          } else {
+            throw new Error(fns.data.message);
+          }
+        } catch (error) {
+          dispatch(
+            ShowToast({
+              text: "Не удалось обработать чек",
+              title: "Ошибка",
+              type: "error",
+            })
+          );
+        }
+      }
+
+      const data =
+        operationType === "WITHDRAW"
+          ? {
+              amount: summ,
+              cents: 0,
+              description: description,
+              categoryId: selectedCategory?.id,
+              lon: location![1],
+              lat: location![0],
+              placeName: "string",
+              time: `${date}T16:23:25.356Z`,
+            }
+          : {
+              amount: summ,
+              cents: 0,
+              description: description,
+              categoryId: selectedCategory?.id,
+              time: `${date}T16:23:25.356Z`,
+            };
+
       const url =
         operationType === "WITHDRAW"
           ? `api/v1/bill/withdraw/${bill?.id}`
@@ -292,12 +357,25 @@ const useAddOperation = (OperationParams: OperationParamsType) => {
 
       const res = await axios.patch(`${API_URL}${url}`, data);
       if (res.data.status === 200) {
-        console.log(res.data.data);
+        dispatch(
+          ShowToast({
+            text: "Операция добавлена",
+            title: "Успешно",
+            type: "success",
+          })
+        );
+        onSuccess();
       } else {
         throw new Error(res.data.message);
       }
     } catch (error: any) {
-      console.log(error.message);
+      dispatch(
+        ShowToast({
+          text: error.message,
+          title: "Ошибка",
+          type: "error",
+        })
+      );
     }
   };
   return { OperationAdd };
