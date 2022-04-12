@@ -15,6 +15,7 @@ import CardScanIcon from "Static/icons/sidebar-card-scan.svg";
 import WalletSideImage from "../Static/Images/wallet-side.svg";
 import WalletSideSettingsImage from "../Static/Images/wallet-side-settings.svg";
 import WalletSideBudgetImage from "../Static/Images/wallet-side-budget.svg";
+import WalletSideBonusImage from "../Static/Images/wallet-side-bonus.svg";
 
 const dashboardRoutes = [
   {
@@ -35,7 +36,7 @@ const dashboardRoutes = [
     path: "/bonuscards",
     name: "Бонусные карты",
     icon: BonusСardsIcon,
-    sideIcon: WalletSideImage,
+    sideIcon: WalletSideBonusImage,
     component: BonusСards,
   },
   {

@@ -4,7 +4,7 @@ import "Styles/Components/TextButton/TextButton.scss";
 
 interface Props {
   title: string;
-  onClick: () => void;
+  onClick?: () => void;
   tintColor?: string;
 }
 

@@ -4,8 +4,8 @@ import "Styles/Components/IconButton/IconButton.scss";
 
 interface Props {
   icon: string;
-  alt: string;
-  onClick: () => void;
+  alt?: string;
+  onClick?: () => void;
 }
 
 const IconButton: React.FunctionComponent<Props> = (props: Props) => {
