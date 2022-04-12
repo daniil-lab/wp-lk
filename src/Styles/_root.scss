@@ -41,18 +41,18 @@ input {
 }
 
 .button-primary {
-  background-color: #3a6df0;
+  background-color: #f0187b;
   border: none;
-  padding: 14px 26px;
+  padding: 10px 20px;
   color: #fff;
-  border-radius: 20px;
+  border-radius: 15px;
   cursor: pointer;
   transition: 0.3s;
   white-space: nowrap;
   width: 100%;
   font-size: 14px;
   &:hover {
-    background-color: #3665da;
+    background-color: #c80d61;
   }
   &:disabled {
     opacity: 0.5;

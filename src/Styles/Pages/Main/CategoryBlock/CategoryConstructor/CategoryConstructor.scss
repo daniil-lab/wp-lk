@@ -37,6 +37,8 @@
     }
     input {
       height: 10px;
+      background-color: #eff3f8;
+      padding: 15px 10px;
     }
   }
   &-row {
@@ -46,6 +48,7 @@
     grid-template-columns: 1fr;
     grid-template-rows: 0.2fr 1.8fr;
     gap: 10px 0px;
+    color: #9c9aa8;
     grid-template-areas:
       "."
       ".";

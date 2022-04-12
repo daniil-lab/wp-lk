@@ -10,7 +10,7 @@ interface Props {
 }
 
 const Picker: React.FunctionComponent<Props> = ({ onChange, data }: Props) => {
-  const [value, setValue] = useState<string>('');
+  const [value, setValue] = useState<string>("");
 
   const onSlideChange = (swiper: any): void => setValue(data[swiper.realIndex]);
 
