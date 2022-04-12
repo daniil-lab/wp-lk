@@ -21,11 +21,12 @@ const Select: React.FunctionComponent<Props> = ({
     handler(i);
     toggle(!expand);
   };
-
+  console.log(data);
   return (
     <div className="select" style={{ width }}>
       <div className="select-wrapper" onClick={() => toggle(!expand)}>
-        <span>{value ?? "Не выбрано"}</span>
+        <span>$</span>
+        <span>{value ? "Валюта" : "Не выбрано"}</span>
         <svg
           id="select-arrow-down"
           viewBox="0 0 10 6"
@@ -40,11 +41,14 @@ const Select: React.FunctionComponent<Props> = ({
       )}
       {expand && (
         <div className={`options ${expand ? "active" : "hidden"}`}>
-          {data.map(({ label }, i) => {
+          {data.map(({ label, symbol }, i) => {
             return (
-              <span key={i} className="option" onClick={() => _handler(i)}>
-                {label}
-              </span>
+              <div className="select-content">
+                <span key={i} className="option" onClick={() => _handler(i)}>
+                  <span>{label}</span>
+                  <span>{symbol}</span>
+                </span>
+              </div>
             );
           })}
         </div>

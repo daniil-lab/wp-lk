@@ -4,6 +4,8 @@ import { ISubscriptionGroup } from "Services/Interfaces";
 import "Styles/Pages/Settings/SubscriptionBlock/SubscriptionItem/SubscriptionItem.scss";
 import SubscriptionItemLite from "./SubscriptionItemLite";
 
+import Logo from "../../../../Static/Images/Logo.svg";
+
 interface Props {
   subscriptionGroup: ISubscriptionGroup;
   list?: string[];
@@ -18,6 +20,12 @@ const SubscriptionItem: React.FC<Props> = ({ subscriptionGroup, list }) => {
 
   return (
     <div className="subscription-item">
+      <img
+        src={Logo}
+        className="subscription-item-logo"
+        aria-hidden="true"
+        alt=""
+      />
       <span className="subscription-item-title">{name}</span>
 
       <ul className="subscription-item-list">

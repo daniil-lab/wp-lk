@@ -26,7 +26,7 @@ const Main: React.FunctionComponent<Props> = (props: Props) => {
   return (
     <div className="main">
       <Header />
-      <h1 className="main__greet">
+      <h1 className="main__title">
         Добрый день{username ? `, ${username}!` : "!"}
       </h1>
       <div className="app-card">

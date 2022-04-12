@@ -5,13 +5,14 @@ import Routes from "Utils/Routes";
 import Sidebar from "Components/Sidebar/Sidebar";
 
 import "Styles/Layers/PersonalArea/PersonalAreaLayer.scss";
-import WalletSideImage from "../../Static/Images/wallet-side.svg";
 interface Props {}
 
 const PersonalAreaLayer: React.FunctionComponent<Props> = (props: Props) => {
   const location = useLocation();
 
   const [activeRoute, setActiveRoute] = useState<string | null>(null);
+
+  const [sideComponent, setSideComponent] = useState<string | null>(null);
 
   useMemo(() => {
     [...Routes.dashboardRoutes, ...Routes.supportRouters].forEach(
@@ -21,6 +22,15 @@ const PersonalAreaLayer: React.FunctionComponent<Props> = (props: Props) => {
     );
   }, [location.pathname]);
 
+  useMemo(() => {
+    [...Routes.dashboardRoutes, ...Routes.supportRouters].forEach(
+      (route, idx) => {
+        if (location.pathname.includes(route.path))
+          setSideComponent(route.sideIcon);
+      }
+    );
+  }, [location.pathname]);
+  console.log(activeRoute);
   return (
     <div className="personal-area-layer" id="body">
       <div className="app">
@@ -28,7 +38,7 @@ const PersonalAreaLayer: React.FunctionComponent<Props> = (props: Props) => {
           <div className="left-side">
             <Sidebar activeRoute={activeRoute} />
             <div className="left-side__image">
-              <img src={WalletSideImage} aria-hidden="true" alt="" />
+              <img src={sideComponent || ""} aria-hidden="true" alt="" />
             </div>
           </div>
           <Outlet />

@@ -3,7 +3,7 @@ import UserBlockWrapper from "./UserBlockWrapper/UserBlockWrapper";
 import Select from "Components/Select/Select";
 import useGetWallets from "Services/Wallets";
 import PhoneIcon from "Static/icons/phone.svg";
-import MailIcon from "Static/icons/mail.svg";
+import MailIcon from "Static/icons/mail-user.svg";
 import DownloadIcon from "Static/icons/download.svg";
 import RemoveIcon from "Static/icons/remove.svg";
 import PencilIcon from "Static/icons/pencil.svg";
@@ -75,11 +75,12 @@ const UserBlock: React.FunctionComponent<Props> = (props: Props) => {
           <span>Удалить данные</span>
         </div>
       </UserBlockWrapper>
-      <UserBlockWrapper title="Валюта">
+      <UserBlockWrapper title="Валюта" className="user-block-wrapper-currency">
         <Select
           value={wallet?.walletDisplayName ?? ""}
           data={wallets.map((i) => ({
             label: i.walletDisplayName,
+            symbol: i.walletSystemName,
           }))}
           handler={(index) => {}}
         />

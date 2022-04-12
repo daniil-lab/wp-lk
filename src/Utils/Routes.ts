@@ -12,29 +12,36 @@ import SupportIcon from "Static/icons/sidebar-support-icon.svg";
 import SettingsIcon from "Static/icons/sidebar-settings-icon.svg";
 import CardScanIcon from "Static/icons/sidebar-card-scan.svg";
 
+import WalletSideImage from "../Static/Images/wallet-side.svg";
+import WalletSideSettingsImage from "../Static/Images/wallet-side-settings.svg";
+
 const dashboardRoutes = [
   {
     path: "/",
     name: "Главная",
     icon: MainIcon,
     component: Main,
+    sideIcon: WalletSideImage,
   },
   {
     path: "/budget",
     name: "Бюджет",
     icon: BudgetIcon,
+    sideIcon: WalletSideImage,
     component: Budget,
   },
   {
     path: "/bonuscards",
     name: "Бонусные карты",
     icon: BonusСardsIcon,
+    sideIcon: WalletSideImage,
     component: BonusСards,
   },
   {
     path: "/cardscan",
     name: "Сканирование чеков",
     icon: CardScanIcon,
+    sideIcon: WalletSideImage,
     component: CardScan,
   },
 ];
@@ -44,6 +51,7 @@ const supportRouters = [
     path: "/support",
     name: "Поддержка",
     icon: SupportIcon,
+    sideIcon: WalletSideImage,
     component: Support,
   },
   {
@@ -51,6 +59,7 @@ const supportRouters = [
     name: "Настройки",
     icon: SettingsIcon,
     component: Settings,
+    sideIcon: WalletSideSettingsImage,
   },
 ];
 
