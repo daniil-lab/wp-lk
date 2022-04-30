@@ -11,6 +11,9 @@ import { ColorType, IconType } from "./Interfaces";
 export interface ICategory {
   id: string;
   name: string;
+  categorySpend: number,
+  categoryEarn: number;
+  onlyForEarn: boolean;
   color: {
     name: string;
     hex: string;
@@ -174,7 +177,7 @@ const addCategory = async (
         color: params.color.systemName,
         userId: userId,
         categoryLimit: 0,
-        onlyForEarn: true,
+        onlyForEarn: params.onlyForEarn,
       },
     });
 
@@ -192,6 +195,24 @@ const addCategory = async (
 
   return false
 };
+
+const setCategoryLimit = async (
+  categoryId: string,
+  dispatch: AppDispatch,
+  categoryLimit: number
+) => {
+  try {
+    const response = await axios({
+      method: "patch",
+      url: `${API_URL}api/v1/category/${categoryId}/`,
+      data: {
+        categoryLimit
+      }
+    })
+  } catch(e: any) {
+    console.log(e)
+  }
+}
 
 const deleteCategory = async (
   categoryId: string,
@@ -214,4 +235,5 @@ export default {
   useGetCategoryIcons,
   addCategory,
   deleteCategory,
+  setCategoryLimit
 };

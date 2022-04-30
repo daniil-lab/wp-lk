@@ -129,18 +129,18 @@ const Budget: React.FunctionComponent<Props> = (props: Props) => {
                         <span className="expense-income-card-content-title">
                           Сейчас
                         </span>
-                        <span>{income} ₽</span>
+                        <span>{selectedCategory?.categorySpend} ₽</span>
                         <span className="expense-income-card-content-title ">
                           Запланировано
                         </span>
-                        <span>{expenses} ₽</span>
+                        <span>{selectedCategory?.categoryLimit} ₽</span>
                       </div>
                       <div className="expense-income-card-bar">
                         <CircleChart
-                          strokeDashoffset={expenseCircle.strokeDashOffsetValue}
+                          strokeDashoffset={100 - (selectedCategory?.percentsFromLimit < 100 ? selectedCategory?.percentsFromLimit : 100)}
                           color="#F0187B"
                         />
-                        <div className="expense-income-card-bar-value">67%</div>
+                        <div className="expense-income-card-bar-value">{Math.round(selectedCategory?.percentsFromLimit)}%</div>
                       </div>
                     </div>
                   </div>

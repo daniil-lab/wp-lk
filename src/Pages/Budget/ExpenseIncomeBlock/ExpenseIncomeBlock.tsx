@@ -2,7 +2,9 @@ import CircleChart from "Components/CircleChart/CircleChart";
 import Dateslider from "Components/DateSlider/Dateslider";
 import LineChart from "Components/LineChart/LineChart";
 import Load from "Components/Load/Load";
-import React from "react";
+import React, { useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
+import { ShowToast } from "Redux/Actions";
 import "Styles/Pages/Budget/ExpenseIncomeBlock/ExpenseIncomeBlock.scss";
 import { API_URL } from "Utils/Config";
 import useCircleChart from "Utils/Hooks/useCircleChart";
@@ -29,19 +31,46 @@ const ExpenseIncomeBlock: React.FunctionComponent<Props> = ({
 }) => {
   const { load, categories } = Catigories.useGetCategory();
 
+  const [categoryLimit, setCategoryLimit] = useState<string>("")
+
   const expenseCircle = useCircleChart(
     expenses / selectedCategory?.categoryLimit
   );
   const incomeCircle = useCircleChart(income / selectedCategory?.categoryLimit);
+
+  useMemo(() => {
+    if (selectedCategory) {
+      if (selectedCategory.categoryLimit != 0)
+        setCategoryLimit(selectedCategory.categoryLimit)
+    }
+  }, [selectedCategory])
+
+  const dispatch = useDispatch();
+
+  const setLimit = async () => {
+    const limit = Number.parseInt(categoryLimit);
+
+    if (limit < 0 || limit > 1000000) {
+      dispatch(ShowToast({
+        type: "error",
+        title: "Ошибка",
+        text: "Неверный лимит"
+      }))
+
+      return
+    }
+    await Catigories.setCategoryLimit(selectedCategory.id, dispatch, limit)
+    window.location.reload()
+  }
   return (
     <div className="expense-income-block">
       <div className="expense-income-info">
         <Dateslider prev={prev} next={next} selectedDate={selectedDate} />
-        <div className="expense-income-card expense-income-wrapper">
+        {!selectedCategory?.onlyForEarn && <div className="expense-income-card expense-income-wrapper">
           <div className="expense-income-card-content">
             <span>Расход</span>
             <span className="expense-income-card-content-title">Сейчас</span>
-            <span>{expenses} ₽</span>
+            <span>{selectedCategory?.categorySpend} ₽</span>
             <span className="expense-income-card-content-title">
               Запланировано
             </span>
@@ -50,18 +79,16 @@ const ExpenseIncomeBlock: React.FunctionComponent<Props> = ({
           <div className="expense-income-card-bar">
             <CircleChart
               strokeDashoffset={
-                expenseCircle.strokeDashOffsetValue <= 0
-                  ? 0
-                  : expenseCircle.strokeDashOffsetValue
+                100 - (selectedCategory?.percentsFromLimit < 100 ? selectedCategory?.percentsFromLimit : 100)
               }
               color="#F0187B"
             />
             <div className="expense-income-card-bar-value">
-              {expenses / selectedCategory?.categoryLimit <= 100 || 0} %
+            {Math.round(selectedCategory?.percentsFromLimit)}%
             </div>
           </div>
-        </div>
-        <div className="expense-income-card expense-income-wrapper">
+        </div>}
+        {selectedCategory?.onlyForEarn && <div className="expense-income-card expense-income-wrapper">
           <div className="expense-income-card-content">
             <span>Доход</span>
             <span className="expense-income-card-content-title">Сейчас</span>
@@ -74,17 +101,37 @@ const ExpenseIncomeBlock: React.FunctionComponent<Props> = ({
           <div className="expense-income-card-bar">
             <CircleChart
               strokeDashoffset={
-                incomeCircle.strokeDashOffsetValue <= 0
-                  ? 0
-                  : incomeCircle.strokeDashOffsetValue
+                100 - (selectedCategory?.percentsFromLimit < 100 ? selectedCategory?.percentsFromLimit : 100)
               }
               color="#6A82FB"
             />
             <div className="expense-income-card-bar-value">
-              {income / selectedCategory?.categoryLimit <= 100 || 0} %
+              {selectedCategory?.percentsFromLimit}%
             </div>
           </div>
-        </div>
+        </div>}
+
+
+        {!selectedCategory?.onlyForEarn && <>
+          <div className="add-operation-modal-block">
+            <span className="add-operation-modal-block-title">
+              Управление лимитом для категории
+            </span>
+            <input
+              type="number"
+              value={categoryLimit}
+              onChange={(e) => setCategoryLimit(e.currentTarget.value)}
+              placeholder="Установить лимит на категорию"
+              className="add-operation-modal-input"
+            />
+          </div>
+
+          <button onClick={setLimit} style={{
+            width: "100%"
+          }} className="button-primary" type="submit">
+            Установить
+          </button>
+        </>}
       </div>
       <Load load={load}>
         <div className="expense-income-history expense-income-wrapper">
@@ -129,13 +176,13 @@ const ExpenseIncomeBlock: React.FunctionComponent<Props> = ({
                     </svg>
                   </div>
                   <span className="expense-income-history-row-info-amount">
-                    {data?.user?.plannedIncome} из {data?.categoryLimit} ₽
+                    {data?.categorySpend} из {data?.categoryLimit} ₽
                   </span>
                   <LineChart
                     value={
-                      data?.user?.plannedIncome / (data?.categoryLimit || 1)
+                      data?.percentsFromLimit
                     }
-                    color="#6A82FB"
+                    color={data?.percentsFromLimit < 100 ? "#6A82FB" : "red"}
                   />
                 </div>
               </div>
@@ -143,7 +190,7 @@ const ExpenseIncomeBlock: React.FunctionComponent<Props> = ({
           })}
         </div>
       </Load>
-    </div>
+    </div >
   );
 };
 

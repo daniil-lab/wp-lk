@@ -17,6 +17,7 @@ export type CategoryType = {
   color: ColorType | null;
   icon: IconType | null;
   name: string;
+  onlyForEarn: boolean;
 };
 
 const CategoryConstructor: React.FunctionComponent<Props> = (props: Props) => {
@@ -30,6 +31,7 @@ const CategoryConstructor: React.FunctionComponent<Props> = (props: Props) => {
     icon: null,
     color: null,
     name: "",
+    onlyForEarn: false
   });
 
   const setIcon = (icon: IconType): void => setCategory({ ...category, icon });
@@ -70,6 +72,23 @@ const CategoryConstructor: React.FunctionComponent<Props> = (props: Props) => {
       <div className="category-constructor-row">
         <span>Цвет</span>
         <ColorsBlock onColorChange={setColor} color={category.color} />
+      </div>
+      <div className="category-constructor-row">
+        <label className="checkbox">
+          <input
+            style={{
+              marginRight: 10
+            }}
+            type="radio"
+            name="radio"
+            checked={category.onlyForEarn}
+            onChange={(e) => setCategory({
+              ...category,
+              onlyForEarn: !category.onlyForEarn
+            })}
+          />
+          <span>Только для доходов</span>
+        </label>
       </div>
       <div className="category-constructor-controll">
         <button className="button-primary" onClick={handleStoreCategory}>

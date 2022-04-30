@@ -2,11 +2,11 @@ import ContextButton from "Components/ContextButton/ContextButton";
 import DatePicker from "Components/DatePicker/DatePicker";
 import Modal from "Components/Modal/Modal";
 import Select from "Components/Select/Select";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import Bill from "Services/Bill";
 import Category from "Services/Category";
-import { IBalances, IBaseCategory, TransactionType } from "Services/Interfaces";
+import { IBalances, IBaseCategory, ICategory, TransactionType } from "Services/Interfaces";
 import Transaction from "Services/Transaction";
 import CalendarDark from "Static/icons/calendar-dark.svg";
 import ScanQr from "Static/icons/scan-qr-nigger.svg";
@@ -34,6 +34,8 @@ const AddOperationModal: React.FC<Props> = ({
 
   const { categories, load } = useGetCategory();
   const { balances, load: loadBill } = useGetBill();
+  console.log(balances);
+  console.log(useGetBill())
 
   const [date, setDate] = useState<null | string[]>(null);
 
@@ -57,9 +59,31 @@ const AddOperationModal: React.FC<Props> = ({
 
   const [expand, setExpand] = useState<boolean>(false);
 
+  const [standartCategories, setStandartCategories] = useState<ICategory[]>([])
+
+  const [onlyForEarnCategories, setOnlyForEarnCategories] = useState<ICategory[]>([])
+
   useEffect(() => {
     initialSum && setSumm(initialSum);
   }, [initialSum]);
+
+  useMemo(() => {
+    if(categories) {
+      const standartArr: ICategory[] = []
+
+      const earnArr: ICategory[] = []
+
+      categories.forEach((category) => {
+        if(category.onlyForEarn)
+          earnArr.push(category)
+        else
+          standartArr.push(category)
+      })
+
+      setStandartCategories(standartArr);
+      setOnlyForEarnCategories(earnArr)
+    }
+  }, [categories])
 
   const onEnter = (v: string[]): void => {
     if (Array.isArray(v)) {
@@ -121,7 +145,12 @@ const AddOperationModal: React.FC<Props> = ({
               type="radio"
               name="radio"
               defaultChecked
-              onChange={(e) => setOperationType("WITHDRAW")}
+              onChange={(e) => {
+                if(operationType != "WITHDRAW") {
+                  setOperationType("WITHDRAW")
+                  setSelectedCategory(null)
+                }
+              }}
             />
             <span>Расход</span>
           </label>
@@ -129,7 +158,12 @@ const AddOperationModal: React.FC<Props> = ({
             <input
               type="radio"
               name="radio"
-              onChange={(e) => setOperationType("DEPOSIT")}
+              onChange={(e) => {
+                if(operationType != "DEPOSIT") {
+                  setOperationType("DEPOSIT")
+                  setSelectedCategory(null)
+                }
+              }}
             />
             <span>Доход</span>
           </label>
@@ -156,10 +190,10 @@ const AddOperationModal: React.FC<Props> = ({
           </div>
           <Select
             value={selectedCategory?.name ?? ""}
-            data={categories.map((i) => ({
-              label: i.name,
+            data={(operationType === "DEPOSIT" ? onlyForEarnCategories : standartCategories).map((i) => ({
+              label: i.name
             }))}
-            handler={(index) => setSelectedCategory(categories[index])}
+            handler={(index) => setSelectedCategory((operationType === "DEPOSIT" ? onlyForEarnCategories : standartCategories)[index])}
           />
         </div>
       </div>

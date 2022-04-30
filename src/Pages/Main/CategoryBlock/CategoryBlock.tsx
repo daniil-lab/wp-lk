@@ -24,6 +24,7 @@ const CategoryBlock: React.FC<Props> = ({ categories, load }) => {
           {categories.map((category, i) => {
             return (
               <CategoryItem
+                onlyForEarn={category.onlyForEarn}
                 key={i}
                 icon={category.icon.name}
                 color={category.color.hex}

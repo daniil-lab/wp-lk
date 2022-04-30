@@ -13,6 +13,7 @@ import {
 import { Buffer } from "buffer";
 
 import { API_URL } from "Utils/Config";
+import { base64encode } from "nodejs-base64";
 
 class Auth {
   dispatch: AppDispatch | undefined;
@@ -25,6 +26,42 @@ class Auth {
 
   private clearNumber(str: string): string {
     return str.replace(/[^0-9]/g, "");
+  }
+
+  public async createUser(username: string, password: string) {
+    if(this.dispatch) {
+      try {
+        this.dispatch(ShowPreloader());
+       
+        const response = await axios({
+          method: "post",
+          url: `${API_URL}api/v1/user/`,
+          data: {
+            username: "+" + this.clearNumber(username),
+            password: Buffer.from(password).toString("base64"),
+            walletType: "RUB",
+            type: "SYSTEM"
+          }
+        })
+
+        if (response.status === 201) {
+          this.dispatch(HidePreloader());
+          return true;
+        } else {
+          throw new Error(response.data.message);
+        }
+      } catch(e: any) {
+        this.dispatch(
+          ShowToast({
+            title: "Ошибка",
+            text: e.message,
+            type: "error",
+          })
+        );
+      } finally {
+        this.dispatch(HidePreloader())
+      }
+    }
   }
 
   public async ChekRegister(username: string): Promise<boolean | undefined> {
