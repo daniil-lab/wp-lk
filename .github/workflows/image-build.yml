@@ -22,5 +22,5 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: docker.pkg.github.com
-          repository: kyzinatra/wp-lk/wp-lk
+          repository: daniil-lab/wp-lk/wp-lk
           tag_with_ref: true
