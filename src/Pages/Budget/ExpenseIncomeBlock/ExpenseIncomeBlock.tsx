@@ -135,7 +135,7 @@ const ExpenseIncomeBlock: React.FunctionComponent<Props> = ({
       </div>
       <Load load={load}>
         <div className="expense-income-history expense-income-wrapper">
-          {categories.map((data, i) => {
+          {categories.sort((a, b) => b.categorySpend - a.categorySpend).map((data, i) => {
             return (
               <div
                 key={i}

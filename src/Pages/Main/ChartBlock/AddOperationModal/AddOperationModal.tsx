@@ -85,6 +85,12 @@ const AddOperationModal: React.FC<Props> = ({
     }
   }, [categories])
 
+  useMemo(() => {
+    if(standartCategories.length != 0 && operationType == "WITHDRAW") {
+        setSelectedCategory(standartCategories[0])
+    }
+  }, [standartCategories])
+
   const onEnter = (v: string[]): void => {
     if (Array.isArray(v)) {
       setDate(v);
@@ -118,7 +124,6 @@ const AddOperationModal: React.FC<Props> = ({
   };
 
   useEffect(() => {
-    if (load) setSelectedCategory(categories[0]);
     if (loadBill) setBill(balances[0]);
   }, [load, loadBill]);
 
