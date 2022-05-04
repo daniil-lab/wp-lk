@@ -7,9 +7,14 @@ const ITEM_HEIGHT = 30;
 interface Props {
   onChange: (v: string) => void;
   data: any[];
+  initialSlide: number;
 }
 
-const Picker: React.FunctionComponent<Props> = ({ onChange, data }: Props) => {
+const Picker: React.FunctionComponent<Props> = ({
+  onChange,
+  data,
+  initialSlide,
+}: Props) => {
   const [value, setValue] = useState<string>("");
 
   const onSlideChange = (swiper: any): void => setValue(data[swiper.realIndex]);
@@ -20,7 +25,7 @@ const Picker: React.FunctionComponent<Props> = ({ onChange, data }: Props) => {
 
   return (
     <Swiper
-      initialSlide={2}
+      initialSlide={initialSlide}
       onSlideChange={onSlideChange}
       direction="vertical"
       slidesPerView={3}

@@ -9,15 +9,20 @@ import AddModalBlank from "./AddModalBlank";
 
 interface Props {
   closeModal: () => void;
+  updateBonusCards: () => void;
 }
 
-const AddModal: React.FC<Props> = ({ closeModal }) => {
+const AddModal: React.FC<Props> = ({ closeModal, updateBonusCards }) => {
   const { bonusCardBlanks, isLoad } = useBonusCardBlanks();
   const [showAddCardModal, setShowAddCardModal] = useState(false);
   const [activeBlank, setActiveBlank] = useState<IBonusBlank | null>(null);
 
   const openAddCardModal = () => setShowAddCardModal(true);
-  const closeAddCardModal = () => setShowAddCardModal(false);
+  const closeAddCardModal = () => {
+    setActiveBlank(null);
+    setShowAddCardModal(false);
+    closeModal();
+  };
 
   return (
     <div className="bonus-add-modal">
@@ -43,7 +48,11 @@ const AddModal: React.FC<Props> = ({ closeModal }) => {
       </div>
 
       <Modal zIndex={11} show={showAddCardModal} onClose={closeAddCardModal}>
-        <AddCardModal blank={activeBlank} closeModal={closeAddCardModal} />
+        <AddCardModal
+          blank={activeBlank}
+          closeModal={closeAddCardModal}
+          updateBonusCards={updateBonusCards}
+        />
       </Modal>
     </div>
   );

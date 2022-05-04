@@ -1,47 +1,8 @@
 import { useEffect, useState } from "react";
 
-const colors = [
-  "#fd7f6f",
-  "#7eb0d5",
-  "#b2e061",
-  "#bd7ebe",
-  "#ffb55a",
-  "#ffee65",
-  "#beb9db",
-  "#fdcce5",
-  "#8bd3c7",
-  "#b30000",
-  "#7c1158",
-  "#4421af",
-  "#1a53ff",
-  "#0d88e6",
-  "#00b7c7",
-  "#5ad45a",
-  "#8be04e",
-  "#ebdc78",
-  "#e60049",
-  "#0bb4ff",
-  "#50e991",
-  "#e6d800",
-  "#9b19f5",
-  "#ffa300",
-  "#dc0ab4",
-  "#b3d4ff",
-  "#00bfa0",
-  "#ea5545",
-  "#f46a9b",
-  "#ef9b20",
-  "#edbf33",
-  "#ede15b",
-  "#bdcf32",
-  "#87bc45",
-  "#27aeef",
-  "#b33dc6",
-];
-
 type arcradius = { x: number; y: number };
 
-const CreateDonutChart = (data: (string | number)[]) => {
+const CreateDonutChart = (data: []) => {
   const [chartData, setChartData] = useState<Array<any>>([]);
 
   const arcradius = (
@@ -70,13 +31,13 @@ const CreateDonutChart = (data: (string | number)[]) => {
     const array = data;
 
     array.forEach((v, i) => {
-      total += +v;
+      total += +v.sum;
     });
 
     array.forEach((v, i) => {
       let tmp: any = {};
 
-      let p = ((+v + 1) / total) * 100;
+      let p = ((+v.sum + 1) / total) * 100;
 
       count += p;
 
@@ -101,13 +62,11 @@ const CreateDonutChart = (data: (string | number)[]) => {
         e.x.toFixed(decimals),
         e.y.toFixed(decimals),
       ].join(" ");
-      tmp.stroke =
-        v === 5
-          ? "transparent"
-          : colors[Math.floor(Math.random() * colors.length)];
+      tmp.stroke = v.color;
       arr.push(tmp);
       beg = end;
     });
+
     setChartData(arr);
   };
 

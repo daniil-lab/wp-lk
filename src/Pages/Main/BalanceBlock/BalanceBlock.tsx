@@ -1,67 +1,75 @@
 import Load from "Components/Load/Load";
+import { BillModel } from "Models/BillModel";
 import React from "react";
 import Bill from "Services/Bill";
+import { SelectedBillType } from "Services/Interfaces";
+import { BillType } from "Services/Transaction";
 import SberIcon from "Static/Images/sber.png";
 import TinkoffIcon from "Static/Images/tinkoff.png";
 import "Styles/Pages/Main/BalanceBlock/BalanceBlock.scss";
 import BalanceBlockItem from "./BalanceBlockItem/BalanceBlockItem";
 import CardBlockItem from "./CardBlockItem/CardBlockItem";
+import WalletIcon from "Static/icons/wallet.svg";
+import Image from "Components/Image/Image";
 
 interface Props {
-  setSelectedBill: (str: string | null) => void;
-  selectedBill: string | null;
+  data: BillModel[];
+  generalBalance: number;
+  load: boolean;
+  selected: string | null;
+  setBill: React.Dispatch<React.SetStateAction<string | null>>;
+  billType: BillType;
+  setBillType: React.Dispatch<React.SetStateAction<BillType>>;
 }
 
-const BalanceBlock: React.FC<Props> = ({ setSelectedBill, selectedBill }) => {
-  const { useGetBill, useGetTinkoffCards, useGetSberCards } = Bill;
-  const { load: loadBill, balances, generalBalance } = useGetBill();
-  const { load: loadTinkoffCards, cards: tinkoffCards } = useGetTinkoffCards();
-  const { load: loadSberCards, cards: sberCards } = useGetSberCards();
+const BalanceBlock: React.FC<Props> = (props: Props) => {
+  const { data, load, selected, setBill, generalBalance, setBillType } = props;
+  // const { useGetTinkoffCards, useGetSberCards } = Bill;
 
   return (
-    <Load
-      load={loadBill && loadTinkoffCards && loadSberCards}
-      className="balance-block"
-    >
+    <div className="balance-block">
       <h1 className="balance-block-title">Балансы</h1>
-      <BalanceBlockItem
-        onClick={() => setSelectedBill(null)}
-        className={!selectedBill ? "general" : ""}
-        title="Общий баланс"
-        price={generalBalance}
-      />
-      {balances.map((balance) => (
-        <BalanceBlockItem
-          onClick={(title) => setSelectedBill(title)}
-          key={balance.id}
-          title={balance.name}
-          price={balance.balance.amount}
-          className={selectedBill == balance.name ? "general" : ""}
-        />
-      ))}
-      {tinkoffCards.map((card) => (
-        <CardBlockItem
-          onClick={(title) => setSelectedBill(title)}
-          key={card.id}
-          title={card.bankName}
-          price={card.balance.amount}
-          subtitle={card.cardNumber}
-          icon={TinkoffIcon}
-          className={selectedBill == card.cardNumber ? "general" : ""}
-        />
-      ))}
-      {sberCards.map((card) => (
-        <CardBlockItem
-          key={card.id}
-          onClick={(title) => setSelectedBill(title)}
-          title={card.bankName}
-          price={card.balance.amount}
-          subtitle={card.cardNumber}
-          icon={SberIcon}
-          className={selectedBill == card.cardNumber ? "general" : ""}
-        />
-      ))}
-    </Load>
+      <Load
+        {...{ load }}
+        className={`${data.length === 0 && "bill-list-isEmpty"}`}
+      >
+        {data.length > 0 ? (
+          <React.Fragment>
+            <BalanceBlockItem
+              onClick={() => {
+                setBill(null);
+                setBillType("general");
+              }}
+              className={!selected ? "general" : ""}
+              title="Общий баланс"
+              price={generalBalance}
+              cents={0}
+            />
+            {data.map((bill) => (
+              <BalanceBlockItem
+                onClick={() => {
+                  setBill(bill.id);
+                  setBillType("bill");
+                }}
+                key={bill.id}
+                title={bill.name}
+                price={bill.balance.amount}
+                cents={bill.balance.cents}
+                className={selected == bill.id ? "general" : ""}
+              />
+            ))}
+          </React.Fragment>
+        ) : (
+          <div className="bill-list-isEmpty">
+            <Image
+              src={WalletIcon}
+              alt="Wallet"
+              frame={{ width: 100, height: 100 }}
+            />
+          </div>
+        )}
+      </Load>
+    </div>
   );
 };
 

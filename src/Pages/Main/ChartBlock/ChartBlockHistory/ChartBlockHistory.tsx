@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TransactionsSorted } from "Services/Interfaces";
+import { SelectedBillType, TransactionsSorted } from "Services/Interfaces";
 import ChartBlockHistoryWrapper from "./ChartBlockHistoryWrapper/ChartBlockHistoryWrapper";
 import ChartBlockHistoryItem from "./ChartBlockHistoryItem/ChartBlockHistoryItem";
 
@@ -9,60 +9,68 @@ import BellIcon from "../../../../Static/icons/bell.svg";
 import moment from "moment";
 import Modal from "Components/Modal/Modal";
 import DeleteModal from "Pages/Main/BalanceBlock/DeleteModal/DeleteModal";
+import { BillType } from "Services/Transaction";
+import { UseGetCategoryType } from "Services/Category";
 
 interface Props {
   transactions: TransactionsSorted[];
   selectedBill: string | null;
+  billType: BillType;
+  updateTransactions?: () => void;
+  categories: UseGetCategoryType;
 }
 
+const sortByDate = (a, b) => (moment(a.date).isAfter(moment(b.date)) ? -1 : 1);
+
 const ChartBlockHistory: React.FunctionComponent<Props> = (props: Props) => {
-  const { transactions, selectedBill } = props;
+  const { transactions, selectedBill, updateTransactions, categories } = props;
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [transactionId, setTransactionId] = useState<string | null>(null);
 
+  const existsCategory = (id: string): boolean => {
+    if (categories.categories.find((c) => c.id === id)) return true;
+    else return false;
+  };
+
   return (
     <div className="chart-block-history">
-      {transactions
-        .sort((a, b) => (moment(a.date).isAfter(moment(b.date)) ? -1 : 1))
-        .map((a) => ({
-          ...a,
-          transactions: a.transactions.filter(
-            (b) => !selectedBill || selectedBill == b.title
-          ),
-        }))
-        .map((g, i) => {
-          return (
-            <ChartBlockHistoryWrapper key={i} date={g.date}>
-              {g.transactions.map((transaction, k) => {
-                return (
-                  <ChartBlockHistoryItem
-                    key={k}
-                    type={transaction.action}
-                    icon={{
-                      color: transaction.category?.color.hex,
-                      path: transaction.category?.icon.name,
-                    }}
-                    title={transaction.title}
-                    // title={transaction.category?.name ?? transaction.bill.name}
-                    subtitle={"**** 1234"}
-                    price={transaction.amount}
-                    currency={transaction.currency}
-                    onClick={() => {
-                      setTransactionId(transaction.id);
-                      setShowDeleteModal(true);
-                    }}
-                  />
-                );
-              })}
-            </ChartBlockHistoryWrapper>
-          );
-        })}
+      {transactions.sort(sortByDate).map((g, i) => {
+        return g.transactions.length > 0 ? (
+          <ChartBlockHistoryWrapper key={i} date={g.date}>
+            {g.transactions.map((transaction, k) => {
+              return existsCategory(transaction.category.id) ? (
+                <ChartBlockHistoryItem
+                  key={k}
+                  transactionType={
+                    !selectedBill
+                      ? transaction.transactionType
+                      : transaction.action
+                  }
+                  icon={{
+                    color: transaction.category?.color.hex,
+                    path: transaction.category?.icon.name,
+                  }}
+                  title={transaction.category?.name ?? transaction?.description}
+                  subtitle={transaction?.bill?.name ?? transaction?.billName}
+                  price={transaction.sum}
+                  currency={transaction.currency}
+                  onClick={() => {
+                    setTransactionId(transaction.id);
+                    setShowDeleteModal(true);
+                  }}
+                />
+              ) : null;
+            })}
+          </ChartBlockHistoryWrapper>
+        ) : null;
+      })}
 
       <Modal show={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
         <DeleteModal
           closeModal={() => setShowDeleteModal(false)}
           transactionId={transactionId}
+          updateTransactions={updateTransactions}
         />
       </Modal>
     </div>

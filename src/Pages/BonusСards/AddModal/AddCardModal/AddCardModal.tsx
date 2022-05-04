@@ -2,25 +2,34 @@ import Load from "Components/Load/Load";
 import TextFieldPrimary from "Components/TextFieldPrimary/TextFieldPrimary";
 import BonusCardContext from "Context/BonusCardContext";
 import React, { useContext, useState } from "react";
+import { useAddBunusCard } from "Services/Bonuscard";
 import { IBonusBlank } from "Services/Interfaces";
 import { API_URL } from "Utils/Config";
 
 interface Props {
   blank: IBonusBlank | null;
   closeModal: () => void;
+  updateBonusCards: () => void;
 }
 
-const AddCardModal: React.FC<Props> = ({ blank, closeModal }) => {
-  const { createBonusCard } = useContext(BonusCardContext);
+const AddCardModal: React.FC<Props> = ({
+  blank,
+  closeModal,
+  updateBonusCards,
+}) => {
+  // const { createBonusCard } = useContext(BonusCardContext);
+  const addBunusCard = useAddBunusCard();
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     if (!blank) return;
-
-    createBonusCard(blank.id, code, closeModal);
+    await addBunusCard.createCard(blank.id, code);
+    setCode("");
+    setName("");
+    closeModal();
+    updateBonusCards();
   };
 
   return (

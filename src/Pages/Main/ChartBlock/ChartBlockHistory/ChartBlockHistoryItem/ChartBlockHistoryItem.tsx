@@ -6,7 +6,7 @@ import { API_URL } from "Utils/Config";
 import HexToRgbA from "Utils/HexToRgbA";
 
 interface Props {
-  type: TransactionType;
+  transactionType: TransactionType;
   price: string | number;
   title: string | undefined;
   subtitle: string;
@@ -47,9 +47,16 @@ const ChartBlockHistoryItem: React.FunctionComponent<Props> = (
       </div>
       <div className="chart-block-history-item-price-wrapper">
         <span>
-          {props.type === "WITHDRAW" || props.type === "SPEND"
-            ? `-${props.price} ${props.currency || "₽"}`
-            : `+${props.price} ${props.currency || "₽"}`}
+          {(props.transactionType === "SPEND" ||
+            props.transactionType === "WITHDRAW") &&
+            `-${props.price.toLocaleString("en-US", {
+              currency: props.currency ? props.currency : "RUB",
+            })} ${props.currency || "₽"}`}
+          {(props.transactionType === "EARN" ||
+            props.transactionType === "DEPOSIT") &&
+            `+${props.price.toLocaleString("en-US", {
+              currency: props.currency ? props.currency : "RUB",
+            })} ${props.currency || "₽"}`}
         </span>
       </div>
     </div>

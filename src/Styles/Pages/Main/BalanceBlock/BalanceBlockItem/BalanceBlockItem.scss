@@ -7,6 +7,9 @@
   margin-bottom: 20px;
   text-align: right;
   transition: background 0.1s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   &:active {
     background-color: rgba(0, 0, 0, 0.1);
   }

@@ -1,13 +1,12 @@
 .donut-chart-block-calendar {
-  display: grid;
-  grid-auto-columns: 1fr;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 0px 0px;
+  display: flex;
   align-items: center;
-  justify-items: end;
+  justify-content: center;
   z-index: 10;
-  margin-right: 10px;
+  height: 30px;
   span {
+    position: relative;
+    top: -2px;
     color: #333333;
   }
 }

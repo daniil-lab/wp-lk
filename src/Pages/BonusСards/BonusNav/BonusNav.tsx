@@ -8,9 +8,14 @@ import AddModal from "../AddModal/AddModal";
 interface BonusNavProps {
   bonusCards: IBonus[];
   setActiveCard: (card: IBonus | null) => void;
+  updateBonusCards: () => void;
 }
 
-const BonusNav: FC<BonusNavProps> = ({ bonusCards, setActiveCard }) => {
+const BonusNav: FC<BonusNavProps> = ({
+  bonusCards,
+  setActiveCard,
+  updateBonusCards,
+}) => {
   const [searchValue, setSearchValue] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [list, setList] = useState(bonusCards);
@@ -54,7 +59,10 @@ const BonusNav: FC<BonusNavProps> = ({ bonusCards, setActiveCard }) => {
           {list.map((card) => (
             <div
               className="bonuscard-search-item"
-              onClick={() => setActiveCard(card)}
+              onClick={() => {
+                setActiveCard(card);
+                setShowList(false);
+              }}
               key={card.id}
             >
               <img
@@ -83,7 +91,7 @@ const BonusNav: FC<BonusNavProps> = ({ bonusCards, setActiveCard }) => {
       </div>
 
       <Modal show={showAddModal} onClose={closeModal}>
-        <AddModal closeModal={closeModal} />
+        <AddModal closeModal={closeModal} updateBonusCards={updateBonusCards} />
       </Modal>
     </div>
   );

@@ -63,7 +63,6 @@ const Router: React.FunctionComponent<Props> = (props: Props) => {
           </Routes>
         </BrowserRouter>
       )}
-
       <Preloader show={isPreloader} />
       <Splash {...{ load }} />
       <Toast />

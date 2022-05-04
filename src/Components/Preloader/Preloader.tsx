@@ -12,7 +12,8 @@ const Preloader: React.FunctionComponent<Props> = (props: Props) => {
   return props.show ? (
     <div className={`preloader ${props.show && "active"}`}>
       <div className="preloader-wrapper">
-        <img src={Loader} />
+        {/* <img src={Loader} /> */}
+        <div className="loader"></div>
       </div>
     </div>
   ) : null;

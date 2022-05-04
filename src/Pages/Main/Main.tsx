@@ -3,8 +3,8 @@ import Header from "Components/Header/Header";
 import Modal from "Components/Modal/Modal";
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import Bill from "Services/Bill";
 import Category from "Services/Category";
+import { SelectedBillType } from "Services/Interfaces";
 import PlusCircleFill from "Static/icons/plus-circle-fill.svg";
 import "Styles/Pages/Main/Main.scss";
 import AddBillModal from "./BalanceBlock/AddBillModal/AddBillModal";
@@ -15,27 +15,28 @@ import CategoryConstructor from "./CategoryBlock/CategoryConstructor/CategoryCon
 import AddOperationModal from "./ChartBlock/AddOperationModal/AddOperationModal";
 import ChartBlock from "./ChartBlock/ChartBlock";
 
+import Bill from "Services/Bill";
+import Transaction from "Services/Transaction";
+
 interface Props {}
 
 const Main: React.FunctionComponent<Props> = (props: Props) => {
   const username = useSelector((state: any) => state?.user?.user?.username);
+  const bill = Bill.useGetBill();
+  const transaction = Transaction.useGetTransaction();
+  const categories = Category.useGetCategory();
+
+  // MARK : Modals
   const [showAddOperationModal, setShowAddOperationModal] =
     useState<boolean>(false);
-
   const [showBillModal, setShowBillModal] = useState<boolean>(false);
 
-  const [selectedBill, setSelectedBill] = useState<string | null>(null);
-  const { useGetCategory } = Category;
-  const { categories, load: isCategoriesLoad } = useGetCategory();
-  const { useGetBill } = Bill;
-  const { load: loadBill, balances } = useGetBill();
-
   const handleAddOperation = () => {
-    if (!!balances.length && !!categories.length) {
+    if (!!bill.data.length && !!categories.categories.length) {
       setShowAddOperationModal(true);
-    } else if (!!balances.length) {
+    } else if (!!bill.data.length) {
       alert("Добавьте категорию!");
-    } else if (!!categories.length) {
+    } else if (!!categories.categories.length) {
       alert("Добавьте счет!");
     } else {
       alert("Добавьте категорию и счет!");
@@ -58,7 +59,7 @@ const Main: React.FunctionComponent<Props> = (props: Props) => {
             <img src={PlusCircleFill} alt={"Plus icon"} />
           </div>
         </div>
-        <ChartBlock selectedBill={selectedBill} />
+        <ChartBlock transaction={transaction} categories={categories} />
       </div>
       <div className="app-card">
         <div className="app-card-header">
@@ -71,10 +72,16 @@ const Main: React.FunctionComponent<Props> = (props: Props) => {
           </div>
         </div>
         <BalanceBlock
-          selectedBill={selectedBill}
-          setSelectedBill={(str: string | null) => setSelectedBill(str)}
+          data={bill.data}
+          generalBalance={bill.generalBalance}
+          load={bill.load}
+          setBill={transaction.setBill}
+          selected={transaction.bill}
+          billType={transaction.billType}
+          setBillType={transaction.setBillType}
         />
       </div>
+      {/* MARK : Category list */}
       <div className="app-card">
         <div className="app-card-header">
           <div className="content-section-title content-section-category">
@@ -89,13 +96,21 @@ const Main: React.FunctionComponent<Props> = (props: Props) => {
                 </div>
               }
               content={(params, ctx) => (
-                <CategoryConstructor {...{ ...ctx, params }} />
+                <CategoryConstructor
+                  updateCategory={categories.updateCategory}
+                  {...{ ...ctx, params }}
+                />
               )}
             />
           </div>
         </div>
-        <CategoryBlock categories={categories} load={isCategoriesLoad} />
+        <CategoryBlock
+          categories={categories.categories}
+          load={categories.load}
+          updateCategory={categories.updateCategory}
+        />
       </div>
+      {/* MARK : Banner */}
       <div className="app-card" style={{ minHeight: "200px" }}>
         <Banner />
       </div>
@@ -103,10 +118,17 @@ const Main: React.FunctionComponent<Props> = (props: Props) => {
         show={showAddOperationModal}
         onClose={() => setShowAddOperationModal(false)}
       >
-        <AddOperationModal onClose={() => setShowAddOperationModal(false)} />
+        <AddOperationModal
+          onClose={() => setShowAddOperationModal(false)}
+          updateTransactions={transaction.updateTransactions}
+        />
       </Modal>
+
       <Modal show={showBillModal} onClose={() => setShowBillModal(false)}>
-        <AddBillModal onClose={() => setShowBillModal(false)} />
+        <AddBillModal
+          onClose={() => setShowBillModal(false)}
+          updateBill={bill.updateBill}
+        />
       </Modal>
     </div>
   );

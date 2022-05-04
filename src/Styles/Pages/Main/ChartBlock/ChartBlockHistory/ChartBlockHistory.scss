@@ -12,4 +12,13 @@
   &-item-title {
     text-transform: capitalize;
   }
+  &-isEmpty {
+    display: grid;
+    grid-auto-columns: 1fr;
+    gap: 0px 0px;
+    justify-items: center;
+    align-items: center;
+    height: 200px;
+    text-align: center;
+  }
 }

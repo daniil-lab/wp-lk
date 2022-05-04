@@ -10,7 +10,8 @@ import { API_URL } from "Utils/Config";
 import BonusNav from "./BonusNav/BonusNav";
 
 const BonusСards: React.FC = () => {
-  const { bonusCards, deleteBonusCard, createBonusCard } = useBonusCards();
+  const { bonusCards, deleteBonusCard, createBonusCard, updateBonusCards } =
+    useBonusCards();
 
   const [activeCard, setActiveCard] = useState<IBonus | null>(null);
 
@@ -24,7 +25,11 @@ const BonusСards: React.FC = () => {
         <div className="bonuscard-content">
           <Header />
           <h1 className="bonuscard__title main__title">Бонусные карты</h1>
-          <BonusNav setActiveCard={setActiveCard} bonusCards={bonusCards} />
+          <BonusNav
+            setActiveCard={setActiveCard}
+            bonusCards={bonusCards}
+            updateBonusCards={updateBonusCards}
+          />
           {bonusCards.length ? (
             <Load load={!!activeCard}>
               {activeCard && (

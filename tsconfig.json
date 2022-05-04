@@ -27,7 +27,8 @@
       "Static": ["./src/Static/*"],
       "Layers": ["./src/Layers/*"],
       "Redux": ["./src/Redux/*"],
-      "Services": ["./src/Services/*"]
+      "Services": ["./src/Services/*"],
+      "Models": ["./src/Models/*"]
     }
   },
   "include": ["src"]

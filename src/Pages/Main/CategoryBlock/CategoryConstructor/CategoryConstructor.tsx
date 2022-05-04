@@ -1,9 +1,9 @@
+import { ColorType, IconType } from "Models/CategoryModel";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GetUserId } from "Redux/Selectors";
 import { AppDispatch } from "Redux/Store";
 import Category from "Services/Category";
-import { ColorType, IconType } from "Services/Interfaces";
 import "Styles/Pages/Main/CategoryBlock/CategoryConstructor/CategoryConstructor.scss";
 import { API_URL } from "Utils/Config";
 import ColorsBlock from "./ColorsBlock/ColorsBlock";
@@ -11,6 +11,7 @@ import IconsBlock from "./IconsBlock/IconsBlock";
 
 interface Props {
   close: () => void;
+  updateCategory: () => void;
 }
 
 export type CategoryType = {
@@ -31,7 +32,7 @@ const CategoryConstructor: React.FunctionComponent<Props> = (props: Props) => {
     icon: null,
     color: null,
     name: "",
-    onlyForEarn: false
+    onlyForEarn: false,
   });
 
   const setIcon = (icon: IconType): void => setCategory({ ...category, icon });
@@ -41,6 +42,7 @@ const CategoryConstructor: React.FunctionComponent<Props> = (props: Props) => {
 
   const handleStoreCategory = async () => {
     const isAdded = await addCategory(category, userId!, dispatch);
+    props.updateCategory();
     isAdded && props.close();
   };
 
@@ -77,15 +79,17 @@ const CategoryConstructor: React.FunctionComponent<Props> = (props: Props) => {
         <label className="checkbox">
           <input
             style={{
-              marginRight: 10
+              marginRight: 10,
             }}
             type="radio"
             name="radio"
             checked={category.onlyForEarn}
-            onChange={(e) => setCategory({
-              ...category,
-              onlyForEarn: !category.onlyForEarn
-            })}
+            onChange={(e) =>
+              setCategory({
+                ...category,
+                onlyForEarn: !category.onlyForEarn,
+              })
+            }
           />
           <span>Только для доходов</span>
         </label>

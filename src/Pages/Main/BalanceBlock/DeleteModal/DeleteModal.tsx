@@ -1,24 +1,31 @@
 import React from "react";
-import { useTransaction } from "Services/Transaction";
+import Transactions from "Services/Transaction";
 import "Styles/Pages/Main/BalanceBlock/DeleteModal/DeleteModal.scss";
 
 interface Props {
   closeModal: () => void;
   transactionId: string | null;
   deleteOp?: () => void;
+  updateTransactions?: () => void;
+  updateCategory?: () => void;
 }
 
 const DeleteModal: React.FC<Props> = ({
   closeModal,
   transactionId,
   deleteOp,
+  updateTransactions,
+  updateCategory,
 }) => {
-  const { deleteTransaction } = useTransaction(transactionId);
+  const { deleteTransaction } =
+    Transactions.useRemoveTransaction(transactionId);
 
   const handleDeleteTransaction = () => {
     if (deleteOp) deleteOp();
     else deleteTransaction();
     closeModal();
+    if (updateTransactions) updateTransactions();
+    if (updateCategory) updateCategory();
   };
 
   return (

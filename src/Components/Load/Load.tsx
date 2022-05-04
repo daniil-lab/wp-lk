@@ -25,7 +25,8 @@ const Load: React.FunctionComponent<Props> = (props: Props) => {
     </div>
   ) : (
     <div className="load">
-      <img src={Loader} />
+      <div className="loader"></div>
+      {/* <img src={Loader} /> */}
     </div>
   );
 };

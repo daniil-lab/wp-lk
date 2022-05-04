@@ -2,11 +2,13 @@ import ContextButton from "Components/ContextButton/ContextButton";
 import DatePicker from "Components/DatePicker/DatePicker";
 import Modal from "Components/Modal/Modal";
 import Select from "Components/Select/Select";
+import { BillModel } from "Models/BillModel";
+import { BaseCategoryModel, CategoryModel } from "Models/CategoryModel";
+import { TransactionType } from "Models/TransactionModel";
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import Bill from "Services/Bill";
 import Category from "Services/Category";
-import { IBalances, IBaseCategory, ICategory, TransactionType } from "Services/Interfaces";
 import Transaction from "Services/Transaction";
 import CalendarDark from "Static/icons/calendar-dark.svg";
 import ScanQr from "Static/icons/scan-qr-nigger.svg";
@@ -20,6 +22,7 @@ interface Props {
   qr?: File;
   initialSum?: string;
   noQrLink?: boolean;
+  updateTransactions: () => void;
 }
 
 const AddOperationModal: React.FC<Props> = ({
@@ -27,69 +30,40 @@ const AddOperationModal: React.FC<Props> = ({
   qr,
   initialSum,
   noQrLink,
+  updateTransactions,
 }) => {
-  const { useAddOperation } = Transaction;
-  const { useGetBill } = Bill;
-  const { useGetCategory } = Category;
-
-  const { categories, load } = useGetCategory();
-  const { balances, load: loadBill } = useGetBill();
-  console.log(balances);
-  console.log(useGetBill())
-
   const [date, setDate] = useState<null | string[]>(null);
-
+  const [expand, setExpand] = useState<boolean>(false);
   const [operationType, setOperationType] =
     useState<TransactionType>("WITHDRAW");
-
   const [selectedCategory, setSelectedCategory] =
-    useState<IBaseCategory | null>(null);
-
-  const [bill, setBill] = useState<IBalances | null>(null);
-
+    useState<BaseCategoryModel | null>(null);
+  const [onlyForEarnCategories, setOnlyForEarnCategories] = useState<
+    CategoryModel[]
+  >([]);
+  const [standartCategories, setStandartCategories] = useState<CategoryModel[]>(
+    []
+  );
   const [summ, setSumm] = useState("");
-
+  const [bill, setBill] = useState<BillModel | null>(null);
   const [description, setDescription] = useState<string>("");
-
   const [placeName, setPlaceName] = useState<string>("");
-
   const [location, setLocation] = useState<number[] | null>(null);
-
   const [mapModal, setMapModal] = useState<boolean>(false);
 
-  const [expand, setExpand] = useState<boolean>(false);
-
-  const [standartCategories, setStandartCategories] = useState<ICategory[]>([])
-
-  const [onlyForEarnCategories, setOnlyForEarnCategories] = useState<ICategory[]>([])
-
-  useEffect(() => {
-    initialSum && setSumm(initialSum);
-  }, [initialSum]);
-
-  useMemo(() => {
-    if(categories) {
-      const standartArr: ICategory[] = []
-
-      const earnArr: ICategory[] = []
-
-      categories.forEach((category) => {
-        if(category.onlyForEarn)
-          earnArr.push(category)
-        else
-          standartArr.push(category)
-      })
-
-      setStandartCategories(standartArr);
-      setOnlyForEarnCategories(earnArr)
-    }
-  }, [categories])
-
-  useMemo(() => {
-    if(standartCategories.length != 0 && operationType == "WITHDRAW") {
-        setSelectedCategory(standartCategories[0])
-    }
-  }, [standartCategories])
+  const bills = Bill.useGetBill();
+  const category = Category.useGetCategory();
+  const { OperationAdd } = Transaction.useAddOperation({
+    bill,
+    date,
+    selectedCategory,
+    summ,
+    description,
+    location,
+    operationType,
+    qr,
+    placeName,
+  });
 
   const onEnter = (v: string[]): void => {
     if (Array.isArray(v)) {
@@ -107,25 +81,40 @@ const AddOperationModal: React.FC<Props> = ({
     setLocation(null);
   };
 
-  const { OperationAdd } = useAddOperation({
-    bill,
-    date,
-    selectedCategory,
-    summ,
-    description,
-    location,
-    operationType,
-    qr,
-    placeName,
-  });
-
   const _addOperation = async (): Promise<void> => {
     await OperationAdd(onClose);
+    updateTransactions();
   };
 
   useEffect(() => {
-    if (loadBill) setBill(balances[0]);
-  }, [load, loadBill]);
+    initialSum && setSumm(initialSum);
+  }, [initialSum]);
+
+  useMemo(() => {
+    if (category.categories) {
+      const standartArr: CategoryModel[] = [];
+
+      const earnArr: CategoryModel[] = [];
+
+      category.categories.forEach((category) => {
+        if (category.onlyForEarn) earnArr.push(category);
+        else standartArr.push(category);
+      });
+
+      setStandartCategories(standartArr);
+      setOnlyForEarnCategories(earnArr);
+    }
+  }, [category.load, category.categories]);
+
+  useMemo(() => {
+    if (standartCategories.length != 0 && operationType == "WITHDRAW") {
+      setSelectedCategory(standartCategories[0]);
+    }
+  }, [category.load, standartCategories]);
+
+  useEffect(() => {
+    if (bills.load) setBill(bills.data[0]);
+  }, [bills.load]);
 
   return (
     <div className="add-operation-modal">
@@ -151,9 +140,9 @@ const AddOperationModal: React.FC<Props> = ({
               name="radio"
               defaultChecked
               onChange={(e) => {
-                if(operationType != "WITHDRAW") {
-                  setOperationType("WITHDRAW")
-                  setSelectedCategory(null)
+                if (operationType != "WITHDRAW") {
+                  setOperationType("WITHDRAW");
+                  setSelectedCategory(null);
                 }
               }}
             />
@@ -164,9 +153,9 @@ const AddOperationModal: React.FC<Props> = ({
               type="radio"
               name="radio"
               onChange={(e) => {
-                if(operationType != "DEPOSIT") {
-                  setOperationType("DEPOSIT")
-                  setSelectedCategory(null)
+                if (operationType != "DEPOSIT") {
+                  setOperationType("DEPOSIT");
+                  setSelectedCategory(null);
                 }
               }}
             />
@@ -188,17 +177,28 @@ const AddOperationModal: React.FC<Props> = ({
               )} 100%)`,
             }}
           >
-            <img
-              src={`${API_URL}api/v1/image/content/${selectedCategory?.icon.name}`}
-              alt="Category base icon"
-            />
+            {selectedCategory != null && (
+              <img
+                src={`${API_URL}api/v1/image/content/${selectedCategory?.icon.name}`}
+                alt="Category base icon"
+              />
+            )}
           </div>
           <Select
             value={selectedCategory?.name ?? ""}
-            data={(operationType === "DEPOSIT" ? onlyForEarnCategories : standartCategories).map((i) => ({
-              label: i.name
+            data={(operationType === "DEPOSIT"
+              ? onlyForEarnCategories
+              : standartCategories
+            ).map((i) => ({
+              label: i.name,
             }))}
-            handler={(index) => setSelectedCategory((operationType === "DEPOSIT" ? onlyForEarnCategories : standartCategories)[index])}
+            handler={(index) =>
+              setSelectedCategory(
+                (operationType === "DEPOSIT"
+                  ? onlyForEarnCategories
+                  : standartCategories)[index]
+              )
+            }
           />
         </div>
       </div>
@@ -219,10 +219,10 @@ const AddOperationModal: React.FC<Props> = ({
           <span>{bill?.name}</span>
           <Select
             value={bill?.name ?? ""}
-            data={balances.map((i) => ({
+            data={bills.data.map((i) => ({
               label: i.name,
             }))}
-            handler={(index) => setBill(balances[index])}
+            handler={(index) => setBill(bills.data[index])}
           />
         </div>
       </div>
@@ -302,6 +302,7 @@ const AddOperationModal: React.FC<Props> = ({
       <Modal
         style={{
           padding: 0,
+          width: 400,
         }}
         zIndex={16}
         show={mapModal}

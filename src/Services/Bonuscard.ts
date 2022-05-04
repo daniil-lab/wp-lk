@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { HidePreloader, ShowPreloader, ShowToast } from "Redux/Actions";
 import { GetUserId } from "Redux/Selectors";
+import { AppDispatch } from "Redux/Store";
 import axios from "Utils/Axios";
 import { API_URL } from "Utils/Config";
 import { IBonus, IBonusBlank } from "./Interfaces";
@@ -13,13 +14,18 @@ export const useBonusCards = () => {
   const [bonusCards, setBonusCards] = useState<IBonus[]>([]);
   const [isLoad, setIsLoad] = useState<boolean>(false);
 
+  const [update, setUpdate] = useState<boolean | null>(null);
+
+  const updateBonusCards = (): void => {
+    if (update === null) setUpdate(true);
+    else setUpdate(!update);
+  };
+
   const getBonusCards = async () => {
     try {
       setIsLoad(false);
 
-      const { data } = await axios.get(
-        `${API_URL}api/v1/loyalty-card/user/?userId=${userId}`
-      );
+      const { data } = await axios.get(`${API_URL}api/v1/loyalty-card/user`);
 
       if (data.status === 200) {
         setBonusCards(data.data);
@@ -80,7 +86,7 @@ export const useBonusCards = () => {
     try {
       dispatch(ShowPreloader());
 
-      const response = await axios.post(`${API_URL}api/v1/loyalty-card/`, {
+      const response = await axios.post(`${API_URL}api/v1/loyalty-card`, {
         blankId,
         userId,
         data: code,
@@ -113,6 +119,12 @@ export const useBonusCards = () => {
   };
 
   useEffect(() => {
+    if (update != null) {
+      getBonusCards();
+    }
+  }, [update]);
+
+  useEffect(() => {
     getBonusCards();
   }, []);
 
@@ -121,7 +133,48 @@ export const useBonusCards = () => {
     isLoad,
     deleteBonusCard,
     createBonusCard,
+    updateBonusCards,
   };
+};
+
+export const useAddBunusCard = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const userId = useSelector(GetUserId);
+  const createCard = async (blankId, code): Promise<void> => {
+    try {
+      dispatch(ShowPreloader());
+
+      const response = await axios.post(`${API_URL}api/v1/loyalty-card/`, {
+        blankId,
+        userId,
+        data: code,
+      });
+
+      if (response.data.status === 201) {
+        dispatch(
+          ShowToast({
+            title: "Успешно",
+            text: "Карточка успешно создана",
+            type: "success",
+          })
+        );
+      } else {
+        throw new Error(response.data.message);
+      }
+    } catch (error: any) {
+      dispatch(
+        ShowToast({
+          title: "Ошибка",
+          text: error.message,
+          type: "error",
+        })
+      );
+    } finally {
+      dispatch(HidePreloader());
+    }
+  };
+
+  return { createCard };
 };
 
 export const useBonusCardBlanks = () => {

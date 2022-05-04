@@ -1,13 +1,11 @@
 import Load from "Components/Load/Load";
 import React, { useMemo } from "react";
 import Advertising from "Services/Advertising";
-
-import "Styles/Pages/Main/Banner/Banner.scss";
 import { API_URL } from "Utils/Config";
+import imageExists from "Utils/imageExists";
+import "Styles/Pages/Main/Banner/Banner.scss";
 
-interface Props {}
-
-const Banner: React.FunctionComponent<Props> = (props: Props) => {
+const Banner: React.FunctionComponent = () => {
   const { useGetAdvertising } = Advertising;
 
   const { load, advertising } = useGetAdvertising();
@@ -24,17 +22,24 @@ const Banner: React.FunctionComponent<Props> = (props: Props) => {
       {advertisingRandom && (
         <div className="banner">
           <div className="banner-image-wrapper">
-            {advertisingRandom.files.length > 0 && (
-              <img
-                src={`${API_URL}api/v1/advertising/content/${
+            {advertisingRandom.files.length > 0 ? (
+              imageExists(
+                `${API_URL}api/v1/advertising/content/${
                   advertisingRandom.files[
                     Math.floor(Math.random() * advertisingRandom.files.length)
                   ].path
-                }`}
-              />
-            )}
+                }`
+              ) ? (
+                <img
+                  src={`${API_URL}api/v1/advertising/content/${
+                    advertisingRandom.files[
+                      Math.floor(Math.random() * advertisingRandom.files.length)
+                    ].path
+                  }`}
+                />
+              ) : null
+            ) : null}
           </div>
-
           <div className="banner-content">
             <span>{advertisingRandom.title}</span>
             <span>{advertisingRandom.subTitle}</span>

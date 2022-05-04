@@ -15,6 +15,9 @@ const CircleChart: React.FunctionComponent<Props> = ({
       width={"100%"}
       height={"100%"}
       viewBox="0 0 50 50"
+      style={{
+        transform: "rotate(-90deg)",
+      }}
     >
       <circle
         cx="25"

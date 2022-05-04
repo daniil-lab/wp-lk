@@ -1,0 +1,16 @@
+.image {
+  -webkit-animation: fadeinImage 1.5s; /* Safari, Chrome and Opera > 12.1 */
+  -moz-animation: fadeinImage 1.5s; /* Firefox < 16 */
+  -ms-animation: fadeinImage 1.5s; /* Internet Explorer */
+  -o-animation: fadeinImage 1.5s; /* Opera < 12.1 */
+  animation: fadeinImage 1.5s;
+}
+
+@keyframes fadeinImage {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

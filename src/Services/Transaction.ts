@@ -1,272 +1,280 @@
 import moment from "moment";
-import QrScanner from "qr-scanner";
+import "moment/locale/ru";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { HidePreloader, ShowPreloader, ShowToast } from "Redux/Actions";
-import ArrayGroups from "Utils/ArrayGroups";
-import axios from "Utils/Axios";
+import { AppDispatch } from "Redux/Store";
 import { API_URL } from "Utils/Config";
-import Category from "./Category";
+import axios from "Utils/Axios";
 import {
-  ITinkoffTransaction,
-  ITransaction,
-  OperationParamsType,
-  TransactionsSorted,
-  UserTranscationsType,
-} from "./Interfaces";
+  AbstractTransactionModel,
+  TransactionModel,
+  TransactionsSortedModel,
+} from "Models/TransactionModel";
+import ArrayGroups from "Utils/ArrayGroups";
+import { OperationParamsType } from "./Interfaces";
+import QrScanner from "qr-scanner";
 
-const useGetTransaction = (selecterBill?: string | null) => {
+export type UseTransactionParams = {
+  load: boolean;
+  bill: string | null;
+  billType: BillType;
+  setBillType: React.Dispatch<React.SetStateAction<BillType>>;
+  setBill: React.Dispatch<React.SetStateAction<string | null>>;
+  date: {
+    date: string;
+    setStart: (date: string) => void;
+    setEnd: (date: string) => void;
+    nextMonth: () => void;
+    prevMonth: () => void;
+    startDate: string;
+    endDate: string;
+  };
+  transactions: TransactionsSortedModel[];
+  isLastMonth: boolean;
+  income: number;
+  expenses: number;
+  prices: any;
+  updateTransactions: () => void;
+};
+
+export type BillType = "general" | "bill";
+
+// MARK : Sorted transactions by groups date and min to max date
+const sorted = (
+  array: AbstractTransactionModel[] | TransactionModel[]
+): TransactionsSortedModel[] => {
+  const sortedTransactionByGroup = ArrayGroups(array);
+  const sortedTransactionByDate = sortedTransactionByGroup.sort(
+    (x, y) => <any>moment(y.date).format("L") - <any>moment(x.date).format("L")
+  );
+  return sortedTransactionByDate;
+};
+
+const useGetTransaction = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const [load, setLoad] = useState<boolean>(false);
-  const [income, setIncome] = useState<number>(0);
-  const [expenses, setExpenses] = useState<number>(0);
-  const [prices, setPreces] = useState<(string | number)[]>([]);
+  const [bill, setBill] = useState<string | null>(null);
+  const [billType, setBillType] = useState<BillType>("general");
+  const [data, setData] = useState<TransactionsSortedModel[]>([]);
+  const [startDate, setStartDate] = useState<string>(
+    `${moment().startOf("month").format("YYYY-MM-DD")}T00:00:00Z`
+  );
+  const [endDate, setEndDate] = useState<string>(
+    `${moment().endOf("month").format("YYYY-MM-DD")}T23:59:59Z`
+  );
+  const [update, setUpdate] = useState<boolean | null>(null);
 
-  const [selectedDate, setSelectedDate] = useState<string[]>([
-    moment().format("YYYY-MM-DD"),
-  ]);
+  const updateTransactions = (): void => {
+    if (update === null) setUpdate(true);
+    else setUpdate(!update);
+  };
 
-  function next() {
-    if (!moment(selectedDate[0]).isSameOrAfter(moment().subtract(1, "day")))
-      setDate([moment(selectedDate[0]).add(1, "months").format("YYYY-MM-DD")]);
-  }
+  const transactions = useMemo(() => {
+    return load
+      ? !bill
+        ? data
+        : data.filter(
+            (v) =>
+              moment(moment(startDate.split("T")[0], "YYYY-MM-DD")).get(
+                "month"
+              ) == moment(v.date).get("month")
+          )
+      : [];
+  }, [load, data, startDate, endDate, bill]);
 
-  function prev() {
-    setDate([
-      moment(selectedDate[0]).subtract(1, "months").format("YYYY-MM-DD"),
-    ]);
-  }
+  const income = useMemo(() => {
+    if (load) {
+      const arr = [...transactions.map((t) => t.transactions)]
+        .flat(1)
+        .filter(
+          (el) => el.action === "DEPOSIT" || el.transactionType === "EARN"
+        )
+        .map((el) => el.sum);
 
-  useEffect(() => {
-    if (moment(selectedDate[0]).isAfter(moment())) {
-      setSelectedDate([moment().format("YYYY-MM-DD")]);
+      return arr.reduce((b, a) => b + a, 0);
     }
-  }, [selectedDate]);
+  }, [load, data, startDate, endDate, bill]);
 
-  const [transactions, setTransactions] = useState<TransactionsSorted[]>([]);
+  const expenses = useMemo(() => {
+    if (load) {
+      const arr = [...transactions.map((t) => t.transactions)]
+        .flat(1)
+        .filter(
+          (el) => el.action === "WITHDRAW" || el.transactionType === "SPEND"
+        )
+        .map((el) => el.sum);
 
-  const filterByDate = (v: TransactionsSorted) => {
-    const now = moment(selectedDate[0]);
-    return moment(now).get("month") == moment(v.date).get("month");
-  };
-
-  const mapBySelectedBill = (v: TransactionsSorted) => {
-    return {
-      ...v,
-      transactions: v.transactions.filter(
-        (b) => !selecterBill || b.title == selecterBill
-      ),
-    };
-  };
-
-  useEffect(() => {
-    const newIcome = transactions
-      .filter(filterByDate)
-      .map(mapBySelectedBill)
-      .map((item) =>
-        item.transactions
-          .filter((i) => i.action === "DEPOSIT" || i.action === "EARN")
-          .reduce((x, y) => +x + +y.amount, 0)
-      )
-      .reduce((x, y) => x + y, 0);
-    const newExpenses = transactions
-      .filter(filterByDate)
-      .map(mapBySelectedBill)
-      .map((item) =>
-        item.transactions
-          .filter((i) => i.action === "WITHDRAW" || i.action === "SPEND")
-          .reduce((x, y) => +x + +y.amount, 0)
-      )
-      .reduce((x, y) => x + y, 0);
-    setIncome(newIcome);
-    setExpenses(newExpenses);
-  }, [selectedDate, transactions, selecterBill]);
-
-  const setDate = (dates: string[]): void =>
-    setSelectedDate(dates.map((i) => moment(i).format("YYYY-MM-DD")));
-
-  const filterdTransactions = useMemo(() => {
-    const f = transactions.filter(filterByDate);
-
-    if (f) return f;
-    else return [];
-  }, [selectedDate, transactions]);
-
-  useEffect(() => {
-    const f = transactions
-      .find(filterByDate)
-      ?.transactions.filter((b) => !selecterBill || b.title == selecterBill)
-      .map((t) => t.amount);
-
-    if (f) setPreces(f);
-    else setPreces([]);
-  }, [selectedDate, transactions, selecterBill]);
-
-  const sorted = (array: UserTranscationsType[]): TransactionsSorted[] => {
-    const sortedTransactionByGroup = ArrayGroups(array);
-    const sortedTransactionByDate = sortedTransactionByGroup.sort(
-      (x, y) =>
-        <any>moment(y.date).format("L") - <any>moment(x.date).format("L")
-    );
-    return sortedTransactionByDate;
-  };
-
-  const getOrdinaryTransactions = async (): Promise<ITransaction[]> => {
-    try {
-      const res = await axios.get(
-        `${API_URL}api/v1/transaction/user/?page=0&pageSize=10`
-      );
-      if (res.data.status === 200) {
-        return res.data.data.page;
-      } else {
-        throw new Error(res.data.message);
-      }
-    } catch (error: any) {
-      console.log(error);
-      return [];
+      return arr.reduce((b, a) => b + a, 0);
     }
-  };
+  }, [load, data, startDate, endDate, bill]);
 
-  const getTinkoffTransactions = async (): Promise<ITinkoffTransaction[]> => {
-    try {
-      const res = await axios.get(`${API_URL}api/v1/tinkoff/cards/`);
-      if (res.data.status === 200) {
-        const cards = res.data.data;
-
-        let array: ITinkoffTransaction[] = [];
-
-        for (let i = 0; i < cards.length; i++) {
-          const tr = await axios.get(
-            `${API_URL}api/v1/tinkoff/transactions/${cards[i].id}?page=0&pageSize=10`
-          );
-          array = [...array, ...tr.data.data.page];
+  const prices = useMemo(() => {
+    if (load) {
+      let res = {};
+      const arr = [...transactions.map((t) => t.transactions)]
+        .flat(1)
+        .map((el) => ({
+          sum: el.sum,
+          value: el.category?.name,
+          color: el.category?.color.hex,
+        }));
+      arr.forEach((el) => {
+        if (el.value) {
+          if (res[el.value]) {
+            res[el.value] = {
+              value: el.value,
+              sum: res[el.value].sum + el.sum,
+              color: el.color,
+            };
+          } else {
+            res[el.value] = {
+              value: el.value,
+              sum: el.sum,
+              color: el.color,
+            };
+          }
         }
-        return array;
-      } else {
-        throw new Error(res.data.message);
-      }
-    } catch (error: any) {
-      console.log(error);
+      });
+
+      return Object.values(res).sort((a: any, b: any) => a.sum - b.sum);
+    } else {
       return [];
     }
+  }, [load, data, startDate, endDate, bill]);
+
+  const date = useMemo(() => {
+    moment.locale("ru");
+    return `${moment(startDate.split("T")[0], "YYYY-MM-DD").format(
+      "MMMM YYYY"
+    )}`;
+  }, [startDate, endDate]);
+
+  // MARK : Change date
+  const isLastMonth = useMemo(() => {
+    if (
+      `${moment(startDate).startOf("month").format("YYYY-MM-DD")}T00:00:00Z` ===
+      `${moment().startOf("month").format("YYYY-MM-DD")}T00:00:00Z`
+    ) {
+      return false;
+    } else {
+      return true;
+    }
+  }, [startDate, endDate]);
+
+  const setStart = (date: string): void =>
+    setStartDate(`${moment(date).format("YYYY-MM-DD")}T00:00:00Z`);
+
+  const setEnd = (date: string): void =>
+    setEndDate(`${moment(date).format("YYYY-MM-DD")}T23:59:59Z`);
+
+  const nextMonth = () => {
+    if (!isLastMonth) return;
+    setStartDate(
+      `${moment(startDate)
+        .startOf("month")
+        .add(1, "months")
+        .format("YYYY-MM-DD")}T00:00:00Z`
+    );
+    setEndDate(
+      `${moment(startDate)
+        .endOf("month")
+        .add(1, "months")
+        .format("YYYY-MM-DD")}T23:59:59Z`
+    );
   };
 
-  const get = async (): Promise<void> => {
-    const ordinaryTransactions = await getOrdinaryTransactions();
-    const tinkoffTransactions = await getTinkoffTransactions();
-
-    const t: UserTranscationsType[] = [];
-
-    for (let i = 0; i < ordinaryTransactions.length; i++) {
-      const transaction = ordinaryTransactions[i];
-      t.push({
-        id: transaction.id,
-        action: transaction.action,
-        category: transaction.category ?? null,
-        date: transaction.createAt,
-        currency: transaction.currency,
-        amount: transaction.sum,
-        title: transaction.bill.name,
-      });
-    }
-
-    for (let i = 0; i < tinkoffTransactions.length; i++) {
-      const transaction = tinkoffTransactions[i];
-      t.push({
-        id: transaction.id,
-        action: transaction.transactionType,
-        category: null,
-        date: transaction.date,
-        currency: transaction.currency,
-        amount: transaction.amount.amount,
-        title: "Tinkoff",
-      });
-    }
-
-    setTransactions(sorted(t));
-
-    setLoad(true);
+  const prevMonth = () => {
+    setStartDate(
+      `${moment(startDate)
+        .startOf("month")
+        .subtract(1, "months")
+        .format("YYYY-MM-DD")}T00:00:00Z`
+    );
+    setEndDate(
+      `${moment(startDate)
+        .endOf("month")
+        .subtract(1, "months")
+        .format("YYYY-MM-DD")}T23:59:59Z`
+    );
   };
 
-  const init = async (): Promise<void> => await get();
+  // MARK : fetch data transaction
+  const getUrl = () => {
+    switch (billType) {
+      case "bill": {
+        return `${API_URL}api/v1/transaction/bill/${bill}?page=0&pageSize=10`;
+      }
+      default: {
+        return `${API_URL}api/v1/abstract/all-transactions?startDate=${startDate}&endDate=${endDate}&page=0&pageSize=10`;
+      }
+    }
+  };
+
+  const getTransactions = async (): Promise<void> => {
+    try {
+      const url = getUrl();
+      // console.log(url);
+      await axios
+        .get(url)
+        .then((data) => {
+          console.log(data.data.data.page);
+          setData(sorted(data.data.data.page));
+          setLoad(true);
+        })
+        .catch((error) => {
+          throw new Error(error);
+        });
+    } catch (error: any) {
+      setLoad(true);
+      dispatch(
+        ShowToast({
+          text: "Не удалось загрузить список транзакий",
+          title: "Ошибка",
+          type: "error",
+        })
+      );
+    }
+  };
 
   useEffect(() => {
-    init();
-  }, []);
+    if (update != null) {
+      if (load) {
+        setLoad(false);
+      }
+      getTransactions();
+    }
+  }, [update]);
+
+  useEffect(() => {
+    if (load) {
+      setLoad(false);
+    }
+    getTransactions();
+  }, [startDate, endDate, bill]);
 
   return {
     load,
-    transactions: filterdTransactions,
-    selectedDate,
-    setDate,
-    prices,
-    allTransactions: transactions,
+    bill,
+    billType,
+    setBillType,
+    setBill,
+    date: {
+      date: date,
+      setStart,
+      setEnd,
+      nextMonth,
+      prevMonth,
+      startDate,
+      endDate,
+    },
+    transactions,
+    isLastMonth,
     income,
     expenses,
-    next,
-    prev,
-  };
-};
-
-const useGetBudget = () => {
-  const { allTransactions } = useGetTransaction();
-
-  const { useGetCategory } = Category;
-  const { categories, load } = useGetCategory();
-
-  const [selectedMonth, setSelectedMonth] = useState<string>(
-    moment().format("YYYY-MM-DD")
-  );
-
-  const prev = (): void => {
-    let currentDate = moment(selectedMonth);
-    setSelectedMonth(
-      moment(currentDate).subtract(1, "months").format("YYYY-MM-DD")
-    );
-  };
-
-  const next = (): void => {
-    let currentDate = moment(selectedMonth);
-    let futureMonth = moment(currentDate).add(1, "M");
-    let futureMonthEnd = moment(futureMonth).endOf("month");
-
-    if (
-      currentDate.date() != futureMonth.date() &&
-      futureMonth.isSame(futureMonthEnd.format("YYYY-MM-DD"))
-    ) {
-      futureMonth = futureMonth.add(1, "d");
-    }
-    setSelectedMonth(futureMonth.format("YYYY-MM-DD"));
-  };
-
-  const expenses = useMemo(() => {
-    const f = allTransactions
-      .filter(
-        (transaction) =>
-          transaction.date.split("-")[1] === selectedMonth.split("-")[1] &&
-          transaction.date.split("-")[0] === selectedMonth.split("-")[0]
-      )
-      .map((t) => t.transactions);
-
-    const merged = f.flat(1);
-
-    const exp = merged.filter(
-      (t) => t.action === "WITHDRAW" || t.action === "SPEND"
-    );
-
-    const amount =
-      exp.length > 0
-        ? exp.map((item) => item.amount).reduce((prev, next) => +prev + +next)
-        : 0;
-
-    return "expenses";
-  }, [selectedMonth]);
-
-  return {
-    selectedMonth,
-    expenses,
-    prev,
-    next,
-  };
+    prices,
+    updateTransactions,
+  } as UseTransactionParams;
 };
 
 const useAddOperation = (OperationParams: OperationParamsType) => {
@@ -293,15 +301,6 @@ const useAddOperation = (OperationParams: OperationParamsType) => {
       if (!summ) {
         throw new Error("Укажите сумму");
       }
-
-      if (!location) {
-        throw new Error("Укажите местоположение");
-      }
-
-      if (operationType === "WITHDRAW" && !placeName) {
-        throw new Error("Укажите название местоположения");
-      }
-
       if (qr) {
         try {
           const { data } = await QrScanner.scanImage(qr, {
@@ -358,16 +357,13 @@ const useAddOperation = (OperationParams: OperationParamsType) => {
         }
       }
 
-      const data =
+      let data =
         operationType === "WITHDRAW"
           ? {
               amount: summ,
               cents: 0,
               description: description,
               categoryId: selectedCategory?.id,
-              lon: location![1],
-              lat: location![0],
-              placeName,
               time: `${date}T16:23:25.356Z`,
             }
           : {
@@ -377,6 +373,21 @@ const useAddOperation = (OperationParams: OperationParamsType) => {
               categoryId: selectedCategory?.id,
               time: `${date}T16:23:25.356Z`,
             };
+      if (operationType === "WITHDRAW" && location != null) {
+        data = {
+          ...data,
+          lon: location![1],
+          lat: location![0],
+        };
+      }
+      if (operationType === "WITHDRAW" && placeName) {
+        data = {
+          ...data,
+          placeName,
+        };
+      }
+
+      console.log("data", data);
 
       const url =
         operationType === "WITHDRAW"
@@ -409,14 +420,8 @@ const useAddOperation = (OperationParams: OperationParamsType) => {
   return { OperationAdd };
 };
 
-export default {
-  useGetTransaction,
-  useAddOperation,
-  useGetBudget,
-};
-
-export const useTransaction = (transactionId: string | null) => {
-  const dispatch = useDispatch();
+export const useRemoveTransaction = (transactionId: string | null) => {
+  const dispatch = useDispatch<AppDispatch>();
 
   const deleteTransaction = async () => {
     try {
@@ -455,4 +460,10 @@ export const useTransaction = (transactionId: string | null) => {
   };
 
   return { deleteTransaction };
+};
+
+export default {
+  useGetTransaction,
+  useAddOperation,
+  useRemoveTransaction,
 };

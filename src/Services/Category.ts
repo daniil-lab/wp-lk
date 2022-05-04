@@ -1,17 +1,28 @@
 import axios from "axios";
+import { ColorType, IconType } from "Models/CategoryModel";
 import { CategoryType } from "Pages/Main/CategoryBlock/CategoryConstructor/CategoryConstructor";
-import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { ShowToast, UpdateCategory } from "Redux/Actions";
+import { useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  HidePreloader,
+  ShowPreloader,
+  ShowToast,
+  UpdateCategory,
+} from "Redux/Actions";
 import { GetUpdateCategory, GetUserToken } from "Redux/Selectors";
 import { AppDispatch } from "Redux/Store";
 import { API_URL } from "Utils/Config";
-import { ColorType, IconType } from "./Interfaces";
+
+export interface UseGetCategoryType {
+  categories: ICategory[];
+  load: boolean;
+  updateCategory: () => void;
+}
 
 export interface ICategory {
   id: string;
   name: string;
-  categorySpend: number,
+  categorySpend: number;
   categoryEarn: number;
   onlyForEarn: boolean;
   color: {
@@ -52,16 +63,28 @@ export interface ICategory {
     notificationsEnable: boolean;
     createAt: string;
   };
+  percentsFromLimit: number;
 }
 
 const useGetCategory = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const token = useSelector(GetUserToken);
-  const updateCategory = useSelector(GetUpdateCategory);
 
-  const [categories, setCategories] = useState<ICategory[]>([]);
+  const [data, setData] = useState<ICategory[]>([]);
   const [load, setLoad] = useState<boolean>(false);
 
-  const get = async (): Promise<void> => {
+  const [update, setUpdate] = useState<boolean | null>(null);
+
+  const categories = useMemo(() => {
+    return data;
+  }, [load, data]);
+
+  const updateCategory = (): void => {
+    if (update === null) setUpdate(true);
+    else setUpdate(!update);
+  };
+
+  const getCategories = async (): Promise<void> => {
     try {
       setLoad(false);
       const res = await axios.get(`${API_URL}api/v1/category/`, {
@@ -70,28 +93,44 @@ const useGetCategory = () => {
         },
       });
       if (res.data.status === 200) {
-        setCategories(res.data.data);
+        setData(res.data.data);
         setLoad(true);
       } else {
         throw new Error(res.data.message);
       }
     } catch (error: any) {
-      console.log(error.message);
+      setLoad(true);
+      dispatch(
+        ShowToast({
+          text: "Не удалось загрузить список категорий",
+          title: "Ошибка",
+          type: "error",
+        })
+      );
     }
   };
 
-  const init = async (): Promise<void> => {
-    await get();
-  };
+  useEffect(() => {
+    if (update != null) {
+      if (load) {
+        setLoad(false);
+      }
+      getCategories();
+    }
+  }, [update]);
 
   useEffect(() => {
-    init();
-  }, [updateCategory]);
+    if (load) {
+      setLoad(false);
+    }
+    getCategories();
+  }, []);
 
   return {
     categories,
     load,
-  };
+    updateCategory,
+  } as UseGetCategoryType;
 };
 
 const useGetCategoryColors = () => {
@@ -159,11 +198,11 @@ const addCategory = async (
     if (!params.name) {
       throw new Error("Введите название категории");
     }
-    
+
     if (!params.icon) {
       throw new Error("Выберите иконку категории");
     }
-    
+
     if (!params.color) {
       throw new Error("Выберите цвет категории");
     }
@@ -182,7 +221,7 @@ const addCategory = async (
     });
 
     dispatch(UpdateCategory());
-    return true
+    return true;
   } catch (error: any) {
     dispatch(
       ShowToast({
@@ -193,7 +232,7 @@ const addCategory = async (
     );
   }
 
-  return false
+  return false;
 };
 
 const setCategoryLimit = async (
@@ -202,17 +241,33 @@ const setCategoryLimit = async (
   categoryLimit: number
 ) => {
   try {
-    const response = await axios({
+    dispatch(ShowPreloader());
+    await axios({
       method: "patch",
       url: `${API_URL}api/v1/category/${categoryId}/`,
       data: {
-        categoryLimit
-      }
-    })
-  } catch(e: any) {
-    console.log(e)
+        categoryLimit,
+      },
+    });
+    dispatch(HidePreloader());
+    dispatch(
+      ShowToast({
+        text: "Лимит категории успешно изменен",
+        title: "Успех",
+        type: "success",
+      })
+    );
+  } catch (e: any) {
+    dispatch(HidePreloader());
+    dispatch(
+      ShowToast({
+        text: "Не укдалось изменить лимит",
+        title: "Ошибка",
+        type: "error",
+      })
+    );
   }
-}
+};
 
 const deleteCategory = async (
   categoryId: string,
@@ -235,5 +290,5 @@ export default {
   useGetCategoryIcons,
   addCategory,
   deleteCategory,
-  setCategoryLimit
+  setCategoryLimit,
 };

@@ -3,6 +3,7 @@ import useCalendar from "Utils/Hooks/useCalendar";
 import moment from "moment";
 import Picker from "./Picker";
 import Datetime from "Utils/Datetime";
+import "moment/locale/ru";
 
 import "Styles/Components/DatePicker/DatePicker.scss";
 
@@ -84,6 +85,21 @@ const DatePicker: React.FunctionComponent<Props> = (props: Props) => {
     setDates([date]);
   }, [day, month, year]);
 
+  const initialSlide = (
+    type: "month" | "day" | "year",
+    array: any[]
+  ): number => {
+    moment.locale("ru");
+    switch (type) {
+      case "month":
+        return array.indexOf(moment().format("MMMM").toUpperCase());
+      case "day":
+        return array.indexOf(parseInt(moment().format("D")));
+      default:
+        return array.indexOf(parseInt(moment().format("YYYY")));
+    }
+  };
+
   return (
     <div>
       <div className="datepicker-backdrop"></div>
@@ -130,14 +146,17 @@ const DatePicker: React.FunctionComponent<Props> = (props: Props) => {
           <Picker
             onChange={(value) => _handlePicker("month", value)}
             data={months}
+            initialSlide={initialSlide("month", months)}
           />
           <Picker
             onChange={(value) => _handlePicker("day", value)}
             data={getMonthDays()}
+            initialSlide={initialSlide("day", getMonthDays())}
           />
           <Picker
             onChange={(value) => _handlePicker("year", value)}
             data={generateArrayOfYears()}
+            initialSlide={initialSlide("year", generateArrayOfYears())}
           />
         </div>
         <div className="datepicker-controll">

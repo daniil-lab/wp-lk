@@ -7,11 +7,18 @@ import CardIcon from "Static/icons/card.svg";
 import "Styles/Pages/Main/BalanceBlock/AddBillModal/AddBillModal.scss";
 import AddBank from "./AddBank/AddBank";
 
+// TASK : Update Bills
+// TASK : Fix styles
+
 interface Props {
   onClose: () => void;
+  updateBill: () => void;
 }
 
-const AddBillModal: React.FunctionComponent<Props> = ({ onClose }: Props) => {
+const AddBillModal: React.FunctionComponent<Props> = ({
+  onClose,
+  updateBill,
+}: Props) => {
   const [name, setName] = useState<string>("");
   const [balance, setBalance] = useState<string>("");
 
@@ -19,11 +26,11 @@ const AddBillModal: React.FunctionComponent<Props> = ({ onClose }: Props) => {
 
   const { activeSubscription } = useGetActiveSubscription();
 
-  const { useAddBill } = Bill;
-  const { addBill } = useAddBill(name, balance);
+  const bill = Bill.useAddBill(name, balance);
 
   const addDefaulBill = async (): Promise<void> => {
-    await addBill();
+    await bill.addBill();
+    updateBill();
     onClose();
   };
 
@@ -81,7 +88,7 @@ const AddBillModal: React.FunctionComponent<Props> = ({ onClose }: Props) => {
           Добавить
         </button>
       </div>
-      <Modal
+      {/* <Modal
         zIndex={11}
         show={addBankModal}
         onClose={() => setAddBankModal(false)}
@@ -95,7 +102,7 @@ const AddBillModal: React.FunctionComponent<Props> = ({ onClose }: Props) => {
             счета
           </AccessDenied>
         )}
-      </Modal>
+      </Modal> */}
     </div>
   );
 };

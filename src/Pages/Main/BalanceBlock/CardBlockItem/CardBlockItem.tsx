@@ -1,3 +1,4 @@
+import Image from "Components/Image/Image";
 import React from "react";
 
 import WalletBalanceIcon from "Static/icons/wallet-balance-icon.svg";
@@ -27,7 +28,13 @@ const CardBlockItem: React.FunctionComponent<Props> = ({
       onClick={() => onClick && onClick(title)}
     >
       <div className="balance-block-item-title">
-        <img src={icon || WalletBalanceIcon} alt="Wallet icon" width={20} />
+        <Image
+          frame={{ width: 20, height: 20 }}
+          src={icon || WalletBalanceIcon}
+          alt="Wallet icon"
+          width={20}
+          height={20}
+        />
         <span className="balance-block-item-title-text">{title}</span>
         {subtitle && (
           <span className="balance-block-item-subtitle">{subtitle ?? ""}</span>
