@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 import "Styles/Pages/Main/ChartBlock/AddOperationModal/DatePickerModal/DatePickerModal.scss";
 import useCalendar from "Utils/Hooks/useCalendar";

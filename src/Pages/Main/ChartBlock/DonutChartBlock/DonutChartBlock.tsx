@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from "react";
-// import DonutChartBlockCalendar from "./DonutChartCalendar/DonutChartBlockCalendar";
-
 import "Styles/Pages/Main/ChartBlock/DonutChartBlock/DonutChartBlock.scss";
-
 import PrevIcon from "../../../../Static/icons/prev.svg";
 import NextIcon from "../../../../Static/icons/next.svg";
 import CreateDonutChart from "Utils/CreateDonutChart";

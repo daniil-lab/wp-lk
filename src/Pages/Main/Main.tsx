@@ -3,8 +3,6 @@ import Header from "Components/Header/Header";
 import Modal from "Components/Modal/Modal";
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import Category from "Services/Category";
-import { SelectedBillType } from "Services/Interfaces";
 import PlusCircleFill from "Static/icons/plus-circle-fill.svg";
 import "Styles/Pages/Main/Main.scss";
 import AddBillModal from "./BalanceBlock/AddBillModal/AddBillModal";
@@ -14,17 +12,18 @@ import CategoryBlock from "./CategoryBlock/CategoryBlock";
 import CategoryConstructor from "./CategoryBlock/CategoryConstructor/CategoryConstructor";
 import AddOperationModal from "./ChartBlock/AddOperationModal/AddOperationModal";
 import ChartBlock from "./ChartBlock/ChartBlock";
-
-import Bill from "Services/Bill";
-import Transaction from "Services/Transaction";
+import useGetTransaction from "Services/Transactions/useGetTransaction";
+import useGetCategories from "Services/Category/useGetCategories";
+import useGetBill from "Services/Bill/useGetBill";
 
 interface Props {}
 
 const Main: React.FunctionComponent<Props> = (props: Props) => {
   const username = useSelector((state: any) => state?.user?.user?.username);
-  const bill = Bill.useGetBill();
-  const transaction = Transaction.useGetTransaction();
-  const categories = Category.useGetCategory();
+  const bill = useGetBill();
+
+  const categories = useGetCategories();
+  const transaction = useGetTransaction();
 
   // MARK : Modals
   const [showAddOperationModal, setShowAddOperationModal] =
@@ -79,6 +78,8 @@ const Main: React.FunctionComponent<Props> = (props: Props) => {
           selected={transaction.bill}
           billType={transaction.billType}
           setBillType={transaction.setBillType}
+          updateBill={bill.updateBill}
+          tinkoffCards={bill.tinkoffCards}
         />
       </div>
       {/* MARK : Category list */}

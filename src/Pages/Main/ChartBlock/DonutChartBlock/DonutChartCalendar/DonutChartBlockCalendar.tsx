@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import DatePicker from "Components/DatePicker/DatePicker";
 import Calendar from "Static/icons/calendar-dark.svg";
 import "Styles/Pages/Main/ChartBlock/DonutChartBlock/DonutChartBlockCalendar/DonutChartBlockCalendar.scss";

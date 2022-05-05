@@ -7,9 +7,10 @@ import { BaseCategoryModel, CategoryModel } from "Models/CategoryModel";
 import { TransactionType } from "Models/TransactionModel";
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import Bill from "Services/Bill";
-import Category from "Services/Category";
-import Transaction from "Services/Transaction";
+import useGetBill from "Services/Bill/useGetBill";
+import useGetCategories from "Services/Category/useGetCategories";
+import { useGetActiveSubscription } from "Services/Subscription";
+import useAddTransaction from "Services/Transactions/useAddTransaction";
 import CalendarDark from "Static/icons/calendar-dark.svg";
 import ScanQr from "Static/icons/scan-qr-nigger.svg";
 import "Styles/Pages/Main/ChartBlock/AddOperationModal/AddOperationModal.scss";
@@ -22,7 +23,7 @@ interface Props {
   qr?: File;
   initialSum?: string;
   noQrLink?: boolean;
-  updateTransactions: () => void;
+  updateTransactions?: () => void;
 }
 
 const AddOperationModal: React.FC<Props> = ({
@@ -32,6 +33,8 @@ const AddOperationModal: React.FC<Props> = ({
   noQrLink,
   updateTransactions,
 }) => {
+  const { activeSubscription } = useGetActiveSubscription();
+
   const [date, setDate] = useState<null | string[]>(null);
   const [expand, setExpand] = useState<boolean>(false);
   const [operationType, setOperationType] =
@@ -51,9 +54,9 @@ const AddOperationModal: React.FC<Props> = ({
   const [location, setLocation] = useState<number[] | null>(null);
   const [mapModal, setMapModal] = useState<boolean>(false);
 
-  const bills = Bill.useGetBill();
-  const category = Category.useGetCategory();
-  const { OperationAdd } = Transaction.useAddOperation({
+  const bills = useGetBill();
+  const category = useGetCategories();
+  const { OperationAdd } = useAddTransaction({
     bill,
     date,
     selectedCategory,
@@ -83,7 +86,7 @@ const AddOperationModal: React.FC<Props> = ({
 
   const _addOperation = async (): Promise<void> => {
     await OperationAdd(onClose);
-    updateTransactions();
+    if (updateTransactions) updateTransactions();
   };
 
   useEffect(() => {

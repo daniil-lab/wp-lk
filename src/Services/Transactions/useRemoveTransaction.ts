@@ -45,3 +45,5 @@ export const useRemoveTransaction = (transactionId: string | null) => {
 
   return { deleteTransaction };
 };
+
+export default useRemoveTransaction;

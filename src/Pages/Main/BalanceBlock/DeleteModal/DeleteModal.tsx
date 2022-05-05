@@ -1,5 +1,5 @@
 import React from "react";
-import Transactions from "Services/Transaction";
+import useRemoveTransaction from "Services/Transactions/useRemoveTransaction";
 import "Styles/Pages/Main/BalanceBlock/DeleteModal/DeleteModal.scss";
 
 interface Props {
@@ -8,6 +8,8 @@ interface Props {
   deleteOp?: () => void;
   updateTransactions?: () => void;
   updateCategory?: () => void;
+  updateBill?: () => void;
+  handler?: () => any;
 }
 
 const DeleteModal: React.FC<Props> = ({
@@ -16,16 +18,17 @@ const DeleteModal: React.FC<Props> = ({
   deleteOp,
   updateTransactions,
   updateCategory,
+  handler,
 }) => {
-  const { deleteTransaction } =
-    Transactions.useRemoveTransaction(transactionId);
+  const { deleteTransaction } = useRemoveTransaction(transactionId);
 
-  const handleDeleteTransaction = () => {
+  const handleDeleteTransaction = async () => {
     if (deleteOp) deleteOp();
+    if (handler) await handler();
     else deleteTransaction();
-    closeModal();
     if (updateTransactions) updateTransactions();
     if (updateCategory) updateCategory();
+    closeModal();
   };
 
   return (

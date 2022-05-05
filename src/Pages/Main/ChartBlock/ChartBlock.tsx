@@ -3,14 +3,14 @@ import DonutChartBlock from "./DonutChartBlock/DonutChartBlock";
 import ChartBlockHistory from "./ChartBlockHistory/ChartBlockHistory";
 import "Styles/Pages/Main/ChartBlock/ChartBlock.scss";
 import Load from "Components/Load/Load";
-import { UseTransactionParams } from "Services/Transaction";
 import TransactionsIcon from "Static/icons/transaction.svg";
 import Image from "Components/Image/Image";
-import { UseGetCategoryType } from "Services/Category";
+import { UseTransactionParams } from "Services/Transactions/Models";
+import { UseGetCategoriesModel } from "Services/Category/Models";
 
 interface Props {
   transaction: UseTransactionParams;
-  categories: UseGetCategoryType;
+  categories: UseGetCategoriesModel;
 }
 
 const ChartBlock: React.FunctionComponent<Props> = (props: Props) => {

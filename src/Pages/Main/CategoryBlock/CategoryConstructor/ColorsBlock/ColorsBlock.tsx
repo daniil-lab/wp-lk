@@ -1,10 +1,10 @@
 import React, { useRef } from "react";
-import Category from "Services/Category";
 import useDraggableScroll from "Utils/Hooks/useDraggableScroll";
-import { ColorType } from "Services/Interfaces";
 import Checkmark from "Components/Checkmark/Checkmark";
 
 import "Styles/Pages/Main/CategoryBlock/CategoryConstructor/ColorsBlock/ColorsBlock.scss";
+import { ColorType } from "Models/CategoryModel";
+import useGetCategoryColors from "Services/Category/useGetCategoryColors";
 
 interface Props {
   onColorChange: (color: ColorType) => void;
@@ -18,8 +18,6 @@ const ColorsBlock: React.FunctionComponent<Props> = ({
   const ref = useRef(null);
 
   const { onMouseDown } = useDraggableScroll(ref, { direction: "horizontal" });
-
-  const { useGetCategoryColors } = Category;
 
   const { load, colors } = useGetCategoryColors();
 

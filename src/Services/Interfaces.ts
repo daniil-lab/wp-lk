@@ -93,18 +93,6 @@ export interface IAdvertising {
   files: IFiles[];
 }
 
-export type OperationParamsType = {
-  bill: IBalances | null;
-  date: string[] | null;
-  selectedCategory: IBaseCategory | null;
-  summ: string | null;
-  description: string | null;
-  location: number[] | null;
-  operationType: TransactionType;
-  placeName: string;
-  qr?: File;
-};
-
 export type UserTranscationsType = {
   transactionType: TransactionType;
   category: ICategory | null;

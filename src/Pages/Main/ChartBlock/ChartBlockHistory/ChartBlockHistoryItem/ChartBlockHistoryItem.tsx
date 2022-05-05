@@ -1,6 +1,5 @@
+import { TransactionType } from "Models/TransactionModel";
 import React from "react";
-import { IconType, TransactionType } from "Services/Interfaces";
-
 import "Styles/Pages/Main/ChartBlock/ChartBlockHistory/ChartBlockHistoryItem/ChartBlockHistoryItem.scss";
 import { API_URL } from "Utils/Config";
 import HexToRgbA from "Utils/HexToRgbA";

@@ -22,11 +22,15 @@ export interface BaseCategoryModel {
 }
 
 export interface CategoryModel {
-  categoryLimit: number;
-  color: ColorType;
-  description: string;
   id: string;
   name: string;
-  user: UserModel;
+  categorySpend: number;
+  categoryEarn: number;
+  onlyForEarn: boolean;
+  color: ColorType;
   icon: IconType;
+  description: string;
+  categoryLimit: number;
+  user: UserModel;
+  percentsFromLimit: number;
 }

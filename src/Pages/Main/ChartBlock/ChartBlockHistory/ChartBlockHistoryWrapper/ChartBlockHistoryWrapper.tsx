@@ -1,5 +1,4 @@
 import React from "react";
-
 import "Styles/Pages/Main/ChartBlock/ChartBlockHistory/ChartBlockHistoryWrapper/ChartBlockHistoryWrapper.scss";
 
 interface Props {

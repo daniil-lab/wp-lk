@@ -1,5 +1,5 @@
+import { BaseCategoryModel } from "Models/CategoryModel";
 import React, { useRef } from "react";
-import { IBaseCategory } from "Services/Interfaces";
 import useGetBaseCategory from "Services/BaseCategory";
 
 import "Styles/Pages/Main/ChartBlock/AddOperationModal/CategoryListModal/CategoryListModal.scss";
@@ -7,7 +7,7 @@ import useDraggableScroll from "Utils/Hooks/useDraggableScroll";
 
 interface Props {
   onClose: () => void;
-  handler: (v: IBaseCategory) => void;
+  handler: (v: BaseCategoryModel) => void;
 }
 
 const CategoryListModal: React.FunctionComponent<Props> = ({
@@ -20,7 +20,7 @@ const CategoryListModal: React.FunctionComponent<Props> = ({
 
   const { categories, load } = useGetBaseCategory();
 
-  const _selectBaseCategory = (category: IBaseCategory): void => {
+  const _selectBaseCategory = (category: BaseCategoryModel): void => {
     handler(category);
     onClose();
   };

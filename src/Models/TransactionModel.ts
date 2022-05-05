@@ -29,7 +29,7 @@ export interface TransactionModel {
   sum: number;
 }
 
-export type UserTranscationsType = {
+export type Transcation = {
   transactionType: TransactionType;
   category: CategoryModel | null;
   date: string;
@@ -43,5 +43,5 @@ export type UserTranscationsType = {
 
 export interface TransactionsSortedModel {
   date: string;
-  transactions: UserTranscationsType[] | AbstractTransactionModel[];
+  transactions: Transcation[];
 }

@@ -1,23 +1,20 @@
 import React, { useState } from "react";
-import { SelectedBillType, TransactionsSorted } from "Services/Interfaces";
+import { TransactionsSorted } from "Services/Interfaces";
 import ChartBlockHistoryWrapper from "./ChartBlockHistoryWrapper/ChartBlockHistoryWrapper";
 import ChartBlockHistoryItem from "./ChartBlockHistoryItem/ChartBlockHistoryItem";
-
 import "Styles/Pages/Main/ChartBlock/ChartBlockHistory/ChartBlockHistory.scss";
-
-import BellIcon from "../../../../Static/icons/bell.svg";
 import moment from "moment";
 import Modal from "Components/Modal/Modal";
 import DeleteModal from "Pages/Main/BalanceBlock/DeleteModal/DeleteModal";
-import { BillType } from "Services/Transaction";
-import { UseGetCategoryType } from "Services/Category";
+import { BillType } from "Services/Transactions/Models";
+import { UseGetCategoriesModel } from "Services/Category/Models";
 
 interface Props {
   transactions: TransactionsSorted[];
   selectedBill: string | null;
   billType: BillType;
   updateTransactions?: () => void;
-  categories: UseGetCategoryType;
+  categories: UseGetCategoriesModel;
 }
 
 const sortByDate = (a, b) => (moment(a.date).isAfter(moment(b.date)) ? -1 : 1);

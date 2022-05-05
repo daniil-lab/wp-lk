@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React from "react";
 import ReactDOM from "react-dom";
 
 import "Styles/Components/Modal/Modal.scss";

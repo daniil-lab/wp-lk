@@ -1,14 +1,11 @@
 import AccessDenied from "Components/AccessDenied/AccessDenied";
 import Modal from "Components/Modal/Modal";
 import React, { useState } from "react";
-import Bill from "Services/Bill";
+import useAddBill from "Services/Bill/useAddBill";
 import { useGetActiveSubscription } from "Services/Subscription";
 import CardIcon from "Static/icons/card.svg";
 import "Styles/Pages/Main/BalanceBlock/AddBillModal/AddBillModal.scss";
 import AddBank from "./AddBank/AddBank";
-
-// TASK : Update Bills
-// TASK : Fix styles
 
 interface Props {
   onClose: () => void;
@@ -26,10 +23,12 @@ const AddBillModal: React.FunctionComponent<Props> = ({
 
   const { activeSubscription } = useGetActiveSubscription();
 
-  const bill = Bill.useAddBill(name, balance);
+  const addBill = useAddBill(name, balance);
 
   const addDefaulBill = async (): Promise<void> => {
-    await bill.addBill();
+    if (name.length === 0) return alert("Добавьте название");
+    if (balance.length === 0) return alert("Добавьте баланс");
+    await addBill();
     updateBill();
     onClose();
   };
@@ -88,11 +87,12 @@ const AddBillModal: React.FunctionComponent<Props> = ({
           Добавить
         </button>
       </div>
-      {/* <Modal
+      <Modal
         zIndex={11}
         show={addBankModal}
         onClose={() => setAddBankModal(false)}
       >
+        <AddBank />
         {activeSubscription?.variant.role.name === "PremiumRole" ||
         activeSubscription?.variant.role.name === "ProRole" ? (
           <AddBank />
@@ -102,7 +102,7 @@ const AddBillModal: React.FunctionComponent<Props> = ({
             счета
           </AccessDenied>
         )}
-      </Modal> */}
+      </Modal>
     </div>
   );
 };

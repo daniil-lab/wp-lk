@@ -1,5 +1,4 @@
-import React, { useMemo, useState } from "react";
-import ReactDOM from "react-dom";
+import React, { useState } from "react";
 
 import "Styles/Components/ContextButton/ContextButton.scss";
 

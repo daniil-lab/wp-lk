@@ -1,8 +1,6 @@
 import React, { FC } from "react";
-
 import PervIcon from "../../Static/icons/prev.svg";
 import NextIcon from "../../Static/icons/next.svg";
-import Transaction from "Services/Transaction";
 import "Styles/Pages/Budget/ExpenseIncomeBlock/ExpenseIncomeBlock.scss";
 
 interface IDatesSlider {

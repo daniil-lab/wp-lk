@@ -102,3 +102,11 @@
 .expense-income-header-date span {
   padding: 5px 20px;
 }
+
+.budget-empty-transactions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}

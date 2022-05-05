@@ -1,9 +1,9 @@
 import DateField from "Components/DateField/DateField";
 import PhoneField from "Components/PhoneField";
 import React, { useState } from "react";
-import { useBankConnection } from "Services/Bill";
+import { Banks } from "Services/Bill/Models";
+import useBankConnection from "Services/Bill/useBankConnection";
 import "Styles/Pages/Main/BalanceBlock/AddBillModal/AddBank/TinkoffBank/TinkoffBank.scss";
-import { Banks } from "Utils/Types";
 
 interface Props {
   onClose: () => void;

@@ -1,16 +1,14 @@
 import Load from "Components/Load/Load";
 import { BillModel } from "Models/BillModel";
-import React from "react";
-import Bill from "Services/Bill";
-import { SelectedBillType } from "Services/Interfaces";
-import { BillType } from "Services/Transaction";
-import SberIcon from "Static/Images/sber.png";
-import TinkoffIcon from "Static/Images/tinkoff.png";
+import React, { useState } from "react";
 import "Styles/Pages/Main/BalanceBlock/BalanceBlock.scss";
 import BalanceBlockItem from "./BalanceBlockItem/BalanceBlockItem";
-import CardBlockItem from "./CardBlockItem/CardBlockItem";
 import WalletIcon from "Static/icons/wallet.svg";
 import Image from "Components/Image/Image";
+import { BillType } from "Services/Transactions/Models";
+import Modal from "Components/Modal/Modal";
+import DeleteModal from "./DeleteModal/DeleteModal";
+import useRemoveBill from "Services/Bill/useRemoveBill";
 
 interface Props {
   data: BillModel[];
@@ -20,12 +18,21 @@ interface Props {
   setBill: React.Dispatch<React.SetStateAction<string | null>>;
   billType: BillType;
   setBillType: React.Dispatch<React.SetStateAction<BillType>>;
+
+  updateBill: () => void;
 }
 
 const BalanceBlock: React.FC<Props> = (props: Props) => {
-  const { data, load, selected, setBill, generalBalance, setBillType } = props;
-  // const { useGetTinkoffCards, useGetSberCards } = Bill;
-
+  const {
+    data,
+    load,
+    selected,
+    setBill,
+    generalBalance,
+    setBillType,
+    updateBill,
+  } = props;
+  const removeBill = useRemoveBill();
   return (
     <div className="balance-block">
       <h1 className="balance-block-title">Балансы</h1>
@@ -48,8 +55,13 @@ const BalanceBlock: React.FC<Props> = (props: Props) => {
             {data.map((bill) => (
               <BalanceBlockItem
                 onClick={() => {
-                  setBill(bill.id);
-                  setBillType("bill");
+                  if (selected == bill.id) {
+                    removeBill.setBillId(bill.id);
+                    removeBill.setShowDeleteModal(true);
+                  } else {
+                    setBill(bill.id);
+                    setBillType("bill");
+                  }
                 }}
                 key={bill.id}
                 title={bill.name}
@@ -69,6 +81,24 @@ const BalanceBlock: React.FC<Props> = (props: Props) => {
           </div>
         )}
       </Load>
+      <Modal
+        show={removeBill.showDeleteModal}
+        onClose={() => {
+          removeBill.setBillId(null);
+          removeBill.setShowDeleteModal(false);
+        }}
+      >
+        {removeBill.billId}
+        <DeleteModal
+          closeModal={() => {
+            removeBill.setBillId(null);
+            updateBill();
+            removeBill.setShowDeleteModal(false);
+          }}
+          handler={removeBill.remove}
+          transactionId={null}
+        />
+      </Modal>
     </div>
   );
 };

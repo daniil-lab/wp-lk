@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 
 import "Styles/Components/DrumScrolling/DrumScrolling.scss";
 import useDraggableScroll from "Utils/Hooks/useDraggableScroll";

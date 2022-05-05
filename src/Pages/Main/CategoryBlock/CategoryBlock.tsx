@@ -1,14 +1,16 @@
 import Load from "Components/Load/Load";
 import Modal from "Components/Modal/Modal";
+import { CategoryModel } from "Models/CategoryModel";
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
-import Category, { ICategory } from "Services/Category";
 import "Styles/Pages/Main/CategoryBlock/CategoryBlock.scss";
 import DeleteModal from "../BalanceBlock/DeleteModal/DeleteModal";
 import CategoryItem from "./CategoryItem/CategoryItem";
+import useRemoveCategory from "Services/Category/useRemoveCategory";
+import Image from "Components/Image/Image";
+import CategoriesEmpty from "Static/icons/categories-empty.svg";
 
 interface Props {
-  categories: ICategory[];
+  categories: CategoryModel[];
   load: boolean;
   updateCategory: () => void;
 }
@@ -20,8 +22,11 @@ const CategoryBlock: React.FC<Props> = ({
 }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [categoryId, setCategoryId] = useState<string | null>(null);
-  const { deleteCategory } = Category;
-  const dispatch = useDispatch();
+
+  const removeCategory = useRemoveCategory({
+    categoryId: categoryId!,
+  });
+
   if (!load) {
     return (
       <Load {...{ load }}>
@@ -32,23 +37,42 @@ const CategoryBlock: React.FC<Props> = ({
   return (
     <React.Fragment>
       <div className="category-block">
-        <Load {...{ load }} className="category-block-wrapper">
-          <div className="category-block-wrapper">
-            {categories.map((category, i) => {
-              return (
-                <CategoryItem
-                  onlyForEarn={category.onlyForEarn}
-                  key={i}
-                  icon={category.icon.name}
-                  color={category.color.hex}
-                  name={category.name}
-                  onClick={() => {
-                    setShowDeleteModal(true);
-                    setCategoryId(category.id);
-                  }}
+        <Load
+          {...{ load }}
+          className={`category-block-wrapper ${
+            categories.length === 0 && "categories-empty"
+          }`}
+        >
+          <div
+            className={`category-block-wrapper ${
+              categories.length === 0 && "categories-empty"
+            }`}
+          >
+            {categories.length === 0 ? (
+              <div className="categories-empty">
+                <Image
+                  src={CategoriesEmpty}
+                  alt="Categories"
+                  frame={{ width: 100, height: 100 }}
                 />
-              );
-            })}
+              </div>
+            ) : (
+              categories.map((category, i) => {
+                return (
+                  <CategoryItem
+                    onlyForEarn={category.onlyForEarn}
+                    key={i}
+                    icon={category.icon.name}
+                    color={category.color.hex}
+                    name={category.name}
+                    onClick={() => {
+                      setShowDeleteModal(true);
+                      setCategoryId(category.id);
+                    }}
+                  />
+                );
+              })
+            )}
           </div>
         </Load>
       </div>
@@ -56,7 +80,7 @@ const CategoryBlock: React.FC<Props> = ({
         <DeleteModal
           closeModal={() => setShowDeleteModal(false)}
           transactionId={categoryId}
-          deleteOp={() => categoryId && deleteCategory(categoryId, dispatch)}
+          deleteOp={() => categoryId && removeCategory()}
           updateCategory={updateCategory}
         />
       </Modal>

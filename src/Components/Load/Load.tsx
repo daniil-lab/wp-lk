@@ -1,7 +1,4 @@
 import React from "react";
-
-import Loader from "Static/Images/Loader.svg";
-
 import "Styles/Components/Load/Load.scss";
 
 interface Props {
@@ -26,7 +23,6 @@ const Load: React.FunctionComponent<Props> = (props: Props) => {
   ) : (
     <div className="load">
       <div className="loader"></div>
-      {/* <img src={Loader} /> */}
     </div>
   );
 };

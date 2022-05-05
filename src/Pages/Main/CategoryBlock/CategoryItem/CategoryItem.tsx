@@ -1,9 +1,5 @@
 import React from "react";
-
 import { API_URL } from "Utils/Config";
-
-import HexToRgbA from "Utils/HexToRgbA";
-
 import "Styles/Pages/Main/CategoryBlock/CategoryItem/CategoryItem.scss";
 
 interface Props {
@@ -30,11 +26,15 @@ const CategoryItem: React.FunctionComponent<Props> = (props: Props) => {
       </div>
       <span>{props.name}</span>
 
-      <span style={{
-        color: "#909090",
-        fontSize: 11,
-        width: "100%"
-      }}>{props.onlyForEarn && "Только для доходов"}</span>
+      <span
+        style={{
+          color: "#909090",
+          fontSize: 11,
+          width: "100%",
+        }}
+      >
+        {props.onlyForEarn && "Только для доходов"}
+      </span>
     </div>
   );
 };

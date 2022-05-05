@@ -18,7 +18,7 @@ const useEditEmail = (email: string) => {
     try {
       if (IsEmail(email)) {
         dispatch(ShowPreloader());
-        const res = await axios.patch(`${API_URL}api/v1/user/${userId}`, {
+        const res = await axios.patch(`${API_URL}api/v1/user/`, {
           email,
         });
         if (res.data.status === 200) {
@@ -30,6 +30,7 @@ const useEditEmail = (email: string) => {
               type: "success",
             })
           );
+          window.location.reload();
         } else {
           throw new Error(res.data.message);
         }
@@ -37,14 +38,28 @@ const useEditEmail = (email: string) => {
         throw new Error("Некорректный email");
       }
     } catch (error: any) {
-      dispatch(HidePreloader());
-      dispatch(
-        ShowToast({
-          text: error.message,
-          title: "Ошибка",
-          type: "error",
-        })
-      );
+      if (
+        error.response.data.status === 400 &&
+        error.response.data.error === "User with given email already exist"
+      ) {
+        dispatch(HidePreloader());
+        dispatch(
+          ShowToast({
+            text: "Этот email уже используется",
+            title: "Ошибка",
+            type: "error",
+          })
+        );
+      } else {
+        dispatch(HidePreloader());
+        dispatch(
+          ShowToast({
+            text: error.message,
+            title: "Ошибка",
+            type: "error",
+          })
+        );
+      }
     }
   };
 

@@ -1,12 +1,9 @@
 import React, { useState } from "react";
-
 import Modal from "Components/Modal/Modal";
 import TinkoffIcon from "Static/Images/tinkoff.png";
 import SberIcon from "Static/Images/sber.png";
 import TochkaIcon from "Static/Images/tochka.svg";
-
 import PlusFillIcon from "Static/icons/plus.svg";
-
 import "Styles/Pages/Main/BalanceBlock/AddBillModal/AddBank/AddBank.scss";
 import BankModal from "./BankModal/BankModal";
 
