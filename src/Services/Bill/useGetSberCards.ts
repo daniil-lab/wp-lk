@@ -6,7 +6,7 @@ import axios from "Utils/Axios";
 import { API_URL } from "Utils/Config";
 import { BankCardModel } from "./Models";
 
-const useGetTinkoffCards = () => {
+const useGetSberCards = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   const [cards, setCards] = useState<BankCardModel[]>([]);
@@ -15,7 +15,7 @@ const useGetTinkoffCards = () => {
 
   const get = async (): Promise<void> => {
     try {
-      const res = await axios.get(`${API_URL}api/v1/tinkoff/cards/`);
+      const res = await axios.get(`${API_URL}api/v1/sber/cards/`);
       if (res.data.status === 200) {
         setCards(res.data.data);
         setLoad(true);
@@ -46,4 +46,4 @@ const useGetTinkoffCards = () => {
   };
 };
 
-export default useGetTinkoffCards;
+export default useGetSberCards;

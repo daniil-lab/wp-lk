@@ -6,6 +6,7 @@ import { AppDispatch } from "Redux/Store";
 import axios from "Utils/Axios";
 import { API_URL } from "Utils/Config";
 import { UseGetBillModel } from "./Models";
+import useGetSberCards from "./useGetSberCards";
 import useGetTinkoffCards from "./useGetTinkoffCards";
 
 const useGetBill = (): UseGetBillModel => {
@@ -15,6 +16,7 @@ const useGetBill = (): UseGetBillModel => {
   const [load, setLoad] = useState<boolean>(false);
   const [update, setUpdate] = useState<boolean | null>(null);
   const tinkoff = useGetTinkoffCards();
+  const sber = useGetSberCards()
 
   const updateBill = (): void => {
     if (update === null) setUpdate(true);
@@ -59,11 +61,13 @@ const useGetBill = (): UseGetBillModel => {
   }, []);
 
   return {
-    load: load && tinkoff.load,
+    load: load,
     tinkoffCards: tinkoff.cards,
     data,
     generalBalance,
     updateBill,
+    sberCards: sber.cards,
+    tochkaCards: []
   };
 };
 

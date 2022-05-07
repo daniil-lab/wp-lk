@@ -1,6 +1,6 @@
+import { Banks } from "Services/Bill/Models";
 import axios from "./Axios";
 import { API_URL } from "./Config";
-import { Banks } from "./Types";
 
 interface Params {
   code: string | number;
@@ -10,16 +10,20 @@ interface Params {
 }
 
 const submitBankConnection = async (bank: Banks, params: Params) => {
+  console.log("input data", {
+    bank,
+    params,
+  });
   if (bank === "tinkoff") {
     const { data } = await axios.post(
-      `${API_URL}api/v1/tinkoff/connect/submit`,
+      `${API_URL}api/v1/tinkoff/connect/submit/`,
       {
         code: params.code,
         id: params.bankUserId,
         password: params.password,
       }
     );
-
+    console.log("response data", submitBankConnection);
     return data;
   }
 

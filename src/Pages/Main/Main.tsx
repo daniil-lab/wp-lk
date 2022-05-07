@@ -80,6 +80,8 @@ const Main: React.FunctionComponent<Props> = (props: Props) => {
           setBillType={transaction.setBillType}
           updateBill={bill.updateBill}
           tinkoffCards={bill.tinkoffCards}
+          sberCards={bill.sberCards}
+          tochkaCards={bill.tochkaCards}
         />
       </div>
       {/* MARK : Category list */}

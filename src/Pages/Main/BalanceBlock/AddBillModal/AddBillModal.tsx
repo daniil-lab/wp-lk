@@ -92,7 +92,6 @@ const AddBillModal: React.FunctionComponent<Props> = ({
         show={addBankModal}
         onClose={() => setAddBankModal(false)}
       >
-        <AddBank />
         {activeSubscription?.variant.role.name === "PremiumRole" ||
         activeSubscription?.variant.role.name === "ProRole" ? (
           <AddBank />

@@ -80,20 +80,39 @@ const useBankConnection = (bank: Banks, exportDate: string | null) => {
 
       dispatch(ShowPreloader());
 
+      console.log("submitConnection: input data", {
+        password,
+        code,
+        onSuccess,
+      });
+
       const data = await submitBankConnection(bank, {
         code,
         bankUserId,
         password,
         exportDate,
       });
-
+      console.log("response submitBankConnection", data);
       if (data.status === 200) {
+        console.log("data.status === 200");
         const isSync = await syncConnection();
         isSync && onSuccess();
       } else {
+        console.log("data.status != 200", data);
         throw new Error(data.message);
       }
     } catch (error: any) {
+      console.log("error response", error.response);
+      console.log("error request", error.request);
+      console.log(
+        "error JSON.stringify(error.response)",
+        JSON.stringify(error.response)
+      );
+      console.log(
+        "error JSON.stringify(error.request)",
+        JSON.stringify(error.request)
+      );
+      console.log("Ошибка при добавлении банка", error);
       dispatch(
         ShowToast({
           text: error.message,
@@ -109,13 +128,16 @@ const useBankConnection = (bank: Banks, exportDate: string | null) => {
   const syncConnection = async (): Promise<boolean> => {
     try {
       const { data } = await axios.get(`${API_URL}api/v1/${bank}/sync/`);
-
+      console.log("syncConnection data", data);
       if (data.status === 200) {
+        console.log("syncConnection data.status === 200", data);
         return true;
       } else {
+        console.log("syncConnection data.status != 200", data);
         throw new Error(data.message);
       }
     } catch (error: any) {
+      console.log("syncConnection catch", error);
       dispatch(
         ShowToast({
           text: error.message,

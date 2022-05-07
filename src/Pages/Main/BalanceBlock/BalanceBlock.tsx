@@ -1,6 +1,6 @@
 import Load from "Components/Load/Load";
 import { BillModel } from "Models/BillModel";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import "Styles/Pages/Main/BalanceBlock/BalanceBlock.scss";
 import BalanceBlockItem from "./BalanceBlockItem/BalanceBlockItem";
 import WalletIcon from "Static/icons/wallet.svg";
@@ -9,6 +9,7 @@ import { BillType } from "Services/Transactions/Models";
 import Modal from "Components/Modal/Modal";
 import DeleteModal from "./DeleteModal/DeleteModal";
 import useRemoveBill from "Services/Bill/useRemoveBill";
+import { BankCardModel } from "Services/Bill/Models";
 
 interface Props {
   data: BillModel[];
@@ -18,7 +19,9 @@ interface Props {
   setBill: React.Dispatch<React.SetStateAction<string | null>>;
   billType: BillType;
   setBillType: React.Dispatch<React.SetStateAction<BillType>>;
-
+  tinkoffCards: BankCardModel[];
+  sberCards: BankCardModel[];
+  tochkaCards: BankCardModel[];
   updateBill: () => void;
 }
 
@@ -31,8 +34,16 @@ const BalanceBlock: React.FC<Props> = (props: Props) => {
     generalBalance,
     setBillType,
     updateBill,
+    tinkoffCards,
+    sberCards,
+    tochkaCards,
   } = props;
   const removeBill = useRemoveBill();
+  const length = useMemo(() => {
+    return (
+      data.length + tinkoffCards.length + sberCards.length + tochkaCards.length
+    );
+  }, [data.length, tinkoffCards.length]);
   return (
     <div className="balance-block">
       <h1 className="balance-block-title">Балансы</h1>
@@ -40,7 +51,7 @@ const BalanceBlock: React.FC<Props> = (props: Props) => {
         {...{ load }}
         className={`${data.length === 0 && "bill-list-isEmpty"}`}
       >
-        {data.length > 0 ? (
+        {length > 0 ? (
           <React.Fragment>
             <BalanceBlockItem
               onClick={() => {
@@ -70,6 +81,63 @@ const BalanceBlock: React.FC<Props> = (props: Props) => {
                 className={selected == bill.id ? "general" : ""}
               />
             ))}
+            {tinkoffCards.map((card) => (
+              <BalanceBlockItem
+                onClick={() => {
+                  if (selected == card.id) {
+                    console.log(card);
+
+                    // removeBill.setBillId(cards.id);
+                    // removeBill.setShowDeleteModal(true);
+                  } else {
+                    setBill(card.id);
+                    setBillType("tinkoff");
+                  }
+                }}
+                key={card.id}
+                title={"Tinkoff"}
+                price={card.balance.amount}
+                cents={card.balance.cents}
+                className={selected == card.id ? "general" : ""}
+              />
+            ))}
+            {sberCards.map((card) => (
+              <BalanceBlockItem
+                onClick={() => {
+                  if (selected == card.id) {
+                    // removeBill.setBillId(cards.id);
+                    // removeBill.setShowDeleteModal(true);
+                  } else {
+                    setBill(card.id);
+                    setBillType("tinkoff");
+                  }
+                }}
+                key={card.id}
+                title={"Sber"}
+                price={card.balance.amount}
+                cents={card.balance.cents}
+                className={selected == card.id ? "general" : ""}
+              />
+            ))}
+            {tochkaCards.map((card) => (
+              <BalanceBlockItem
+                onClick={() => {
+                  if (selected == card.id) {
+                    // removeBill.setBillId(cards.id);
+                    // removeBill.setShowDeleteModal(true);
+                  } else {
+                    setBill(card.id);
+                    setBillType("tinkoff");
+                  }
+                }}
+                key={card.id}
+                title={"Tochka"}
+                subtitle={card.cardNumber}
+                price={card.balance.amount}
+                cents={card.balance.cents}
+                className={selected == card.id ? "general" : ""}
+              />
+            ))}
           </React.Fragment>
         ) : (
           <div className="bill-list-isEmpty">
@@ -88,7 +156,6 @@ const BalanceBlock: React.FC<Props> = (props: Props) => {
           removeBill.setShowDeleteModal(false);
         }}
       >
-        {removeBill.billId}
         <DeleteModal
           closeModal={() => {
             removeBill.setBillId(null);

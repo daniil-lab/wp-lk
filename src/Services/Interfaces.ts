@@ -1,37 +1,3 @@
-export interface ITinkoffCard {
-  balance: BalanceType;
-  bankName: string;
-  cardId: string;
-  cardNumber: string;
-  createdInBank: string;
-  currency: string;
-  expiration: string;
-  id: string;
-  name: string;
-  status: string;
-}
-
-export interface ISberCard {
-  id: string;
-  cardNumber: string;
-  description: string;
-  name: string;
-  cardId: string;
-  status: string;
-  expireDate: string;
-  cardAccount: string;
-  balance: BalanceType;
-  cardName: string;
-  bankName: string;
-}
-
-export interface ITochkaCard {
-  id: string;
-  cardNumber: string;
-  balance: BalanceType;
-  bankName: string;
-}
-
 export interface ITinkoffTransaction {
   amount: BalanceType;
   currency: string;

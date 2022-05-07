@@ -1,6 +1,7 @@
 import {
+  AbstractTransactionModel,
+  TransactionModel,
   TransactionsSortedModel,
-  TranscationModel,
 } from "Models/TransactionModel";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -14,12 +15,12 @@ import axios from "Utils/Axios";
 import ArrayGroups from "Utils/ArrayGroups";
 import useGetCategories from "Services/Category/useGetCategories";
 
-const sorted = (array: TranscationModel[]): TransactionsSortedModel[] => {
+const sorted = (
+  array: AbstractTransactionModel[] | TransactionModel[]
+): TransactionsSortedModel[] => {
   const sortedTransactionByGroup = ArrayGroups(array);
   const sortedTransactionByDate = sortedTransactionByGroup.sort(
-    (x, y) =>
-      <any>moment(y?.date ?? y?.createAt).format("L") -
-      <any>moment(x?.date ?? x?.createAt).format("L")
+    (x, y) => <any>moment(y.date).format("L") - <any>moment(x.date).format("L")
   );
   return sortedTransactionByDate;
 };
@@ -63,36 +64,16 @@ const useGetTransaction = (): UseTransactionParams => {
   };
 
   const transactions = useMemo(() => {
-    if (load) {
-      if (
-        billType === "tinkoff" ||
-        billType === "sber" ||
-        billType === "tochka"
-      ) {
-        return data.filter(
-          (v) =>
-            moment(moment(startDate.split("T")[0], "YYYY-MM-DD")).get(
-              "month"
-            ) == moment(v.date).get("month")
-        );
-      } else {
-        return !bill
-          ? data.filter(
-              (v) =>
-                moment(moment(startDate.split("T")[0], "YYYY-MM-DD")).get(
-                  "month"
-                ) == moment(v.date).get("month")
-            )
-          : data.filter(
-              (v) =>
-                moment(moment(startDate.split("T")[0], "YYYY-MM-DD")).get(
-                  "month"
-                ) == moment(v.date).get("month")
-            );
-      }
-    } else {
-      return [];
-    }
+    return load
+      ? !bill
+        ? getTransactionForExistCategory()
+        : getTransactionForExistCategory().filter(
+            (v) =>
+              moment(moment(startDate.split("T")[0], "YYYY-MM-DD")).get(
+                "month"
+              ) == moment(v.date).get("month")
+          )
+      : [];
   }, [load, data, startDate, endDate, bill, category.load]);
 
   const income = useMemo(() => {
@@ -100,13 +81,13 @@ const useGetTransaction = (): UseTransactionParams => {
       const arr = [...transactions.map((t) => t.transactions)]
         .flat(1)
         .filter(
-          (el) => el?.action === "DEPOSIT" || el?.transactionType === "EARN"
+          (el) => el.action === "DEPOSIT" || el.transactionType === "EARN"
         )
-        .map((el) => el?.sum ?? el?.amount?.amount);
+        .map((el) => el.sum);
 
-      return arr.reduce((b, a) => <number>b + <number>a, 0) as number;
+      return arr.reduce((b, a) => b + a, 0);
     } else {
-      return 0 as number;
+      return 0;
     }
   }, [load, category.load, data, startDate, endDate, bill]);
 
@@ -115,13 +96,13 @@ const useGetTransaction = (): UseTransactionParams => {
       const arr = [...transactions.map((t) => t.transactions)]
         .flat(1)
         .filter(
-          (el) => el?.action === "WITHDRAW" || el?.transactionType === "SPEND"
+          (el) => el.action === "WITHDRAW" || el.transactionType === "SPEND"
         )
-        .map((el) => el?.sum ?? el?.amount?.amount);
+        .map((el) => el.sum);
 
-      return arr.reduce((b, a) => <number>b + <number>a, 0) as number;
+      return arr.reduce((b, a) => b + a, 0);
     } else {
-      return 0 as number;
+      return 0;
     }
   }, [load, category.load, data, startDate, endDate, bill]);
 
@@ -131,7 +112,7 @@ const useGetTransaction = (): UseTransactionParams => {
       const arr = [...transactions.map((t) => t.transactions)]
         .flat(1)
         .map((el) => ({
-          sum: el?.sum ?? el?.amount?.amount,
+          sum: el.sum,
           value: el.category?.name,
           color: el.category?.color.hex,
         }));
@@ -140,13 +121,13 @@ const useGetTransaction = (): UseTransactionParams => {
           if (res[el.value]) {
             res[el.value] = {
               value: el.value,
-              sum: res[el.value]?.sum + el?.sum,
+              sum: res[el.value].sum + el.sum,
               color: el.color,
             };
           } else {
             res[el.value] = {
               value: el.value,
-              sum: el?.sum,
+              sum: el.sum,
               color: el.color,
             };
           }
@@ -215,115 +196,22 @@ const useGetTransaction = (): UseTransactionParams => {
     );
   };
 
-  // MARK : Check model
-  const getAllTransactions = async (): Promise<void> => {
-    try {
-      await axios
-        .get(
-          `${API_URL}api/v1/abstract/all-transactions?startDate=${startDate}&endDate=${endDate}&page=0&pageSize=10`
-        )
-        .then((data) => {
-          setData(sorted(data.data.data.page));
-          setLoad(true);
-        })
-        .catch((error) => {
-          throw new Error(error);
-        });
-    } catch (error: any) {
-      setLoad(true);
-      dispatch(
-        ShowToast({
-          text: "Не удалось загрузить список транзакий",
-          title: "Ошибка",
-          type: "error",
-        })
-      );
+  const getUrl = () => {
+    switch (billType) {
+      case "bill": {
+        return `${API_URL}api/v1/transaction/bill/${bill}?page=0&pageSize=10`;
+      }
+      default: {
+        return `${API_URL}api/v1/abstract/all-transactions?startDate=${startDate}&endDate=${endDate}&page=0&pageSize=10`;
+      }
     }
   };
 
-  // MARK : check model
-  const getBillTransactions = async (): Promise<void> => {
+  const getTransactions = async (): Promise<void> => {
     try {
+      const url = getUrl();
       await axios
-        .get(
-          `${API_URL}api/v1/transaction/bill/${bill}?page=0&pageSize=20&startDate=${startDate}&endDate=${endDate}`
-        )
-        .then((data) => {
-          setData(sorted(data.data.data.page));
-          setLoad(true);
-        })
-        .catch((error) => {
-          throw new Error(error);
-        });
-    } catch (error: any) {
-      setLoad(true);
-      dispatch(
-        ShowToast({
-          text: "Не удалось загрузить список транзакий",
-          title: "Ошибка",
-          type: "error",
-        })
-      );
-    }
-  };
-
-  const getTinkoffransactions = async (): Promise<void> => {
-    try {
-      await axios
-        .get(
-          `${API_URL}api/v1/tinkoff/transactions/${bill}?page=0&pageSize=20&startDate=${startDate}&endDate=${endDate}`
-        )
-        .then((data) => {
-          console.log("Tinkoff transactions", data.data.data.page);
-          setData(sorted(data.data.data.page));
-          setLoad(true);
-        })
-        .catch((error) => {
-          throw new Error(error);
-        });
-    } catch (error: any) {
-      setLoad(true);
-      dispatch(
-        ShowToast({
-          text: "Не удалось загрузить список транзакий",
-          title: "Ошибка",
-          type: "error",
-        })
-      );
-    }
-  };
-
-  const getSberTransactions = async (): Promise<void> => {
-    try {
-      await axios
-        .get(
-          `${API_URL}api/v1/sber/transactions/${bill}?page=0&pageSize=20&startDate=${startDate}&endDate=${endDate}`
-        )
-        .then((data) => {
-          setData(sorted(data.data.data.page));
-          setLoad(true);
-        })
-        .catch((error) => {
-          throw new Error(error);
-        });
-    } catch (error: any) {
-      setLoad(true);
-      dispatch(
-        ShowToast({
-          text: "Не удалось загрузить список транзакий",
-          title: "Ошибка",
-          type: "error",
-        })
-      );
-    }
-  };
-
-  const getTochkaTransactions = async (): Promise<void> => {
-    try {
-      await axios
-        .get(
-          `${API_URL}api/v1/tochka/transactions/${bill}?page=0&pageSize=20&startDate=${startDate}&endDate=${endDate}`
-        )
+        .get(url)
         .then((data) => {
           setData(sorted(data.data.data.page));
           setLoad(true);
@@ -348,12 +236,7 @@ const useGetTransaction = (): UseTransactionParams => {
       if (load) {
         setLoad(false);
       }
-      if (billType === "general") getAllTransactions();
-      if (billType === "bill") getBillTransactions();
-      if (billType === "tinkoff") getTinkoffransactions();
-      if (billType === "sber") getSberTransactions();
-      if (billType === "tochka") getTinkoffransactions();
-      console.log("UPDATE TRANSACTIONS");
+      getTransactions();
     }
   }, [update]);
 
@@ -361,12 +244,7 @@ const useGetTransaction = (): UseTransactionParams => {
     if (load) {
       setLoad(false);
     }
-    if (billType === "general") getAllTransactions();
-    if (billType === "bill") getBillTransactions();
-    if (billType === "tinkoff") getTinkoffransactions();
-    if (billType === "sber") getSberTransactions();
-    if (billType === "tochka") getTochkaTransactions();
-    console.log("GET TRANSACTIONS");
+    getTransactions();
   }, [startDate, endDate, bill]);
 
   return {

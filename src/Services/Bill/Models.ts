@@ -1,5 +1,4 @@
 import { BillModel } from "Models/BillModel";
-import { ITinkoffCard } from "Services/Interfaces";
 
 export type Banks = "tinkoff" | "sber" | "tochka";
 
@@ -10,5 +9,19 @@ export interface UseGetBillModel {
   data: BillModel[];
   generalBalance: number;
   updateBill: () => void;
-  tinkoffCards: ITinkoffCard[];
+  tinkoffCards: BankCardModel[];
+  sberCards: BankCardModel[];
+  tochkaCards: BankCardModel[];
+}
+
+export type BalanceType = {
+  amount: number;
+  cents: number;
+};
+
+export interface BankCardModel {
+  balance: BalanceType;
+  bankName: string;
+  cardNumber: string;
+  id: string;
 }

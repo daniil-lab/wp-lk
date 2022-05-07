@@ -1,13 +1,11 @@
 import { BillModel } from "Models/BillModel";
 import { BaseCategoryModel } from "Models/CategoryModel";
 import {
-  AbstractTransactionModel,
-  TransactionModel,
   TransactionsSortedModel,
   TransactionType,
 } from "Models/TransactionModel";
 
-export type BillType = "general" | "bill" | "tinkoff";
+export type BillType = "general" | "bill" | "tinkoff" | "sber" | "tochka";
 
 export type UseTransactionParams = {
   load: boolean;

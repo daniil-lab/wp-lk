@@ -36,28 +36,35 @@ const ChartBlockHistory: React.FunctionComponent<Props> = (props: Props) => {
         return g.transactions.length > 0 ? (
           <ChartBlockHistoryWrapper key={i} date={g.date}>
             {g.transactions.map((transaction, k) => {
-              return existsCategory(transaction.category.id) ? (
+              console.log("transaction?.category", transaction?.category);
+              return (
                 <ChartBlockHistoryItem
                   key={k}
                   transactionType={
-                    !selectedBill
-                      ? transaction.transactionType
-                      : transaction.action
+                    transaction?.transactionType ?? transaction?.action
                   }
-                  icon={{
-                    color: transaction.category?.color.hex,
-                    path: transaction.category?.icon.name,
-                  }}
-                  title={transaction.category?.name ?? transaction?.description}
+                  icon={
+                    transaction?.category
+                      ? existsCategory(transaction?.category?.id)
+                        ? {
+                            color: transaction?.category?.color.hex ?? "",
+                            path: transaction?.category?.icon.name ?? "",
+                          }
+                        : null
+                      : null
+                  }
+                  title={
+                    transaction?.category?.name ?? transaction?.description
+                  }
                   subtitle={transaction?.bill?.name ?? transaction?.billName}
-                  price={transaction.sum}
+                  price={transaction?.amount?.amount ?? transaction?.sum}
                   currency={transaction.currency}
                   onClick={() => {
-                    setTransactionId(transaction.id);
-                    setShowDeleteModal(true);
+                    // setTransactionId(transaction.id);
+                    // setShowDeleteModal(true);
                   }}
                 />
-              ) : null;
+              );
             })}
           </ChartBlockHistoryWrapper>
         ) : null;
