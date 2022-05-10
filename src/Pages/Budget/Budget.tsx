@@ -23,11 +23,14 @@ import useGetBill from "Hooks/useGetBill";
 import moment from "moment";
 import { type } from "os";
 import useCategoryLimit from "Hooks/useCategoryLimit";
+import useAddTransaction from "Hooks/useAddTransaction";
+import NumberWithSpaces from "Utils/NumberWithSpaces";
 
 interface Props {}
 
 const Budget: React.FunctionComponent<Props> = (props: Props) => {
   const transactions = useGetTransaction();
+  const addTransaction = useAddTransaction();
   const categories = useGetCategories();
   const budget = useBudget(categories, transactions);
   const bills = useGetBill();
@@ -119,6 +122,7 @@ const Budget: React.FunctionComponent<Props> = (props: Props) => {
     } else {
       return 0;
     }
+    return 0;
   }, [budget.selectedCategory]);
 
   const [showAddOperationModal, setShowAddOperationModal] = useState(false);
@@ -222,12 +226,15 @@ const Budget: React.FunctionComponent<Props> = (props: Props) => {
                           <span className="expense-income-card-content-title">
                             Сейчас
                           </span>
-                          <span>{getCurrent}₽</span>
+                          <span>{NumberWithSpaces(getCurrent)} ₽</span>
                           <span className="expense-income-card-content-title ">
                             Запланировано
                           </span>
                           <span>
-                            {budget.selectedCategory?.categoryLimit} ₽
+                            {NumberWithSpaces(
+                              budget.selectedCategory?.categoryLimit
+                            )}{" "}
+                            ₽
                           </span>
                         </div>
                         <div className="expense-income-card-bar">
@@ -239,11 +246,23 @@ const Budget: React.FunctionComponent<Props> = (props: Props) => {
                             color="#F0187B"
                           />
                           <div className="expense-income-card-bar-value">
-                            {Math.round(
-                              (getIncomeCategory(budget?.selectedCategory.id) /
-                                budget?.selectedCategory?.categoryLimit) *
-                                100
-                            )}
+                            {isNaN(
+                              Math.round(
+                                (getIncomeCategory(
+                                  budget?.selectedCategory.id
+                                ) /
+                                  budget?.selectedCategory?.categoryLimit) *
+                                  100
+                              )
+                            )
+                              ? 0
+                              : Math.round(
+                                  (getIncomeCategory(
+                                    budget?.selectedCategory.id
+                                  ) /
+                                    budget?.selectedCategory?.categoryLimit) *
+                                    100
+                                )}
                             %
                           </div>
                         </div>
@@ -282,13 +301,17 @@ const Budget: React.FunctionComponent<Props> = (props: Props) => {
         onClose={() => setShowAddOperationModal(false)}
         style={{ width: "30%" }}
       >
-        {/* <AddOperationModal
+        <AddOperationModal
           onClose={() => setShowAddOperationModal(false)}
           updateTransactions={() => {
-            budget.transaction.updateTransactions();
-            budget.categories.updateCategory();
+            transactions.updateTransactions();
+            categories.updateCategory();
           }}
-        /> */}
+          addTransaction={addTransaction.addTransaction}
+          updateBills={bills.updateBill}
+          bills={bills}
+          category={categories}
+        />
       </Modal>
     </div>
   );

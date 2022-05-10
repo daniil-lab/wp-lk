@@ -1,5 +1,9 @@
 import Header from "Components/Header/Header";
 import Modal from "Components/Modal/Modal";
+import useAddTransaction from "Hooks/useAddTransaction";
+import useGetBill from "Hooks/useGetBill";
+import useGetCategories from "Hooks/useGetCategories";
+import useGetTransaction from "Hooks/useGetTransaction";
 import AddOperationModal from "Pages/Main/ChartBlock/AddOperationModal/AddOperationModal";
 import QrScanner from "qr-scanner";
 import React, { useState } from "react";
@@ -13,6 +17,10 @@ const CardScan: React.FC = () => {
   const [showAddOperationModal, setShowAddOperationModal] = useState(false);
   const [sum, setSum] = useState("");
   const [qr, setQr] = useState<File>();
+  const transaction = useGetTransaction();
+  const addTransaction = useAddTransaction();
+  const bills = useGetBill();
+  const categories = useGetCategories();
 
   const handleOnChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -67,6 +75,11 @@ const CardScan: React.FC = () => {
       >
         <AddOperationModal
           onClose={() => setShowAddOperationModal(false)}
+          updateTransactions={transaction.updateTransactions}
+          addTransaction={addTransaction.addTransaction}
+          updateBills={bills.updateBill}
+          bills={bills}
+          category={categories}
           initialSum={sum}
           qr={qr}
           noQrLink

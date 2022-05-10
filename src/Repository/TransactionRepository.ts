@@ -60,7 +60,6 @@ export default class TransactionRepository {
       const data = await axios.get(
         `${API_URL}api/v1/tinkoff/transactions/${billId}?page=0&pageSize=20&startDate=${startDate}&endDate=${endDate}`
       );
-      console.log(data);
       if (data.status === 200) {
         return data.data.data.page;
       }
@@ -209,4 +208,6 @@ export default class TransactionRepository {
       throw new Error();
     }
   }
+
+  async getTransactionById(): Promise<void> {}
 }

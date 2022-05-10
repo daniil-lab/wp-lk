@@ -26,6 +26,7 @@ export default class BillRepository {
       }
     } catch (error: any) {
       if (error.response.status === 404) return [];
+      if (error.response.status === 403) return [];
       throw new Error();
     }
   }
@@ -38,6 +39,7 @@ export default class BillRepository {
       }
     } catch (error: any) {
       if (error.response.status === 404) return [];
+      if (error.response.status === 403) return [];
       throw new Error();
     }
   }
@@ -50,6 +52,7 @@ export default class BillRepository {
       }
     } catch (error: any) {
       if (error.response.status === 404) return [];
+      if (error.response.status === 403) return [];
       throw new Error();
     }
   }

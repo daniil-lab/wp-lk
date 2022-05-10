@@ -5,22 +5,18 @@ import ChartBlockHistoryItem from "./ChartBlockHistoryItem/ChartBlockHistoryItem
 import "Styles/Pages/Main/ChartBlock/ChartBlockHistory/ChartBlockHistory.scss";
 import moment from "moment";
 import Modal from "Components/Modal/Modal";
-import DeleteModal from "Pages/Main/BalanceBlock/BalanceEditModal/BalanceEditModal";
-import { BillType } from "Services/Transactions/Models";
-import { UseGetCategoriesModel } from "Services/Category/Models";
-import TransactionEditModal from "./TransactionEditModal/TransactionEditModal";
 import useEditTransactions from "Hooks/useEditTransactions";
-import { UseGetBillModel } from "Services/Bill/Models";
 import useAddCategoryTransaction from "Hooks/useAddCategoryTransaction";
 import BankAddCategoryModal from "./BankAddCategoryModal/BankAddCategoryModal";
+import { BillType } from "Models/BillModel";
 
 interface Props {
   transactions: TransactionsSorted[];
   selectedBill: string | null;
   billType: BillType;
   updateTransactions: () => void;
-  categories: UseGetCategoriesModel;
-  bills: UseGetBillModel;
+  categories: any;
+  bills: any;
 }
 
 const sortByDate = (a, b) => (moment(a.date).isAfter(moment(b.date)) ? -1 : 1);
@@ -96,8 +92,27 @@ const ChartBlockHistory: React.FunctionComponent<Props> = (props: Props) => {
                         addCategoryTransaction.setSelectedCategory(
                           transaction?.category
                         );
-                    }
-                    if (transaction?.type === "SYSTEM") {
+                    } else if (transaction?.type === "SBER") {
+                      addCategoryTransaction.setTransactionId(transaction.id);
+                      addCategoryTransaction.setTransactionType(
+                        transaction.transactionType
+                      );
+                      addCategoryTransaction.modal.setShow(true);
+                      if (transaction?.category)
+                        addCategoryTransaction.setSelectedCategory(
+                          transaction?.category
+                        );
+                    } else if (transaction?.type === "TOCHKA") {
+                      addCategoryTransaction.setTransactionId(transaction.id);
+                      addCategoryTransaction.setTransactionType(
+                        transaction.transactionType
+                      );
+                      addCategoryTransaction.modal.setShow(true);
+                      if (transaction?.category)
+                        addCategoryTransaction.setSelectedCategory(
+                          transaction?.category
+                        );
+                    } else {
                       setTransactionId(transaction.id);
                       setShowEditModal(true);
                     }
@@ -110,11 +125,11 @@ const ChartBlockHistory: React.FunctionComponent<Props> = (props: Props) => {
       })}
 
       <Modal show={showEditModal} onClose={() => setShowEditModal(false)}>
-        <TransactionEditModal
+        {/* <TransactionEditModal
           onClose={() => setShowEditModal(false)}
           updateTransactions={updateTransactions}
           {...editTransaction}
-        />
+        /> */}
       </Modal>
       <Modal
         style={{
