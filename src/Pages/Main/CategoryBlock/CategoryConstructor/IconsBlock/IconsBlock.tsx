@@ -1,28 +1,26 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { API_URL } from "Utils/Config";
 import useDraggableScroll from "Utils/Hooks/useDraggableScroll";
 import Checkmark from "Components/Checkmark/Checkmark";
-
+import useGetCategoryIcons from "Hooks/useGetCategoryIcons";
 import "Styles/Pages/Main/CategoryBlock/CategoryConstructor/IconsBlock/IconsBlock.scss";
-import useGetCategoryIcons from "Services/Category/useGetCategoryIcons";
 import { IconType } from "Models/CategoryModel";
 
 interface Props {
   onIconChange: (icon: IconType) => void;
   icon: IconType | null;
+  icons: IconType[];
 }
 
 const IconsBlock: React.FunctionComponent<Props> = ({
   onIconChange,
   icon: iconValue,
+  icons,
 }: Props) => {
   const ref = useRef(null);
 
   const { onMouseDown } = useDraggableScroll(ref, { direction: "horizontal" });
 
-  const { load, icons } = useGetCategoryIcons();
-
-  if (!load) return null;
   return (
     <div
       ref={ref}

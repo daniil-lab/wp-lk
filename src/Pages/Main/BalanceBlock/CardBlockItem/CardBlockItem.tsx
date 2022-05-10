@@ -1,9 +1,12 @@
 import Image from "Components/Image/Image";
 import React from "react";
+import { useSelector } from "react-redux";
+import { GetUserWallet } from "Redux/Selectors";
 
 import WalletBalanceIcon from "Static/icons/wallet-balance-icon.svg";
 
 import "Styles/Pages/Main/BalanceBlock/BalanceBlockItem/BalanceBlockItem.scss";
+import GetCurrencySymbol from "Utils/GetCurrencyIcon";
 
 interface Props {
   title: string;
@@ -40,7 +43,9 @@ const CardBlockItem: React.FunctionComponent<Props> = ({
           <span className="balance-block-item-subtitle">{subtitle ?? ""}</span>
         )}
       </div>
-      <span className="balance-block-item-amount">{price} ₽</span>
+      <span className="balance-block-item-amount">
+        {price} {wallet && GetCurrencySymbol(wallet)}
+      </span>
     </div>
   );
 };

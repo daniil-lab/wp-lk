@@ -11,7 +11,7 @@ import Modal from "Components/Modal/Modal";
 import ModalPhone from "./ModalPhone/ModalPhone";
 import ModalEmail from "./ModalEmail/ModalEmail";
 import { useSelector } from "react-redux";
-import { GetUserEmail, GetUserName } from "Redux/Selectors";
+import { GetUserEmail, GetUserName, GetUserWallet } from "Redux/Selectors";
 import "Styles/Pages/Settings/UserBlock/UserBlock.scss";
 import ModalRemoveData from "./ModalRemoveData/ModalRemoveData";
 import ModalExportData from "./ModalExportData/ModalExportData";
@@ -20,6 +20,7 @@ import User from "Services/User";
 interface Props {}
 
 const UserBlock: React.FunctionComponent<Props> = (props: Props) => {
+  const userWallet = useSelector(GetUserWallet);
   const { load, wallets } = useGetWallets();
   const { useEditUserСurrency } = User;
 
@@ -35,7 +36,8 @@ const UserBlock: React.FunctionComponent<Props> = (props: Props) => {
   const { wallet, setWallet, updateUserCurrency } = useEditUserСurrency();
 
   useEffect(() => {
-    if (load) setWallet(wallets[0]);
+    if (load)
+      setWallet(wallets.filter((w) => w.walletSystemName === userWallet)[0]);
   }, [load]);
 
   return (

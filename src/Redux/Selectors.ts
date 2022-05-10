@@ -20,3 +20,5 @@ export const GetUpdateOperations = (store: RootStore) =>
   store.effects.updateOperation;
 
 export const GetUserRole = (store: RootStore) => store.user.user?.role.name;
+
+export const GetUserWallet = (store: RootStore) => store.user?.user?.walletType;

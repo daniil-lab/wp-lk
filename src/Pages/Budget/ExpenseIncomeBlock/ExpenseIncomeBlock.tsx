@@ -9,11 +9,11 @@ import { useDispatch } from "react-redux";
 import { ShowToast } from "Redux/Actions";
 import { AppDispatch } from "Redux/Store";
 import { GeneralBudget } from "Services/Budget/Models";
-import { UseCategoryLimitConfig } from "Services/Category/Models";
 import "Styles/Pages/Budget/ExpenseIncomeBlock/ExpenseIncomeBlock.scss";
 import { API_URL } from "Utils/Config";
 import CategoriesEmpty from "Static/icons/categories-empty.svg";
 import Image from "Components/Image/Image";
+import NumberWithSpaces from "Utils/NumberWithSpaces";
 
 interface Props {
   prev: () => void;
@@ -23,7 +23,7 @@ interface Props {
   load: boolean;
   categories: CategoryModel[];
   selectCategory: React.Dispatch<React.SetStateAction<CategoryModel | null>>;
-  updateCategoryLimit: (config: UseCategoryLimitConfig) => Promise<void>;
+  updateCategoryLimit: (config) => Promise<void>;
   updateCategories: () => void;
   transactions: TransactionsSortedModel[];
   getIncomeCategory: (id: string) => number;
@@ -212,7 +212,8 @@ const CategoryItem = (props) => {
         {!data.onlyForEarn ? (
           <React.Fragment>
             <span className="expense-income-history-row-info-amount">
-              {data?.categorySpend ?? 0} из {data?.categoryLimit ?? 0} ₽
+              {NumberWithSpaces(data?.categorySpend ?? 0)} из{" "}
+              {NumberWithSpaces(data?.categoryLimit ?? 0)} ₽
             </span>
             <LineChart
               value={data?.percentsFromLimit ?? 0}
@@ -248,11 +249,11 @@ const ExpensesIncome = (props: ExpensesBlockProps) => {
         <div className="expense-income-card-content">
           <span>{type === "income" ? "Доход" : "Расход"}</span>
           <span className="expense-income-card-content-title">Сейчас</span>
-          <span>{value} ₽</span>
+          <span>{NumberWithSpaces(value)} ₽</span>
           <span className="expense-income-card-content-title">
             Запланировано
           </span>
-          <span>{limit} ₽</span>
+          <span>{NumberWithSpaces(limit)} ₽</span>
         </div>
         <div className="expense-income-card-bar">
           <CircleChart

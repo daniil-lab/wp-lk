@@ -24,9 +24,10 @@ export interface TranscationModel {
   action?: TransactionType;
   date?: string;
   category: CategoryModel;
-  bill?: UseGetBillModel;
+  bill?: BillModel;
   geocodedPlace?: string;
   longitude?: number;
   latitude?: number;
   createAt?: string;
+  billName?: string;
 }

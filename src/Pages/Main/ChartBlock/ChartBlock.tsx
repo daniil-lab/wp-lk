@@ -7,19 +7,22 @@ import TransactionsIcon from "Static/icons/transaction.svg";
 import Image from "Components/Image/Image";
 import { UseTransactionParams } from "Services/Transactions/Models";
 import { UseGetCategoriesModel } from "Services/Category/Models";
+import { UseGetBillModel } from "Services/Bill/Models";
 
 interface Props {
   transaction: UseTransactionParams;
   categories: UseGetCategoriesModel;
+  bills: UseGetBillModel;
 }
 
 const ChartBlock: React.FunctionComponent<Props> = (props: Props) => {
-  const { transaction, categories } = props;
+  const { transaction, categories, bills } = props;
   return (
     <div className="chart-block">
       <Load {...{ load: transaction.load }} className="chart-block-history">
         {transaction.transactions.length > 0 ? (
           <ChartBlockHistory
+            bills={bills}
             transactions={transaction.transactions}
             selectedBill={transaction.bill}
             billType={transaction.billType}

@@ -26,7 +26,8 @@ export interface CategoryModel {
   name: string;
   categorySpend: number;
   categoryEarn: number;
-  onlyForEarn: boolean;
+  forEarn: boolean;
+  forSpend: boolean;
   color: ColorType;
   icon: IconType;
   description: string;

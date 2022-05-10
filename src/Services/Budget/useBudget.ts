@@ -1,9 +1,8 @@
+import useGetCategories from "Hooks/useGetCategories";
+import useGetTransaction from "Hooks/useGetTransaction";
 import { CategoryModel } from "Models/CategoryModel";
-import { TransactionType } from "Models/TransactionModel";
 import moment from "moment";
 import { useEffect, useMemo, useState } from "react";
-import useGetCategories from "Services/Category/useGetCategories";
-import useGetTransaction from "Services/Transactions/useGetTransaction";
 import { UseBudgetModel } from "./Models";
 
 const useBudget = (): UseBudgetModel => {

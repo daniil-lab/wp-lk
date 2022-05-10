@@ -1,8 +1,8 @@
 import DateField from "Components/DateField/DateField";
 import PhoneField from "Components/PhoneField";
+import useBankConnection from "Hooks/useBankConnection";
+import { Banks } from "Models/BillModel";
 import React, { useState } from "react";
-import { Banks } from "Services/Bill/Models";
-import useBankConnection from "Services/Bill/useBankConnection";
 import "Styles/Pages/Main/BalanceBlock/AddBillModal/AddBank/TinkoffBank/TinkoffBank.scss";
 
 interface Props {
@@ -29,7 +29,11 @@ const BankModal: React.FC<Props> = ({ onClose, bank }) => {
 
   const handleConnect = async (): Promise<void> => {
     act === "start" && (await startConnection(phone));
-    act === "submit" && (await submitConnection(password, code, onClose));
+    act === "submit" &&
+      (await submitConnection(password, code, () => {
+        onClose();
+        window.location.reload();
+      }));
   };
 
   const handleClose = () => {

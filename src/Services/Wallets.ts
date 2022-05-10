@@ -16,9 +16,7 @@ const useGetWallets = () => {
       } else {
         throw new Error(res.data.message);
       }
-    } catch (error: any) {
-      console.log(error.message);
-    }
+    } catch (error: any) {}
   };
 
   const init = async (): Promise<void> => {

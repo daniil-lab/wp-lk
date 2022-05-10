@@ -1,10 +1,13 @@
+import Checkbox from "Components/Checkbox/Checkbox";
 import Checkmark from "Components/Checkmark/Checkmark";
+import useAddCategory from "Hooks/useAddCategory";
+import useGetCategoryColors from "Hooks/useGetCategoryColors";
+import useGetCategoryIcons from "Hooks/useGetCategoryIcons";
 import { ColorType, IconType } from "Models/CategoryModel";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GetUserId } from "Redux/Selectors";
 import { AppDispatch } from "Redux/Store";
-import useAddCategory from "Services/Category/useAddCategory";
 import "Styles/Pages/Main/CategoryBlock/CategoryConstructor/CategoryConstructor.scss";
 import { API_URL } from "Utils/Config";
 import ColorsBlock from "./ColorsBlock/ColorsBlock";
@@ -19,19 +22,39 @@ export type CategoryType = {
   color: ColorType | null;
   icon: IconType | null;
   name: string;
-  onlyForEarn: boolean;
-  expenses: string;
+  forEarn: boolean;
+  forSpend: boolean;
+  categoryLimit: number;
 };
 
 const CategoryConstructor: React.FunctionComponent<Props> = (props: Props) => {
   const userId = useSelector(GetUserId);
+  const colors = useGetCategoryColors();
+  const icons = useGetCategoryIcons();
   const [category, setCategory] = useState<CategoryType>({
     icon: null,
     color: null,
     name: "",
-    onlyForEarn: false,
-    expenses: "0",
+    forEarn: true,
+    forSpend: false,
+    categoryLimit: 0,
   });
+
+  const __clearState = (): void => {
+    setCategory({
+      icon: icons.icons[0],
+      color: colors.colors[0],
+      name: "",
+      forEarn: true,
+      forSpend: false,
+      categoryLimit: 0,
+    });
+  };
+
+  const __close = (): void => {
+    props.close();
+    __clearState();
+  };
 
   const addCategory = useAddCategory({ params: category, userId: userId! });
 
@@ -40,11 +63,24 @@ const CategoryConstructor: React.FunctionComponent<Props> = (props: Props) => {
   const setColor = (color: ColorType): void =>
     setCategory({ ...category, color });
 
+  useEffect(() => {
+    if (colors.load) setColor(colors.colors[0]);
+  }, [colors.load]);
+
+  useEffect(() => {
+    if (icons.load) setIcon(icons.icons[0]);
+  }, [icons.load]);
+
   const handleStoreCategory = async () => {
-    await addCategory();
-    props.updateCategory();
-    props.close();
+    const action = await addCategory();
+    if (action) {
+      props.updateCategory();
+      props.close();
+      __clearState();
+    }
   };
+
+  if (!colors.load && !icons.load) return null;
 
   return (
     <div className="category-constructor">
@@ -65,46 +101,74 @@ const CategoryConstructor: React.FunctionComponent<Props> = (props: Props) => {
           placeholder="Название"
           value={category.name}
           onChange={(e) => setCategory({ ...category, name: e.target.value })}
+          style={{
+            borderRadius: 15,
+          }}
         />
       </div>
       <div className="category-constructor-row">
         <span>Иконка</span>
-        <IconsBlock onIconChange={setIcon} icon={category.icon} />
+        <IconsBlock
+          icons={icons.icons}
+          onIconChange={setIcon}
+          icon={category.icon}
+        />
       </div>
       <div className="category-constructor-row">
         <span>Цвет</span>
-        <ColorsBlock onColorChange={setColor} color={category.color} />
+        <ColorsBlock
+          colors={colors.colors}
+          onColorChange={setColor}
+          color={category.color}
+        />
       </div>
-      <Checkbox
-        value={category.onlyForEarn}
-        onChange={(e) =>
-          setCategory({
-            ...category,
-            onlyForEarn: !category.onlyForEarn,
-          })
-        }
-      />
-
-      <input
+      <div className="category-constructor-row" style={{ marginBottom: 15 }}>
+        <span>Лимит категории</span>
+        <input
+          type="number"
+          placeholder="Лимит категории"
+          value={category.categoryLimit}
+          onChange={(e) =>
+            setCategory({
+              ...category,
+              categoryLimit: parseInt(e.target.value),
+            })
+          }
+          style={{
+            borderRadius: 15,
+          }}
+        />
+      </div>
+      <div
+        className="category-constructor-row"
         style={{
-          marginTop: 10,
-          marginBottom: 10,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 15,
         }}
-        type="number"
-        placeholder="Запланированный расход"
-        value={category.expenses}
-        onChange={(e) => {
-          setCategory({
-            ...category,
-            expenses: e.target.value,
-          });
-        }}
-      />
+      >
+        <Checkbox
+          value={category.forEarn}
+          onChange={() =>
+            setCategory({ ...category, forEarn: !category.forEarn })
+          }
+          lable="Доходы"
+        />
+        <Checkbox
+          value={category.forSpend}
+          onChange={() =>
+            setCategory({ ...category, forSpend: !category.forSpend })
+          }
+          lable="Расходы"
+        />
+      </div>
+
       <div className="category-constructor-controll">
         <button className="button-primary" onClick={handleStoreCategory}>
           Добавить
         </button>
-        <button className="button-secondary" onClick={props.close}>
+        <button className="button-secondary" onClick={__close}>
           Отмена
         </button>
       </div>
@@ -113,40 +177,3 @@ const CategoryConstructor: React.FunctionComponent<Props> = (props: Props) => {
 };
 
 export default CategoryConstructor;
-
-const Checkbox = ({ value, onChange }) => {
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-      }}
-      onClick={onChange}
-    >
-      <div
-        style={{
-          width: 25,
-          height: 25,
-          borderRadius: 50,
-          background: "#eaeaea",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginRight: 10,
-        }}
-      >
-        {value && (
-          <div
-            style={{
-              width: 17,
-              height: 17,
-              borderRadius: 50,
-              background: "#f0187b",
-            }}
-          />
-        )}
-      </div>
-      <span style={{ color: "#383838" }}>Только для доходов</span>
-    </div>
-  );
-};

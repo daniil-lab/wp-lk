@@ -6,7 +6,6 @@ interface Props {
   name: string;
   icon: string;
   color: string;
-  onlyForEarn: boolean;
   onClick: () => void;
 }
 
@@ -25,7 +24,7 @@ const CategoryItem: React.FunctionComponent<Props> = (props: Props) => {
         />
       </div>
       <span>{props.name}</span>
-
+      {/* 
       <span
         style={{
           color: "#909090",
@@ -34,7 +33,7 @@ const CategoryItem: React.FunctionComponent<Props> = (props: Props) => {
         }}
       >
         {props.onlyForEarn && "Только для доходов"}
-      </span>
+      </span> */}
     </div>
   );
 };

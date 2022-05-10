@@ -1,8 +1,8 @@
-import { UserType } from "Services/Interfaces";
+import { UserModel } from "Models/UserModel";
 
 export interface IUserState {
   token: null | string;
-  user: UserType | null;
+  user: UserModel | null;
 }
 
 export interface IPreloaderState {

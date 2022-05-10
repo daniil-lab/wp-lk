@@ -1,3 +1,5 @@
+import { WalletModel } from "./WalletModel";
+
 export type UserModel = {
   id: string;
   username: string;
@@ -15,7 +17,7 @@ export type UserModel = {
     activated: boolean;
   };
   type: string;
-  walletType: string;
+  walletType: WalletModel;
   touchID: boolean;
   faceID: boolean;
   pinCode: string;

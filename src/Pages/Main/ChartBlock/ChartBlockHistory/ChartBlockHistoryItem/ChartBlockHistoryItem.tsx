@@ -1,12 +1,17 @@
 import { AmountType, TransactionType } from "Models/TransactionModel";
+import { WalletModel } from "Models/WalletModel";
 import React from "react";
+import { useSelector } from "react-redux";
+import { GetUserWallet } from "Redux/Selectors";
 import "Styles/Pages/Main/ChartBlock/ChartBlockHistory/ChartBlockHistoryItem/ChartBlockHistoryItem.scss";
 import { API_URL } from "Utils/Config";
+import GetCurrencySymbol from "Utils/GetCurrencyIcon";
 import HexToRgbA from "Utils/HexToRgbA";
+import NumberWithSpaces from "Utils/NumberWithSpaces";
 
 interface Props {
   transactionType: TransactionType;
-  price: AmountType | number;
+  price: string | number;
   title: string | undefined;
   subtitle: string;
   icon: {
@@ -20,6 +25,7 @@ interface Props {
 const ChartBlockHistoryItem: React.FunctionComponent<Props> = (
   props: Props
 ) => {
+  const wallet = useSelector(GetUserWallet);
   return (
     <div className="chart-block-history-item" onClick={props.onClick}>
       <div
@@ -50,14 +56,22 @@ const ChartBlockHistoryItem: React.FunctionComponent<Props> = (
       <div className="chart-block-history-item-price-wrapper">
         <span>
           {props.transactionType === "SPEND" &&
-            `-${props.price} ${props.currency}`}
+            `-${NumberWithSpaces(props.price)} ${
+              props.currency && GetCurrencySymbol(props.currency as WalletModel)
+            }`}
           {props.transactionType === "WITHDRAW" &&
-            `-${props.price} ${props.currency}`}
+            `-${NumberWithSpaces(props.price)} ${
+              props.currency && GetCurrencySymbol(props.currency as WalletModel)
+            }`}
 
           {props.transactionType === "EARN" &&
-            `+${props.price} ${props.currency}`}
+            `+${NumberWithSpaces(props.price)} ${
+              props.currency && GetCurrencySymbol(props.currency as WalletModel)
+            }`}
           {props.transactionType === "DEPOSIT" &&
-            `+${props.price} ${props.currency}`}
+            `+${NumberWithSpaces(props.price)} ${
+              props.currency && GetCurrencySymbol(props.currency as WalletModel)
+            }`}
         </span>
       </div>
     </div>

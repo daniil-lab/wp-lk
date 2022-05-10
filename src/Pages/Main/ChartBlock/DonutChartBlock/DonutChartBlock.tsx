@@ -4,6 +4,7 @@ import PrevIcon from "../../../../Static/icons/prev.svg";
 import NextIcon from "../../../../Static/icons/next.svg";
 import CreateDonutChart from "Utils/CreateDonutChart";
 import DonutChartBlockCalendar from "./DonutChartCalendar/DonutChartBlockCalendar";
+import NumberWithSpaces from "Utils/NumberWithSpaces";
 
 interface Props {
   data: [];
@@ -112,7 +113,7 @@ const DonutChartBlock: React.FunctionComponent<Props> = (props: Props) => {
                   fill="#6A82FB"
                 />
               </svg>
-              {props.income} ₽
+              {NumberWithSpaces(props.income)} ₽
             </h4>
             <span>Расходы</span>
             <h4>
@@ -129,7 +130,7 @@ const DonutChartBlock: React.FunctionComponent<Props> = (props: Props) => {
                   fill="#F0187B"
                 />
               </svg>
-              -{props.expenses} ₽
+              -{NumberWithSpaces(props.expenses)} ₽
             </h4>
           </div>
         </div>

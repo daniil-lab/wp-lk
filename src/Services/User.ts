@@ -262,6 +262,7 @@ export const useEditUserСurrency = () => {
           })
         );
         setWallet(newWallet);
+        window.location.reload();
       } else {
         throw new Error(data.message);
       }

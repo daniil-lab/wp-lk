@@ -1,3 +1,4 @@
+import { UserModel } from "Models/UserModel";
 import {
   HIDE_PRELOADER,
   HIDE_TOAST,
@@ -8,14 +9,13 @@ import {
   UPDATE_CATEGORY,
   UPDATE_OPERATION,
 } from "Redux/Constants";
-import { UserType } from "Services/Interfaces";
 import { IToast } from "./StateInterface";
 
 export interface IUserSetAction {
   type: typeof SET_USER;
   payload: {
     token: string;
-    user: UserType;
+    user: UserModel;
   };
 }
 

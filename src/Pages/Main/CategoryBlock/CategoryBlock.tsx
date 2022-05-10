@@ -3,11 +3,12 @@ import Modal from "Components/Modal/Modal";
 import { CategoryModel } from "Models/CategoryModel";
 import React, { useState } from "react";
 import "Styles/Pages/Main/CategoryBlock/CategoryBlock.scss";
-import DeleteModal from "../BalanceBlock/DeleteModal/DeleteModal";
+import DeleteModal from "../BalanceBlock/BalanceEditModal/BalanceEditModal";
 import CategoryItem from "./CategoryItem/CategoryItem";
-import useRemoveCategory from "Services/Category/useRemoveCategory";
 import Image from "Components/Image/Image";
 import CategoriesEmpty from "Static/icons/categories-empty.svg";
+import EditCategory from "./EditCategory/EditCategory";
+import useEditCategory from "Hooks/useEditCategory";
 
 interface Props {
   categories: CategoryModel[];
@@ -20,12 +21,7 @@ const CategoryBlock: React.FC<Props> = ({
   load,
   updateCategory,
 }) => {
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [categoryId, setCategoryId] = useState<string | null>(null);
-
-  const removeCategory = useRemoveCategory({
-    categoryId: categoryId!,
-  });
+  const editCategory = useEditCategory(categories);
 
   if (!load) {
     return (
@@ -60,14 +56,13 @@ const CategoryBlock: React.FC<Props> = ({
               categories.map((category, i) => {
                 return (
                   <CategoryItem
-                    onlyForEarn={category.onlyForEarn}
                     key={i}
                     icon={category.icon.name}
                     color={category.color.hex}
                     name={category.name}
                     onClick={() => {
-                      setShowDeleteModal(true);
-                      setCategoryId(category.id);
+                      editCategory.setCategoryId(category.id);
+                      editCategory.modal.setShow(true);
                     }}
                   />
                 );
@@ -76,12 +71,31 @@ const CategoryBlock: React.FC<Props> = ({
           </div>
         </Load>
       </div>
-      <Modal show={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
-        <DeleteModal
-          closeModal={() => setShowDeleteModal(false)}
-          transactionId={categoryId}
-          deleteOp={() => categoryId && removeCategory()}
+      <Modal
+        show={editCategory.modal.show}
+        onClose={() => {
+          editCategory.modal.setShow(false);
+          editCategory.__clearState();
+        }}
+      >
+        <EditCategory
+          edit={editCategory.edit}
+          remove={editCategory.remove}
+          name={editCategory.name}
+          setName={editCategory.setName}
+          icon={editCategory.icon}
+          setIcon={editCategory.setIcon}
+          color={editCategory.color}
+          setColor={editCategory.setColor}
+          categoryLimit={editCategory.categoryLimit}
+          setCategoryLimit={editCategory.setCategoryLimit}
+          onClose={() => editCategory.modal.setShow(false)}
           updateCategory={updateCategory}
+          clearState={editCategory.__clearState}
+          forEarn={editCategory.forEarn}
+          setForEarn={editCategory.setForEarn}
+          forSpend={editCategory.forSpend}
+          setForSpend={editCategory.setForSpend}
         />
       </Modal>
     </React.Fragment>
