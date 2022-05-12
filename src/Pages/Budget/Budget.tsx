@@ -58,11 +58,28 @@ const Budget: React.FunctionComponent<Props> = (props: Props) => {
     }
   }, [selectedCategory, transactions.load, categories.load]);
 
+  const fillterCategory = useMemo(() => {
+    if (categories.load) {
+      return categories.categories.filter((category) => {
+        if (category.categoryLimit > 0) return category;
+      });
+    } else {
+      return [];
+    }
+  }, [categories.load]);
+
+  const fillterTransactionsByCategories = useMemo(() => {
+    return createBudget.fillterTransactionsByCategories(
+      transactions.transactions,
+      fillterCategory
+    );
+  }, [transactions.load, categories.load]);
+
   const selectedCategoryBudget = useMemo(() => {
     if (selectedCategory) {
       return createBudget.getSelectedCategoryBudget(
         transactions.transactions,
-        categories.categories,
+        fillterCategory,
         selectedCategory
       );
     } else {
@@ -71,7 +88,7 @@ const Budget: React.FunctionComponent<Props> = (props: Props) => {
   }, [selectedCategory]);
 
   useEffect(() => {
-    if (categories.load) setSelectedCategory(categories.categories[0]);
+    if (categories.load) setSelectedCategory(fillterCategory[0]);
   }, [categories.load]);
 
   const getIncomeCategory = (id: string): number => {
@@ -105,15 +122,15 @@ const Budget: React.FunctionComponent<Props> = (props: Props) => {
             prev={transactions.date.prevMonth}
             next={transactions.date.nextMonth}
             selectedDate={transactions.date.date}
-            categories={categories.categories}
+            categories={fillterCategory}
             updateCategories={categories.updateCategory}
             getIncomeCategory={getIncomeCategory}
             load={
               transactions.load && categories.load && selectedCategory != null
             }
             generalBudget={createBudget.getGeneralBudget(
-              transactions.transactions,
-              categories.categories
+              fillterTransactionsByCategories,
+              fillterCategory
             )}
           />
         </div>
@@ -199,6 +216,7 @@ const Budget: React.FunctionComponent<Props> = (props: Props) => {
                         bills={[]}
                         updateTransactions={transactions.updateTransactions}
                         budget={true}
+                        filteredCategory={fillterCategory}
                       />
                     )}
                   </div>

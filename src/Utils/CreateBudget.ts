@@ -26,6 +26,23 @@ export default class CreateBudget {
       .filter((group) => group.transactions.length > 0);
   }
 
+  fillterTransactionsByCategories(
+    transactions: TransactionsSortedModel[],
+    categories: CategoryModel[]
+  ): TransactionsSortedModel[] {
+    return transactions
+      .map((group) => {
+        const newTransactions = group.transactions.filter((b) => {
+          if (b.category) {
+            const f = categories.find((c) => c.id === b.category.id);
+            if (f) return true;
+          }
+        });
+        return { ...group, transactions: newTransactions };
+      })
+      .filter((group) => group.transactions.length > 0);
+  }
+
   getPercentsFromLimit(selectedCategory: CategoryModel): number {
     if (selectedCategory) {
       if (selectedCategory.percentsFromLimit) {
@@ -58,23 +75,23 @@ export default class CreateBudget {
       group.transactions.map((transaction) => {
         if (
           transaction?.transactionType === "DEPOSIT" ||
-          transaction?.transactionType === "EARN" ||
-          transaction?.action === "DEPOSIT" ||
-          transaction?.action === "EARN"
+          transaction?.transactionType === "EARN"
         )
-          income = income + (transaction?.sum ?? transaction?.amount?.amount);
+          income = income + transaction?.sum;
         if (
           transaction?.transactionType === "WITHDRAW" ||
-          transaction?.transactionType === "SPEND" ||
-          transaction?.action === "WITHDRAW" ||
-          transaction?.action === "SPEND"
+          transaction?.transactionType === "SPEND"
         )
-          expenses =
-            expenses + (transaction?.sum ?? transaction?.amount?.amount);
+          expenses = expenses + transaction?.sum;
       });
     });
 
-    return { income, incomeLimit, expenses, expensesLimit };
+    return {
+      income: income.toFixed(0),
+      incomeLimit,
+      expenses: expenses.toFixed(0),
+      expensesLimit,
+    };
   }
 
   getSelectedCategoryBudget(

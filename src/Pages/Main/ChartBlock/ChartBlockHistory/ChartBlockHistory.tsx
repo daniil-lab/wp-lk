@@ -10,6 +10,7 @@ import useAddCategoryTransaction from "Hooks/useAddCategoryTransaction";
 import BankAddCategoryModal from "./BankAddCategoryModal/BankAddCategoryModal";
 import { BillType } from "Models/BillModel";
 import TransactionEditModal from "./TransactionEditModal/TransactionEditModal";
+import { CategoryModel } from "Models/CategoryModel";
 
 interface Props {
   transactions: TransactionsSorted[];
@@ -19,12 +20,20 @@ interface Props {
   categories: any;
   bills: any;
   budget?: boolean;
+  filteredCategory?: CategoryModel[];
 }
 
 const sortByDate = (a, b) => (moment(a.date).isAfter(moment(b.date)) ? -1 : 1);
 
 const ChartBlockHistory: React.FunctionComponent<Props> = (props: Props) => {
-  const { transactions, bills, updateTransactions, categories, budget } = props;
+  const {
+    transactions,
+    bills,
+    updateTransactions,
+    categories,
+    budget,
+    filteredCategory,
+  } = props;
   const {
     showEditModal,
     setShowEditModal,
@@ -35,7 +44,8 @@ const ChartBlockHistory: React.FunctionComponent<Props> = (props: Props) => {
   const addCategoryTransaction = useAddCategoryTransaction();
 
   const existsCategory = (id: string): boolean => {
-    if (categories.categories.find((c) => c.id === id)) return true;
+    let arr = budget ? filteredCategory : categories.categories;
+    if (arr.find((c) => c.id === id)) return true;
     else return false;
   };
 
@@ -50,7 +60,8 @@ const ChartBlockHistory: React.FunctionComponent<Props> = (props: Props) => {
       addCategoryTransaction.transactionType === "EARN" ||
       addCategoryTransaction.transactionType === "DEPOSIT"
     ) {
-      return categories.categories.filter((c) => !c.forSpend && c.forEarn);
+      let arr = budget ? filteredCategory : categories.categories;
+      return arr.filter((c) => !c.forSpend && c.forEarn);
     }
     return [];
   };
@@ -84,87 +95,13 @@ const ChartBlockHistory: React.FunctionComponent<Props> = (props: Props) => {
                     subtitle={transaction?.bill?.name ?? transaction?.billName}
                     price={transaction?.amount?.amount ?? transaction?.sum}
                     currency={transaction.currency}
-                    onClick={() => {
-                      if (transaction?.type === "TINKOFF") {
-                        addCategoryTransaction.setTransactionId(transaction.id);
-                        addCategoryTransaction.setTransactionType(
-                          transaction.transactionType
-                        );
-                        addCategoryTransaction.modal.setShow(true);
-                        if (transaction?.category)
-                          addCategoryTransaction.setSelectedCategory(
-                            transaction?.category
-                          );
-                      } else if (transaction?.type === "SBER") {
-                        addCategoryTransaction.setTransactionId(transaction.id);
-                        addCategoryTransaction.setTransactionType(
-                          transaction.transactionType
-                        );
-                        addCategoryTransaction.modal.setShow(true);
-                        if (transaction?.category)
-                          addCategoryTransaction.setSelectedCategory(
-                            transaction?.category
-                          );
-                      } else if (transaction?.type === "TOCHKA") {
-                        addCategoryTransaction.setTransactionId(transaction.id);
-                        addCategoryTransaction.setTransactionType(
-                          transaction.transactionType
-                        );
-                        addCategoryTransaction.modal.setShow(true);
-                        if (transaction?.category)
-                          addCategoryTransaction.setSelectedCategory(
-                            transaction?.category
-                          );
-                      } else {
-                        setTransactionId(transaction.id);
-                        setShowEditModal(true);
-                      }
-                    }}
+                    onClick={() => {}}
                   />
                 );
               })}
             </ChartBlockHistoryWrapper>
           ) : null;
         })}
-
-        <Modal show={showEditModal} onClose={() => setShowEditModal(false)}>
-          {/* <TransactionEditModal
-            onClose={() => setShowEditModal(false)}
-            updateTransactions={updateTransactions}
-            {...editTransaction}
-          />  */}
-        </Modal>
-        <Modal
-          style={{
-            width: 500,
-            height: 400,
-          }}
-          show={addCategoryTransaction.modal.show}
-          onClose={() => {
-            addCategoryTransaction.modal.setShow(false);
-            addCategoryTransaction.setTransactionId(null);
-            addCategoryTransaction.setOperationType(null);
-            addCategoryTransaction.setTransactionType(null);
-            addCategoryTransaction.setSelectedCategory(null);
-          }}
-        >
-          <BankAddCategoryModal
-            operationType={addCategoryTransaction.operationType}
-            selectedCategory={addCategoryTransaction.selectedCategory}
-            transactionType={addCategoryTransaction.transactionType}
-            categories={bankCategories()}
-            setSelectedCategory={addCategoryTransaction.setSelectedCategory}
-            edit={addCategoryTransaction.edit}
-            updateTransactions={updateTransactions}
-            onClose={() => {
-              addCategoryTransaction.modal.setShow(false);
-              addCategoryTransaction.setTransactionId(null);
-              addCategoryTransaction.setOperationType(null);
-              addCategoryTransaction.setTransactionType(null);
-              addCategoryTransaction.setSelectedCategory(null);
-            }}
-          />
-        </Modal>
       </div>
     );
   }
