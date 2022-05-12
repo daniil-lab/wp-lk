@@ -134,6 +134,7 @@ const ExpenseIncomeBlock: React.FunctionComponent<Props> = (props: Props) => {
             categories
               .sort((a, b) => b.categorySpend - a.categorySpend)
               .map((data, i) => {
+                console.log(data);
                 return (
                   <CategoryItem
                     key={i}
@@ -153,8 +154,20 @@ const ExpenseIncomeBlock: React.FunctionComponent<Props> = (props: Props) => {
 
 export default ExpenseIncomeBlock;
 
-const CategoryItem = (props) => {
-  const { selectedCategory, selectCategory, data, getIncomeCategory } = props;
+interface CategoryItemProps {
+  selectedCategory: CategoryModel;
+  selectCategory: (data: CategoryModel) => void;
+  data: CategoryModel;
+}
+
+const CategoryItem = (props: CategoryItemProps) => {
+  const { selectedCategory, selectCategory, data } = props;
+  const getCurrentAmount = (): number => {
+    let res = 0;
+    if (data.forEarn) res = res + data.categoryEarn;
+    if (data.forSpend) res = res + data.categorySpend;
+    return res;
+  };
   return (
     <div
       className={`expense-income-history-row ${
@@ -182,7 +195,7 @@ const CategoryItem = (props) => {
           <span className="expense-income-history-row-info-title">
             {data.name}
           </span>
-          {!data!.onlyForEarn ? (
+          {data.forSpend && (
             <svg
               width="11"
               height="11"
@@ -196,7 +209,9 @@ const CategoryItem = (props) => {
                 fill="#F0187B"
               />
             </svg>
-          ) : (
+          )}
+
+          {data.forEarn && (
             <svg
               width="11"
               height="11"
@@ -211,17 +226,18 @@ const CategoryItem = (props) => {
             </svg>
           )}
         </div>
-        {!data.onlyForEarn ? (
-          <React.Fragment>
-            <span className="expense-income-history-row-info-amount">
-              {NumberWithSpaces(data?.categorySpend ?? 0)} из{" "}
-              {NumberWithSpaces(data?.categoryLimit ?? 0)} ₽
-            </span>
-            <LineChart
-              value={data?.percentsFromLimit ?? 0}
-              color={(data?.percentsFromLimit ?? 0) < 100 ? "#6A82FB" : "red"}
-            />
-          </React.Fragment>
+        <React.Fragment>
+          <span className="expense-income-history-row-info-amount">
+            {NumberWithSpaces(getCurrentAmount())} из{" "}
+            {NumberWithSpaces(data?.categoryLimit ?? 0)} ₽
+          </span>
+          <LineChart
+            value={data?.percentsFromLimit ?? 0}
+            color={(data?.percentsFromLimit ?? 0) < 100 ? "#6A82FB" : "red"}
+          />
+        </React.Fragment>
+        {/* {!data.forEarn && (
+          
         ) : (
           <React.Fragment>
             <span className="expense-income-history-row-info-amount">
@@ -232,7 +248,7 @@ const CategoryItem = (props) => {
               color={(data?.percentsFromLimit ?? 0) < 100 ? "#6A82FB" : "red"}
             />
           </React.Fragment>
-        )}
+        )} */}
       </div>
     </div>
   );
@@ -277,4 +293,45 @@ export const ExpensesIncome = (props: ExpensesBlockProps) => {
       </div>
     </React.Fragment>
   );
+};
+
+const c = {
+  id: "a4d410d6-52b0-4897-9ed2-d8cfdd19689d",
+  name: "Инвестиции",
+  color: { name: "Желтый", hex: "#FAC91D", systemName: "YELLOW" },
+  icon: {
+    id: "9bf5e5e6-c4d4-44bc-95b6-180076f15dbc",
+    name: "2022-03-14T08:50:00.126102201Z-e8d17a47-9ea9-4a83-aa2b-1aea3840f4d2.svg",
+    path: "images/2022-03-14T08:50:00.126102201Z-e8d17a47-9ea9-4a83-aa2b-1aea3840f4d2.svg",
+    tag: "CATEGORY_ICON",
+  },
+  description: "description",
+  categoryLimit: 50000,
+  user: {
+    id: "56c64a3c-690e-41aa-b95f-28d1f126ad7c",
+    username: "+79962193990",
+    role: {
+      id: "5a255c7a-d014-4673-b0cf-87ec60bb9928",
+      name: "LiteRole",
+      autoApply: true,
+      roleAfterBuy: false,
+      roleAfterBuyExpiration: false,
+      roleForBlocked: false,
+      admin: false,
+    },
+    email: { address: "t@t.ru", activated: false },
+    type: "SYSTEM",
+    walletType: "INR",
+    touchID: true,
+    faceID: false,
+    pinCode: null,
+    plannedIncome: 0,
+    notificationsEnable: true,
+    createAt: "2022-05-11T09:26:29.508064Z",
+  },
+  forEarn: true,
+  forSpend: true,
+  percentsFromLimit: 30,
+  categorySpend: 15000,
+  categoryEarn: 0,
 };
