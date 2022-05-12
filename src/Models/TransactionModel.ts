@@ -1,4 +1,3 @@
-import { UseGetBillModel } from "Services/Bill/Models";
 import { BillModel } from "./BillModel";
 import { CategoryModel } from "./CategoryModel";
 

@@ -66,29 +66,27 @@ const useEditTransactions = (
       const transaction: TranscationModel = transactions.map((g) =>
         g.transactions.filter((t) => t.id === transactionId)
       )[0][0]; // <--- ERROR
-      console.log(transactionId);
-      console.log(transaction);
-      // setDate([
-      //   moment(transaction?.date ?? transaction?.createAt).format("YYYY-MM-DD"),
-      // ]);
-      // setOperationType(
-      //   transaction?.action ?? transaction?.transactionType === "EARN"
-      //     ? "DEPOSIT"
-      //     : "WITHDRAW"
-      // );
-      // setSelectedCategory(transaction?.category);
-      // setBill(
-      //   transaction?.bill ??
-      //     bills.data.filter((b) => b.name === transaction.billName)[0]
-      // );
-      // setSumm((transaction?.sum ?? transaction?.amount?.amount) as number);
-      // setDescription(transaction.description);
-      // setPlaceName(transaction?.geocodedPlace ?? "");
-      // setLocation(
-      //   transaction?.latitude
-      //     ? ([transaction!.latitude, transaction!.longitude] as number[])
-      //     : null
-      // );
+      setDate([
+        moment(transaction?.date ?? transaction?.createAt).format("YYYY-MM-DD"),
+      ]);
+      setOperationType(
+        transaction?.action ?? transaction?.transactionType === "EARN"
+          ? "DEPOSIT"
+          : "WITHDRAW"
+      );
+      setSelectedCategory(transaction?.category);
+      setBill(
+        transaction?.bill ??
+          bills.data.filter((b) => b.name === transaction.billName)[0]
+      );
+      setSumm((transaction?.sum ?? transaction?.amount?.amount) as number);
+      setDescription(transaction.description);
+      setPlaceName(transaction?.geocodedPlace ?? "");
+      setLocation(
+        transaction?.latitude
+          ? ([transaction!.latitude, transaction!.longitude] as number[])
+          : null
+      );
     }
   }, [transactionId]);
 

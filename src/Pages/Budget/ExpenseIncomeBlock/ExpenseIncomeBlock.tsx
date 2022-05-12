@@ -14,20 +14,20 @@ import { API_URL } from "Utils/Config";
 import CategoriesEmpty from "Static/icons/categories-empty.svg";
 import Image from "Components/Image/Image";
 import NumberWithSpaces from "Utils/NumberWithSpaces";
+import { GeneralBudgetType } from "Utils/CreateBudget";
 
 interface Props {
   prev: () => void;
   next: () => void;
-  selectedCategory: CategoryModel;
+  selectedCategory: CategoryModel | null;
   selectedDate: string;
   load: boolean;
   categories: CategoryModel[];
   selectCategory: React.Dispatch<React.SetStateAction<CategoryModel | null>>;
   updateCategoryLimit: (config) => Promise<void>;
   updateCategories: () => void;
-  transactions: TransactionsSortedModel[];
   getIncomeCategory: (id: string) => number;
-  generalBudget: GeneralBudget;
+  generalBudget: GeneralBudgetType;
 }
 
 const ExpenseIncomeBlock: React.FunctionComponent<Props> = (props: Props) => {
@@ -48,8 +48,10 @@ const ExpenseIncomeBlock: React.FunctionComponent<Props> = (props: Props) => {
 
   const [categoryLimit, setCategoryLimit] = useState<number>(0);
   useMemo(() => {
-    if (selectedCategory.categoryLimit != 0)
-      setCategoryLimit(selectedCategory.categoryLimit);
+    if (selectedCategory) {
+      if (selectedCategory.categoryLimit != 0)
+        setCategoryLimit(selectedCategory.categoryLimit);
+    }
   }, [selectedCategory]);
 
   const setLimit = async () => {
@@ -98,7 +100,7 @@ const ExpenseIncomeBlock: React.FunctionComponent<Props> = (props: Props) => {
             <input
               type="number"
               value={categoryLimit}
-              onChange={(e) => setCategoryLimit(e.target.value)}
+              onChange={(e) => setCategoryLimit(parseInt(e.target.value))}
               placeholder="Установить лимит на категорию"
               className="add-operation-modal-input"
             />
@@ -241,7 +243,7 @@ interface ExpensesBlockProps {
   value: number;
   limit: number;
 }
-const ExpensesIncome = (props: ExpensesBlockProps) => {
+export const ExpensesIncome = (props: ExpensesBlockProps) => {
   const { type, value, limit } = props;
   return (
     <React.Fragment>
