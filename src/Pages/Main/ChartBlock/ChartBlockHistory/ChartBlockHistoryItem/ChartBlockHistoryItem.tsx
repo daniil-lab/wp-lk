@@ -50,7 +50,7 @@ const ChartBlockHistoryItem: React.FunctionComponent<Props> = (
       <div className="column-start chart-block-history-info">
         <span className="chart-block-history-item-title">{props.title}</span>
         <span className="chart-block-history-item-subtitle">
-          {props.subtitle} {props.transactionType}
+          {props.subtitle}
         </span>
       </div>
       <div className="chart-block-history-item-price-wrapper">
