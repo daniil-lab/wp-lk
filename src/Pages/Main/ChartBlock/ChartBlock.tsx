@@ -5,14 +5,11 @@ import "Styles/Pages/Main/ChartBlock/ChartBlock.scss";
 import Load from "Components/Load/Load";
 import TransactionsIcon from "Static/icons/transaction.svg";
 import Image from "Components/Image/Image";
-import { UseTransactionParams } from "Services/Transactions/Models";
-import { UseGetCategoriesModel } from "Services/Category/Models";
-import { UseGetBillModel } from "Services/Bill/Models";
 
 interface Props {
-  transaction: UseTransactionParams;
-  categories: UseGetCategoriesModel;
-  bills: UseGetBillModel;
+  transaction: any;
+  categories: any;
+  bills: any;
 }
 
 const ChartBlock: React.FunctionComponent<Props> = (props: Props) => {

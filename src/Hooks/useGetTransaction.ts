@@ -66,7 +66,11 @@ const useGetTransaction = () => {
       return [...transactions.map((t) => t.transactions)]
         .flat(1)
         .filter(
-          (el) => el?.action === "DEPOSIT" || el?.transactionType === "EARN"
+          (el) =>
+            el?.action === "DEPOSIT" ||
+            el?.action === "EARN" ||
+            el?.transactionType === "DEPOSIT" ||
+            el?.transactionType === "EARN"
         )
         .map((el) => el?.sum ?? el?.amount?.amount)
         .reduce((b, a) => <number>b + <number>a, 0) as number;
@@ -77,10 +81,14 @@ const useGetTransaction = () => {
 
   const expenses = useMemo(() => {
     if (load) {
-      return [...transactions.map((t) => t.transactions)]
-        .flat(1)
+      let arr = [...transactions.map((t) => t.transactions)].flat(1);
+      return arr
         .filter(
-          (el) => el?.action === "WITHDRAW" || el?.transactionType === "SPEND"
+          (el) =>
+            el?.action === "WITHDRAW" ||
+            el?.action === "SPEND" ||
+            el?.transactionType === "SPEND" ||
+            el?.transactionType === "WITHDRAW"
         )
         .map((el) => el?.sum ?? el?.amount?.amount)
         .reduce((b, a) => <number>b + <number>a, 0) as number;
