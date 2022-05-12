@@ -84,6 +84,7 @@ const Main: React.FunctionComponent<Props> = (props: Props) => {
           tinkoffCards={bills.tinkoffCards}
           sberCards={bills.sberCards}
           tochkaCards={bills.tochkaCards}
+          updateTransactions={transaction.updateTransactions}
         />
       </div>
       {/* MARK : Category list */}

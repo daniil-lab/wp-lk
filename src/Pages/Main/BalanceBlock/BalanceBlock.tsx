@@ -11,6 +11,11 @@ import TinkoffIcon from "Static/Images/tinkoff.png";
 import SberIcon from "Static/Images/sber.png";
 import TochkaIcon from "Static/Images/tochka.svg";
 import useEditBill from "Hooks/useEditBill";
+import BillRepository from "Repository/BillRepository";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "Redux/Store";
+import { HidePreloader, ShowPreloader, ShowToast } from "Redux/Actions";
+import useRemoveIntegration from "Hooks/useRemoveIntegration";
 
 interface Props {
   data: BillModel[];
@@ -24,9 +29,12 @@ interface Props {
   sberCards: BankCardModel[];
   tochkaCards: BankCardModel[];
   updateBill: () => void;
+  updateTransactions: () => void;
 }
 
 const BalanceBlock: React.FC<Props> = (props: Props) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const removeIntegration = useRemoveIntegration();
   const {
     data,
     load,
@@ -38,8 +46,10 @@ const BalanceBlock: React.FC<Props> = (props: Props) => {
     tinkoffCards,
     sberCards,
     tochkaCards,
+    updateTransactions,
   } = props;
   const editBill = useEditBill();
+
   const length = useMemo(() => {
     return load
       ? data.length +
@@ -48,6 +58,7 @@ const BalanceBlock: React.FC<Props> = (props: Props) => {
           tochkaCards.length
       : 0;
   }, [load]);
+
   return (
     <div className="balance-block">
       <h1 className="balance-block-title">Балансы</h1>
@@ -91,10 +102,8 @@ const BalanceBlock: React.FC<Props> = (props: Props) => {
               <BalanceBlockItem
                 onClick={() => {
                   if (selected == card.id) {
-                    console.log(card);
-
-                    // removeBill.setBillId(cards.id);
-                    // removeBill.setShowDeleteModal(true);
+                    removeIntegration.setType("tinkoff");
+                    removeIntegration.setModalShow(true);
                   } else {
                     setBill(card.id);
                     setBillType("tinkoff");
@@ -112,8 +121,8 @@ const BalanceBlock: React.FC<Props> = (props: Props) => {
               <BalanceBlockItem
                 onClick={() => {
                   if (selected == card.id) {
-                    // removeBill.setBillId(cards.id);
-                    // removeBill.setShowDeleteModal(true);
+                    removeIntegration.setType("sber");
+                    removeIntegration.setModalShow(true);
                   } else {
                     setBill(card.id);
                     setBillType("sber");
@@ -131,8 +140,8 @@ const BalanceBlock: React.FC<Props> = (props: Props) => {
               <BalanceBlockItem
                 onClick={() => {
                   if (selected == card.id) {
-                    // removeBill.setBillId(cards.id);
-                    // removeBill.setShowDeleteModal(true);
+                    removeIntegration.setType("tochka");
+                    removeIntegration.setModalShow(true);
                   } else {
                     setBill(card.id);
                     setBillType("tochka");
@@ -158,6 +167,43 @@ const BalanceBlock: React.FC<Props> = (props: Props) => {
           </div>
         )}
       </Load>
+      <Modal
+        show={removeIntegration.modalShow}
+        onClose={() => {
+          removeIntegration.setModalShow(false);
+
+          removeIntegration.setType(null);
+        }}
+      >
+        <div className="delete">
+          <p className="delete__title">Подтверждение удаления</p>
+          <p className="delete__body">
+            Подтвердите удаление. Данное действие невозможно отменить
+          </p>
+          <div className="delete__buttons">
+            <button
+              className="button-secondary"
+              onClick={() => {
+                removeIntegration.setModalShow(false);
+
+                removeIntegration.setType(null);
+              }}
+            >
+              Отмена
+            </button>
+            <button
+              className="button-primary"
+              onClick={() => {
+                removeIntegration.__disableIntegration();
+                updateBill();
+                updateTransactions();
+              }}
+            >
+              Удалить
+            </button>
+          </div>
+        </div>
+      </Modal>
       <Modal
         show={editBill.showEditModal}
         onClose={() => {

@@ -31,8 +31,15 @@ const useGetTransaction = () => {
   const category = useGetCategories();
 
   const updateTransactions = (): void => {
-    if (update === null) setUpdate(true);
-    else setUpdate(!update);
+    if (update === null) {
+      setUpdate(true);
+      setBill(null);
+      setBillType("general");
+    } else {
+      setUpdate(!update);
+      setBill(null);
+      setBillType("general");
+    }
   };
 
   const date = useMemo(() => {

@@ -113,7 +113,7 @@ const DonutChartBlock: React.FunctionComponent<Props> = (props: Props) => {
                   fill="#6A82FB"
                 />
               </svg>
-              {NumberWithSpaces(props.income)} ₽
+              {NumberWithSpaces(Math.floor(props.income))} ₽
             </h4>
             <span>Расходы</span>
             <h4>
@@ -130,7 +130,7 @@ const DonutChartBlock: React.FunctionComponent<Props> = (props: Props) => {
                   fill="#F0187B"
                 />
               </svg>
-              -{NumberWithSpaces(props.expenses)} ₽
+              -{NumberWithSpaces(Math.floor(props.expenses))} ₽
             </h4>
           </div>
         </div>
