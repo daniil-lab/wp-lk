@@ -236,19 +236,6 @@ const CategoryItem = (props: CategoryItemProps) => {
             color={(data?.percentsFromLimit ?? 0) < 100 ? "#6A82FB" : "red"}
           />
         </React.Fragment>
-        {/* {!data.forEarn && (
-          
-        ) : (
-          <React.Fragment>
-            <span className="expense-income-history-row-info-amount">
-              {getIncomeCategory(data.id)} из {data?.categoryLimit ?? 0} ₽
-            </span>
-            <LineChart
-              value={data?.percentsFromLimit ?? 0}
-              color={(data?.percentsFromLimit ?? 0) < 100 ? "#6A82FB" : "red"}
-            />
-          </React.Fragment>
-        )} */}
       </div>
     </div>
   );
