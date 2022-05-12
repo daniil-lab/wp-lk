@@ -18,9 +18,9 @@ export default class CreateBudget {
   ): TransactionsSortedModel[] {
     return transactions
       .map((group) => {
-        const newTransactions = group.transactions.filter(
-          (b) => b.category.id === selectedCategory.id
-        );
+        const newTransactions = group.transactions.filter((b) => {
+          if (b.category) return b.category.id === selectedCategory.id;
+        });
         return { ...group, transactions: newTransactions };
       })
       .filter((group) => group.transactions.length > 0);
@@ -56,10 +56,21 @@ export default class CreateBudget {
 
     transactions.forEach((group) => {
       group.transactions.map((transaction) => {
-        if (transaction.transactionType === "DEPOSIT")
-          income = income + transaction?.sum;
-        if (transaction.transactionType === "WITHDRAW")
-          expenses = expenses + transaction?.sum;
+        if (
+          transaction?.transactionType === "DEPOSIT" ||
+          transaction?.transactionType === "EARN" ||
+          transaction?.action === "DEPOSIT" ||
+          transaction?.action === "EARN"
+        )
+          income = income + (transaction?.sum ?? transaction?.amount?.amount);
+        if (
+          transaction?.transactionType === "WITHDRAW" ||
+          transaction?.transactionType === "SPEND" ||
+          transaction?.action === "WITHDRAW" ||
+          transaction?.action === "SPEND"
+        )
+          expenses =
+            expenses + (transaction?.sum ?? transaction?.amount?.amount);
       });
     });
 
@@ -85,41 +96,26 @@ export default class CreateBudget {
 
     transactions.forEach((group) => {
       group.transactions.map((transaction) => {
-        if (transaction.category.id === selectedCategory.id) {
-          if (transaction.transactionType === "DEPOSIT")
-            income = income + transaction?.sum;
-          if (transaction.transactionType === "WITHDRAW")
-            expenses = expenses + transaction?.sum;
+        if (transaction?.category?.id === selectedCategory.id) {
+          if (
+            transaction.transactionType === "DEPOSIT" ||
+            transaction.transactionType === "EARN" ||
+            transaction?.action === "EARN" ||
+            transaction?.action === "DEPOSIT"
+          )
+            income = income + (transaction?.sum ?? transaction?.amount?.amount);
+          if (
+            transaction?.transactionType === "WITHDRAW" ||
+            transaction?.transactionType === "SPEND" ||
+            transaction?.action === "SPEND" ||
+            transaction?.action === "WITHDRAW"
+          )
+            expenses =
+              expenses + (transaction?.sum ?? transaction?.amount?.amount);
         }
       });
     });
 
     return { income, incomeLimit, expenses, expensesLimit };
-  }
-
-  getIncomeCategory(
-    id: String,
-    transactions: TransactionsSortedModel[]
-  ): number {
-    return 0;
-    // return transactions
-    //   .map((a) => {
-    //     const newTransactions = a?.transactions?.filter(
-    //       (b) => b.category?.id === id
-    //     );
-    //     return { ...a, transactions: newTransactions };
-    //   })
-    //   .map((item) =>
-    //     item.transactions
-    //       .filter(
-    //         (i) =>
-    //           i?.transactionType === "DEPOSIT" ||
-    //           i?.transactionType === "EARN" ||
-    //           i?.action === "DEPOSIT" ||
-    //           i?.action === "EARN"
-    //       )
-    //       .reduce((x, y) => +x + +(y?.sum ?? y?.amount?.amount), 0)
-    //   )
-    //   .reduce((x, y) => x + y, 0);
   }
 }
