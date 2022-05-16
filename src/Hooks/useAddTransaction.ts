@@ -5,7 +5,6 @@ import { useDispatch } from "react-redux";
 import { HidePreloader, ShowPreloader, ShowToast } from "Redux/Actions";
 import { AppDispatch } from "Redux/Store";
 import TransactionRepository from "Repository/TransactionRepository";
-import { API_URL } from "Utils/Config";
 
 const useAddTransaction = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -47,33 +46,33 @@ const useAddTransaction = () => {
       );
     }
 
-    // const { data } = await QrScanner.scanImage(qr, {
-    //   returnDetailedScanResult: true,
-    // });
+    const qrres = await QrScanner.scanImage(qr, {
+      returnDetailedScanResult: true,
+    });
 
-    // const values = new URLSearchParams(data);
-    // const t = values.get("t");
+    const values = new URLSearchParams(qrres.data);
+    const t = values.get("t");
 
-    // const params = {
-    //   sum: +(values.get("s") || 0) * 100,
-    //   fn: values.get("fn"),
-    //   operationType: values.get("n")?.substring(0, 1),
-    //   fiscalDocumentId: values.get("i"),
-    //   fiscalSign: values.get("fp"),
-    //   rawData: false,
-    // };
+    const params = {
+      sum: +(values.get("s") || 0) * 100,
+      fn: values.get("fn"),
+      operationType: values.get("n")?.substring(0, 1),
+      fiscalDocumentId: values.get("i"),
+      fiscalSign: values.get("fp"),
+      rawData: false,
+    };
 
-    // if (t) {
-    //   const year = +t.substring(0, 4);
-    //   const month = +t.substring(4, 6);
-    //   const day = +t.substring(6, 8);
-    //   const hour = +t.substring(9, 11);
-    //   const minute = +t.substring(11, 13);
+    if (t) {
+      const year = +t.substring(0, 4);
+      const month = +t.substring(4, 6);
+      const day = +t.substring(6, 8);
+      const hour = +t.substring(9, 11);
+      const minute = +t.substring(11, 13);
 
-    //   const date = new Date(year, month, day, hour, minute);
+      const date = new Date(year, month, day, hour, minute);
 
-    //   params["date"] = date;
-    // }
+      params["date"] = date;
+    }
 
     let data = {};
 
@@ -125,6 +124,7 @@ const useAddTransaction = () => {
       );
       return true;
     } else {
+      dispatch(HidePreloader());
       dispatch(
         ShowToast({
           title: "Ошибка",

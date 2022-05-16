@@ -187,6 +187,7 @@ const useGetTransaction = () => {
         startDate,
         endDate
       );
+      console.log(action);
       if (action) setData([...TransactionSorted(action)]);
       else
         dispatch(
@@ -236,6 +237,7 @@ const useGetTransaction = () => {
         startDate,
         endDate
       );
+
       if (action) setData([...TransactionSorted(action)]);
       else
         dispatch(
