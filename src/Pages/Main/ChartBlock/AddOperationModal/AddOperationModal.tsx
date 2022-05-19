@@ -18,6 +18,8 @@ import "Styles/Pages/Main/ChartBlock/AddOperationModal/AddOperationModal.scss";
 import { API_URL } from "Utils/Config";
 import HexToRgbA from "Utils/HexToRgbA";
 import MapModal from "./MapModal/MapModal";
+import { HidePreloader } from "Redux/Actions";
+import { useDispatch } from "react-redux";
 
 interface Props {
   onClose: () => void;
@@ -62,6 +64,7 @@ const AddOperationModal: React.FC<Props> = ({
   const [placeName, setPlaceName] = useState<string>("");
   const [location, setLocation] = useState<number[] | null>(null);
   const [mapModal, setMapModal] = useState<boolean>(false);
+  const dispatch = useDispatch();
 
   const onEnter = (v: string[]): void => {
     if (Array.isArray(v)) {
@@ -98,6 +101,7 @@ const AddOperationModal: React.FC<Props> = ({
         updateBills();
       }
     } catch(ex) {
+      dispatch(HidePreloader()); // закрываем прелоадер в случае ошибки
       console.log(ex)
     }
   };
