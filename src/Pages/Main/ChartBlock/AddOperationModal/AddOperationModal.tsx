@@ -80,21 +80,25 @@ const AddOperationModal: React.FC<Props> = ({
   };
 
   const _addOperation = async (): Promise<void> => {
-    const action = await addTransaction({
-      bill,
-      operationType,
-      summ,
-      description,
-      selectedCategory,
-      location,
-      date,
-      qr,
-      placeName,
-    });
-    if (action) {
-      onClose();
-      updateTransactions();
-      updateBills();
+    try {
+      const action = await addTransaction({
+        bill,
+        operationType,
+        summ,
+        description,
+        selectedCategory,
+        location,
+        date,
+        qr,
+        placeName,
+      });
+      if (action) {
+        onClose();
+        updateTransactions();
+        updateBills();
+      }
+    } catch(ex) {
+      console.log(ex)
     }
   };
 
