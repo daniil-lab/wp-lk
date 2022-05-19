@@ -3,9 +3,13 @@ import React, { useMemo } from "react";
 import { useGetSubscriptionGroups } from "Services/Subscription";
 import "Styles/Pages/Settings/SubscriptionBlock/SubscriptionBlock.scss";
 import { Swiper, SwiperSlide } from "swiper/react";
+import SwiperCore, { Navigation } from 'swiper';
 import { updateNonNullChain } from "typescript";
 import SubscriptionPossibilities from "Utils/SubscriptionPossibilities";
 import SubscriptionItem from "./SubscriptionItem/SubscriptionItem";
+import './SubscriptionBlock.css';
+SwiperCore.use([Navigation]);
+
 
 const SubscriptionBlock: React.FC = () => {
   const { load: groupLoaded, subscriptionGroups } = useGetSubscriptionGroups();
@@ -24,6 +28,7 @@ const SubscriptionBlock: React.FC = () => {
     <Swiper
       spaceBetween={50}
       autoplay
+      navigation
       style={{
         overflowY: "visible",
         position: "relative",
