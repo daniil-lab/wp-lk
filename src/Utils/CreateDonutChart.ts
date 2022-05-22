@@ -28,7 +28,7 @@ const CreateDonutChart = (data: []) => {
     let end = 0;
     let count = 0;
 
-    const array = data;
+    const array = data.sort((a,b) => b.sum - a.sum);
 
     array.forEach((v, i) => {
       total += +v.sum;

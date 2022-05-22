@@ -6,6 +6,7 @@ import SupportFiled from "./SupportFiled/SupportFiled";
 import PhoneIcon from "../../Static/icons/phone.svg";
 import MailIcon from "../../Static/icons/mail-user.svg";
 import useSendHelp from "Services/Help";
+import PhoneMask from "Utils/PhoneMask";
 
 interface Props {}
 
@@ -13,13 +14,10 @@ const Support: React.FunctionComponent<Props> = (props: Props) => {
   const [supportPhone, setSupportPhone] = useState("");
   const [supportEmail, setSupportEmail] = useState("");
   const [supportMessage, setSupportMessage] = useState("");
+
+  const _handlePhone = (value: string): string => PhoneMask(value)
+
   const send = useSendHelp();
-  function changeHandler(
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    fn: any
-  ) {
-    fn(e.target.value);
-  }
 
   return (
     <div className="support">
@@ -33,7 +31,7 @@ const Support: React.FunctionComponent<Props> = (props: Props) => {
                 type="text"
                 placeholder="+7 999 999 99 99"
                 value={supportPhone}
-                onChange={(e) => changeHandler(e, setSupportPhone)}
+                onChange={(e: any) => setSupportPhone(_handlePhone(e.target.value))}
               />
             </SupportFiled>
           </div>
@@ -43,7 +41,7 @@ const Support: React.FunctionComponent<Props> = (props: Props) => {
                 type="text"
                 placeholder="email@email.com"
                 value={supportEmail}
-                onChange={(e) => changeHandler(e, setSupportEmail)}
+                onChange={(e: any) => setSupportEmail(e.target.value)}
               />
             </SupportFiled>
           </div>
@@ -52,13 +50,13 @@ const Support: React.FunctionComponent<Props> = (props: Props) => {
               <textarea
                 placeholder="Start typing..."
                 value={supportMessage}
-                onChange={(e) => changeHandler(e, setSupportMessage)}
+                onChange={(e: any) => setSupportMessage(e.target.value)}
               />
             </SupportFiled>
           </div>
           <button
             onClick={(e) => {
-              send(supportPhone, supportEmail, supportMessage);
+              send(supportPhone.replace(/[^0-9]/g, ""), supportEmail, supportMessage);
               setSupportPhone("");
               setSupportEmail("");
               setSupportMessage("");

@@ -157,7 +157,8 @@ const AddOperationModal: React.FC<Props> = ({
           <Checkbox
             onChange={() => {
               setOperationType("WITHDRAW");
-              setSelectedCategory(null);
+              if (standartCategories.length > 0) setSelectedCategory(standartCategories[0]);
+              else setSelectedCategory(null)
             }}
             value={operationType === "WITHDRAW"}
             lable={"Расход"}
@@ -165,7 +166,8 @@ const AddOperationModal: React.FC<Props> = ({
           <Checkbox
             onChange={() => {
               setOperationType("DEPOSIT");
-              setSelectedCategory(null);
+              if (onlyForEarnCategories.length > 0) setSelectedCategory(onlyForEarnCategories[0]);
+              else setSelectedCategory(null)
             }}
             value={operationType === "DEPOSIT"}
             lable={"Доход"}
