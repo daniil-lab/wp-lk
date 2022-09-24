@@ -23,6 +23,18 @@ const useGetCategories = () => {
     else setUpdate(!update);
   };
 
+  const modifyCategory = (categoryId: string, categoryData: CategoryModel) => {
+    const categoryIndex = data.findIndex(
+      (category) => category.id === categoryId
+    );
+    if (categoryIndex !== -1)
+      setData([
+        ...data.slice(0, categoryIndex),
+        categoryData,
+        ...data.slice(categoryIndex + 1),
+      ]);
+  };
+
   useEffect(() => {
     if (update != null) {
       if (load) {
@@ -61,6 +73,7 @@ const useGetCategories = () => {
     categories,
     load,
     updateCategory,
+    modifyCategory,
   };
 };
 

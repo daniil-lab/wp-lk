@@ -1,120 +1,140 @@
-import { TranscationModel } from "Models/TransactionModel";
+import {
+  TransactionType,
+  ITransactionTochka,
+  TransactionResponseType,
+  ITransactionSber,
+  ITransactionTinkoff,
+  ITransactionBill,
+  ITransactionGeneral,
+} from "Models/TransactionModel";
 import axios from "Utils/Axios";
 import { API_URL } from "Utils/Config";
+import { BaseCategoryModel } from "../Models/CategoryModel";
+import { BillModel } from "../Models/BillModel";
+
+const SOMETHING_WENT_WRONG = "Что-то пошло не так";
 
 export default class TransactionRepository {
   constructor() {}
 
   async removeTransaction(transactionId: string): Promise<boolean | undefined> {
     try {
-      const data = await axios.delete(
-        `${API_URL}api/v1/transaction/${transactionId}`
-      );
-      if (data.status === 200) {
-        return true;
-      }
-    } catch (error: any) {
-      throw new Error();
+      await axios.delete(`${API_URL}api/v1/transaction/${transactionId}`);
+      return true;
+    } catch (error) {
+      throw error instanceof Error ? error : new Error(SOMETHING_WENT_WRONG);
     }
   }
 
-  async getGeneralTransactions(
-    startDate: string,
-    endDate: string
-  ): Promise<TranscationModel[] | undefined> {
+  async getGeneralTransactions(data: {
+    startDate: string;
+    endDate: string;
+    page?: number;
+    pageSize?: number;
+    transactionType?: "WITHDRAW" | "DEPOSIT";
+  }): Promise<TransactionResponseType<ITransactionGeneral>> {
     try {
-      const data = await axios.get(
-        `${API_URL}api/v1/abstract/all-transactions?startDate=${startDate}&endDate=${endDate}&page=0&pageSize=10`
+      const response = await axios.get(
+        `${API_URL}api/v1/abstract/all-transactions`,
+        { params: { page: 0, pageSize: 10, ...data } }
       );
-      if (data.status === 200) {
-        return data.data.data.page;
-      }
-    } catch (error: any) {
-      throw new Error();
+      return response.data;
+    } catch (error) {
+      throw error instanceof Error ? error : new Error(SOMETHING_WENT_WRONG);
     }
   }
 
   async getBillTransactions(
     billId: string,
-    startDate: string,
-    endDate: string
-  ): Promise<TranscationModel[] | undefined> {
+    data: {
+      startDate: string;
+      endDate: string;
+      page?: number;
+      pageSize?: number;
+    }
+  ): Promise<TransactionResponseType<ITransactionBill>> {
     try {
-      const data = await axios.get(
-        `${API_URL}api/v1/transaction/bill/${billId}?page=0&pageSize=20&startDate=${startDate}&endDate=${endDate}`
+      const response = await axios.get(
+        `${API_URL}api/v1/transaction/bill/${billId}`,
+        { params: { page: 0, pageSize: 20, ...data } }
       );
-      if (data.status === 200) {
-        return data.data.data.page;
-      }
-    } catch (error: any) {
-      throw new Error();
+      return response.data;
+    } catch (error) {
+      throw error instanceof Error ? error : new Error(SOMETHING_WENT_WRONG);
     }
   }
 
-  async getTinkoffransactions(
+  async getTinkoffTransactions(
     billId: string,
-    startDate: string,
-    endDate: string
-  ): Promise<TranscationModel[] | undefined> {
+    data: {
+      startDate: string;
+      endDate: string;
+      page?: number;
+      pageSize?: number;
+    }
+  ): Promise<TransactionResponseType<ITransactionTinkoff>> {
     try {
-      const data = await axios.get(
-        `${API_URL}api/v1/tinkoff/transactions/${billId}?page=0&pageSize=20&startDate=${startDate}&endDate=${endDate}`
+      const response = await axios.get(
+        `${API_URL}api/v1/tinkoff/transactions/${billId}`,
+        { params: { page: 0, pageSize: 20, ...data } }
       );
-      if (data.status === 200) {
-        return data.data.data.page;
-      }
-    } catch (error: any) {
-      throw new Error();
+      return response.data;
+    } catch (error) {
+      throw error instanceof Error ? error : new Error(SOMETHING_WENT_WRONG);
     }
   }
 
   async getSberTransactions(
     billId: string,
-    startDate: string,
-    endDate: string
-  ): Promise<TranscationModel[] | undefined> {
+    data: {
+      startDate: string;
+      endDate: string;
+      page?: number;
+      pageSize?: number;
+    }
+  ): Promise<TransactionResponseType<ITransactionSber>> {
     try {
-      const data = await axios.get(
-        `${API_URL}api/v1/sber/transactions/${billId}?page=0&pageSize=20&startDate=${startDate}&endDate=${endDate}`
+      const response = await axios.get(
+        `${API_URL}api/v1/sber/transactions/${billId}`,
+        { params: { page: 0, pageSize: 20, ...data } }
       );
-      if (data.status === 200) {
-        return data.data.data.page;
-      } else {
-        throw new Error();
-      }
-    } catch (error: any) {
-      throw new Error();
+      return response.data;
+    } catch (error) {
+      throw error instanceof Error ? error : new Error(SOMETHING_WENT_WRONG);
     }
   }
 
   async getTochkaTransactions(
     billId: string,
-    startDate: string,
-    endDate: string
-  ): Promise<TranscationModel[] | undefined> {
+    data: {
+      startDate: string;
+      endDate: string;
+      page?: number;
+      pageSize?: number;
+    }
+  ): Promise<TransactionResponseType<ITransactionTochka>[]> {
     try {
-      const data = await axios.get(
-        `${API_URL}api/v1/tochka/transactions/${billId}?page=0&pageSize=20&startDate=${startDate}&endDate=${endDate}`
+      const response = await axios.get(
+        `${API_URL}api/v1/tochka/transactions/${billId}`,
+        { params: { page: 0, pageSize: 20, ...data } }
       );
-      if (data.status === 200) {
-        return data.data.data.page;
-      }
-    } catch (error: any) {
-      throw new Error();
+      return response.data;
+    } catch (error) {
+      throw error instanceof Error ? error : new Error(SOMETHING_WENT_WRONG);
     }
   }
 
   async editTransaction(
-    transactionId,
-    operationType,
-    summ,
-    description,
-    selectedCategory,
-    date,
-    location,
-    placeName,
-    bill
-  ): Promise<boolean | undefined> {
+    transactionId: string | null,
+    operationType: TransactionType,
+    summ: string | number,
+    description: string,
+    selectedCategory: BaseCategoryModel | null,
+    date: Array<string> | null,
+    location: Array<number> | null,
+    placeName: string,
+    bill: BillModel | null
+  ): Promise<boolean> {
     try {
       let data =
         operationType === "WITHDRAW"
@@ -125,7 +145,9 @@ export default class TransactionRepository {
               description: description,
               categoryId: selectedCategory?.id,
               time: `${date}T16:23:25.356Z`,
-              billId: bill.id,
+              billId: bill?.id,
+              lon: 0,
+              lat: 0,
             }
           : {
               action: "DEPOSIT",
@@ -134,7 +156,10 @@ export default class TransactionRepository {
               description: description,
               categoryId: selectedCategory?.id,
               time: `${date}T16:23:25.356Z`,
-              billId: bill.id,
+              billId: bill?.id,
+              lon: 0,
+              lat: 0,
+              geocodedPlace: "",
             };
       if (operationType === "WITHDRAW" && location != null) {
         data = {
@@ -154,19 +179,13 @@ export default class TransactionRepository {
         `${API_URL}api/v1/transaction/${transactionId}`,
         data
       );
-      if (res.data.status === 200) {
-        return true;
-      }
+      return res.data.status === 200;
     } catch (error: any) {
       throw new Error();
     }
   }
 
-  async addTransaction(
-    billId,
-    operationType,
-    data
-  ): Promise<boolean | undefined> {
+  async addTransaction(billId, operationType, data): Promise<boolean> {
     try {
       const url =
         operationType === "WITHDRAW"
@@ -181,33 +200,49 @@ export default class TransactionRepository {
         time: data.time,
       });
 
-      if (res.data.status === 200) {
-        return true;
-      }
-
-      return false;
-    } catch (error: any) {
-      console.log(error.response);
-      throw new Error();
+      return res.data.status === 200;
+    } catch (error) {
+      throw error instanceof Error ? error : new Error(SOMETHING_WENT_WRONG);
     }
   }
 
   async updateTinkoffTransaction(
     transactionId: string,
     categoryId: string
-  ): Promise<boolean | undefined> {
+  ): Promise<boolean> {
     try {
-      const res = await axios.patch(
+      await axios.patch(
         `${API_URL}api/v1/tinkoff/transaction/${transactionId}`,
         {
           categoryId: categoryId,
         }
       );
-      if (res.status === 200) return true;
-    } catch (error: any) {
-      throw new Error();
+      return true;
+    } catch (error) {
+      throw error instanceof Error ? error : new Error(SOMETHING_WENT_WRONG);
     }
   }
 
-  async getTransactionById(): Promise<void> {}
+  async getAllPeriodTransactions(data: {
+    start: string;
+    end: string;
+    page: number;
+    categoryId?: string;
+    userId?: string;
+    billId?: string;
+    pageSize?: number;
+  }): Promise<TransactionResponseType<ITransactionGeneral>> {
+    try {
+      const res = await axios.get(`${API_URL}api/v1/transaction/period`, {
+        params: {
+          pageSize: 10,
+          userId: "a22f1299-21f8-4bbc-99e2-8ed2a9a55ee4",
+          ...data,
+        },
+      });
+      return res.data;
+    } catch (error) {
+      throw error instanceof Error ? error : new Error(SOMETHING_WENT_WRONG);
+    }
+  }
 }

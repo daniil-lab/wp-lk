@@ -66,10 +66,9 @@ const supportRouters = [
   },
 ];
 
-const loginRoutes: any = [];
-
-export default {
+const routes = {
   dashboardRoutes,
-  loginRoutes,
   supportRouters,
 };
+
+export default routes;

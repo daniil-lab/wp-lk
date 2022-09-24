@@ -1,18 +1,20 @@
-import { BillModel } from "Models/BillModel";
-import { BaseCategoryModel, CategoryModel } from "Models/CategoryModel";
-import { TransactionType, TranscationModel } from "Models/TransactionModel";
-import moment from "moment";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
+import moment from "moment";
+
+import { BillModel } from "Models/BillModel";
+import { BaseCategoryModel, CategoryModel } from "Models/CategoryModel";
+import { TransactionType, ITransactionsSorted } from "Models/TransactionModel";
 import { HidePreloader, ShowPreloader, ShowToast } from "Redux/Actions";
 import { AppDispatch } from "Redux/Store";
 import TransactionRepository from "Repository/TransactionRepository";
-import { TransactionsSorted } from "Services/Interfaces";
+import useGetBill from "./useGetBill";
+import useGetCategories from "./useGetCategories";
 
 const useEditTransactions = (
-  category,
-  bills,
-  transactions: TransactionsSorted[]
+  category: ReturnType<typeof useGetCategories>,
+  transactions: ITransactionsSorted[],
+  bills?: ReturnType<typeof useGetBill>
 ) => {
   const dispatch = useDispatch<AppDispatch>();
   const transactionRepository = new TransactionRepository();
@@ -42,7 +44,7 @@ const useEditTransactions = (
       const earnArr: CategoryModel[] = [];
 
       category.categories.forEach((category) => {
-        if (category.onlyForEarn) earnArr.push(category);
+        if (category.forEarn) earnArr.push(category);
         else standartArr.push(category);
       });
 
@@ -58,32 +60,46 @@ const useEditTransactions = (
   }, [category.load, standartCategories]);
 
   useEffect(() => {
-    if (bills.load) setBill(bills.data[0]);
-  }, [bills.load]);
+    if (bills && bills.load) setBill(bills.data[0]);
+  }, [bills?.load]);
 
   useEffect(() => {
     if (transactionId) {
-      const transaction: TranscationModel = transactions.map((g) =>
-        g.transactions.filter((t) => t.id === transactionId)
-      )[0][0]; // <--- ERROR
+      const transaction = transactions
+        .map((t) => t.transactions)
+        .flat(1)
+        .find((transaction) => transaction.id === transactionId);
+      if (!transaction) return;
       setDate([
-        moment(transaction?.date ?? transaction?.createAt).format("YYYY-MM-DD"),
+        moment(
+          "date" in transaction ? transaction.date : transaction?.createAt
+        ).format("YYYY-MM-DD"),
       ]);
       setOperationType(
-        transaction?.action ?? transaction?.transactionType === "EARN"
+        ("action" in transaction
+          ? transaction.action
+          : transaction.transactionType) === "EARN"
           ? "DEPOSIT"
           : "WITHDRAW"
       );
       setSelectedCategory(transaction?.category);
       setBill(
-        transaction?.bill ??
-          bills.data.filter((b) => b.name === transaction.billName)[0]
+        "bill" in transaction
+          ? transaction?.bill
+          : bills?.data.filter(
+              (b) =>
+                "billName" in transaction && b.name === transaction.billName
+            )[0] ?? null
       );
-      setSumm((transaction?.sum ?? transaction?.amount?.amount) as number);
+      setSumm(
+        ("sum" in transaction ? transaction.sum : transaction.amount) as number
+      );
       setDescription(transaction.description);
-      setPlaceName(transaction?.geocodedPlace ?? "");
+      setPlaceName(
+        "geocodedPlace" in transaction ? transaction.geocodedPlace : ""
+      );
       setLocation(
-        transaction?.latitude
+        "latitude" in transaction
           ? ([transaction!.latitude, transaction!.longitude] as number[])
           : null
       );

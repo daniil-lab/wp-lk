@@ -11,29 +11,37 @@ import Modal from "Components/Modal/Modal";
 import ModalPhone from "./ModalPhone/ModalPhone";
 import ModalEmail from "./ModalEmail/ModalEmail";
 import { useSelector } from "react-redux";
-import { GetUserEmail, GetUserName, GetUserWallet } from "Redux/Selectors";
+import {
+  GetUserEmail,
+  GetUserGoogleLink,
+  GetUserName,
+  GetUserWallet,
+} from "Redux/Selectors";
 import "Styles/Pages/Settings/UserBlock/UserBlock.scss";
 import ModalRemoveData from "./ModalRemoveData/ModalRemoveData";
 import ModalExportData from "./ModalExportData/ModalExportData";
+import ModalUserGoogleLink from "./ModalUserGoogleLink/ModalUserGoogleLink";
 import User from "Services/User";
 
-interface Props {}
-
-const UserBlock: React.FunctionComponent<Props> = (props: Props) => {
+const UserBlock: React.FunctionComponent = () => {
   const userWallet = useSelector(GetUserWallet);
+
   const { load, wallets } = useGetWallets();
-  const { useEditUserСurrency } = User;
+  const { useEditUserCurrency } = User;
 
   const userPhone = useSelector(GetUserName);
   const userEmail = useSelector(GetUserEmail);
+  const googleLink = useSelector(GetUserGoogleLink);
 
-  const [phoneModal, setPhoneModal] = useState<boolean>(false);
-  const [emailModal, setEmailModal] = useState<boolean>(false);
+  const [phoneModal, setPhoneModal] = useState(false);
+  const [emailModal, setEmailModal] = useState(false);
 
-  const [exportDataModal, setExportDataModal] = useState<boolean>(false);
-  const [removeDataModal, setRemoveDataModal] = useState<boolean>(false);
+  const [exportDataModal, setExportDataModal] = useState(false);
+  const [removeDataModal, setRemoveDataModal] = useState(false);
 
-  const { wallet, setWallet, updateUserCurrency } = useEditUserСurrency();
+  const [googleLinkModal, setGoogleLinkModal] = useState(false);
+
+  const { wallet, setWallet, updateUserCurrency } = useEditUserCurrency();
 
   useEffect(() => {
     if (load)
@@ -57,6 +65,19 @@ const UserBlock: React.FunctionComponent<Props> = (props: Props) => {
           <span>{userEmail ?? "none"}</span>
           <img
             onClick={() => setEmailModal(true)}
+            src={PencilIcon}
+            alt="Edit"
+          />
+        </div>
+        <div className="user-block-item">
+          <img src={MailIcon} alt="Email" />
+          <span>
+            {googleLink
+              ? "Аккаунт Google привязан"
+              : "Аккаунт Google не привязан"}
+          </span>
+          <img
+            onClick={() => setGoogleLinkModal(true)}
             src={PencilIcon}
             alt="Edit"
           />
@@ -107,6 +128,12 @@ const UserBlock: React.FunctionComponent<Props> = (props: Props) => {
         style={{ width: "30%" }}
       >
         <ModalRemoveData onClose={() => setRemoveDataModal(false)} />
+      </Modal>
+      <Modal show={googleLinkModal} onClose={() => setGoogleLinkModal(false)}>
+        <ModalUserGoogleLink
+          googleLink={googleLink}
+          onClose={() => setGoogleLinkModal(false)}
+        />
       </Modal>
     </div>
   );

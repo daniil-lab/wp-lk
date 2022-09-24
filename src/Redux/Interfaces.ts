@@ -1,13 +1,14 @@
 import { UserModel } from "Models/UserModel";
 import {
+  CHANGE_PLANS,
   HIDE_PRELOADER,
-  HIDE_TOAST,
+  HIDE_TOAST, LINK_GOOGLE,
   LOG_OUT,
   SET_USER,
   SHOW_PRELOADER,
   SHOW_TOAST,
   UPDATE_CATEGORY,
-  UPDATE_OPERATION,
+  UPDATE_OPERATION
 } from "Redux/Constants";
 import { IToast } from "./StateInterface";
 
@@ -46,6 +47,21 @@ export interface IToastHideAction {
 export interface IUserLogoutAction {
   type: typeof LOG_OUT;
   payload: null;
+}
+
+export interface IUserLinkGoogleAction {
+  type: typeof LINK_GOOGLE;
+  payload: {
+    toLink: boolean;
+  }
+}
+
+export interface IUserChangePlans {
+  type: typeof CHANGE_PLANS;
+  payload: {
+    plannedEarn: number;
+    plannedSpend: number;
+  }
 }
 
 export interface IUpdateCategory {

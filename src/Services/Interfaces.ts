@@ -1,3 +1,8 @@
+import { UserModel } from "../Models/UserModel";
+import { TransactionType } from "../Models/TransactionModel";
+import { CategoryModel } from "../Models/CategoryModel";
+import { BalanceType } from "../Models/BillModel";
+
 export interface ITinkoffTransaction {
   amount: BalanceType;
   currency: string;
@@ -61,7 +66,7 @@ export interface IAdvertising {
 
 export type UserTranscationsType = {
   transactionType: TransactionType;
-  category: ICategory | null;
+  category: CategoryModel | null;
   date: string;
   currency: string;
   sum: string | number;
@@ -79,7 +84,7 @@ export interface SelectedBillType {
 
 export interface TransactionsSorted {
   date: string;
-  transactions: UserTranscationsType[] | AbstractTransaction[];
+  transactions: UserTranscationsType[];
 }
 
 export interface IBonus {
@@ -96,7 +101,7 @@ export interface IBonus {
   };
   data: string;
   id: string;
-  user: UserType;
+  user: UserModel;
 }
 
 export interface IBonusBlank {

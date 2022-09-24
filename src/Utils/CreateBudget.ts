@@ -1,138 +1,140 @@
 import { CategoryModel } from "Models/CategoryModel";
-import { TransactionsSortedModel } from "Models/TransactionModel";
-import moment from "moment";
+import { ITransactionsSorted } from "Models/TransactionModel";
+import {
+  calculateCategoriesBudget,
+  CategoryBudgetType,
+} from "./calculateCategoriesBudget";
 
 export type GeneralBudgetType = {
   income: number;
-  incomeLimit: number;
   expenses: number;
-  expensesLimit: number;
 };
 
 export default class CreateBudget {
-  constructor() {}
-
-  fillterTransactions(
-    transactions: TransactionsSortedModel[],
+  filterTransactions(
+    transactions: ITransactionsSorted[],
     selectedCategory: CategoryModel
-  ): TransactionsSortedModel[] {
+  ): ITransactionsSorted[] {
     return transactions
       .map((group) => {
-        const newTransactions = group.transactions.filter((b) => {
-          if (b.category) return b.category.id === selectedCategory.id;
-        });
+        const newTransactions = group.transactions.filter(
+          (b) => b.category && b.category.id === selectedCategory.id
+        );
         return { ...group, transactions: newTransactions };
       })
       .filter((group) => group.transactions.length > 0);
   }
 
-  fillterTransactionsByCategories(
-    transactions: TransactionsSortedModel[],
+  filterTransactionsByCategories(
+    transactions: ITransactionsSorted[],
     categories: CategoryModel[]
-  ): TransactionsSortedModel[] {
+  ): ITransactionsSorted[] {
     return transactions
       .map((group) => {
-        const newTransactions = group.transactions.filter((b) => {
-          if (b.category) {
-            const f = categories.find((c) => c.id === b.category.id);
-            if (f) return true;
-          }
-        });
+        const newTransactions = group.transactions.filter(
+          (b) => b.category && categories.find((c) => c.id === b.category.id)
+        );
         return { ...group, transactions: newTransactions };
       })
       .filter((group) => group.transactions.length > 0);
   }
 
   getPercentsFromLimit(selectedCategory: CategoryModel): number {
-    if (selectedCategory) {
-      if (selectedCategory.percentsFromLimit) {
-        return selectedCategory.percentsFromLimit < 100
-          ? selectedCategory.percentsFromLimit
-          : 100;
-      } else {
-        return 0;
-      }
-    } else {
-      return 0;
-    }
+    return selectedCategory.percentsFromLimit < 100
+      ? selectedCategory.percentsFromLimit
+      : 100;
   }
 
-  getGeneralBudget(
-    transactions: TransactionsSortedModel[],
-    categories: CategoryModel[]
-  ): GeneralBudgetType {
-    let incomeLimit = 0;
+  getGeneralBudget(transactions: ITransactionsSorted[]): GeneralBudgetType {
     let income = 0;
-    let expensesLimit = 0;
     let expenses = 0;
 
-    categories.forEach((category) => {
-      if (category.forSpend) expensesLimit += category.categoryLimit;
-      if (category.forEarn) incomeLimit += category.categoryLimit;
-    });
-
     transactions.forEach((group) => {
-      group.transactions.map((transaction) => {
+      group.transactions.forEach((transaction) => {
+        if (!("transactionType" in transaction && "sum" in transaction)) return;
+
         if (
           transaction?.transactionType === "DEPOSIT" ||
           transaction?.transactionType === "EARN"
         )
-          income = income + transaction?.sum;
+          income = income + (transaction?.sum || 0);
         if (
           transaction?.transactionType === "WITHDRAW" ||
           transaction?.transactionType === "SPEND"
         )
-          expenses = expenses + transaction?.sum;
+          expenses = expenses + (transaction?.sum || 0);
       });
     });
 
     return {
-      income: income.toFixed(0),
-      incomeLimit,
-      expenses: expenses.toFixed(0),
-      expensesLimit,
+      income: +income.toFixed(0),
+      expenses: +expenses.toFixed(0),
     };
   }
 
+  getCategoriesExpensesBudget(
+    transactions: ITransactionsSorted[]
+  ): CategoryBudgetType[] {
+    return calculateCategoriesBudget(
+      transactions.map((t) => t.transactions).flat(1),
+      "expenses"
+    );
+  }
+
+  getCategoriesIncomeBudget(transactions: ITransactionsSorted[]): {
+    value: string;
+    color: string;
+    sum: number;
+  }[] {
+    return calculateCategoriesBudget(
+      transactions.map((t) => t.transactions).flat(1),
+      "expenses"
+    );
+  }
+
   getSelectedCategoryBudget(
-    transactions: TransactionsSortedModel[],
-    categories: CategoryModel[],
+    transactions: ITransactionsSorted[],
     selectedCategory: CategoryModel
   ): GeneralBudgetType {
-    let incomeLimit = 0;
     let income = 0;
-    let expensesLimit = 0;
     let expenses = 0;
 
-    categories
-      .filter((category) => category.id === selectedCategory.id)
-      .forEach((category) => {
-        if (category.forSpend) expensesLimit += category.categoryLimit;
-        if (category.forEarn) incomeLimit += category.categoryLimit;
-      });
-
     transactions.forEach((group) => {
-      group.transactions.map((transaction) => {
-        if (transaction?.category?.id === selectedCategory.id) {
+      group.transactions.forEach((transaction) => {
+        if (transaction.category.id !== selectedCategory.id) return;
+
+        const transactionSum =
+          "sum" in transaction
+            ? transaction.sum
+            : "amount" in transaction
+            ? transaction.amount
+            : 0;
+
+        if ("transactionType" in transaction) {
           if (
             transaction.transactionType === "DEPOSIT" ||
-            transaction.transactionType === "EARN" ||
-            transaction?.action === "EARN" ||
-            transaction?.action === "DEPOSIT"
+            transaction.transactionType === "EARN"
           )
-            income = income + (transaction?.sum ?? transaction?.amount?.amount);
+            income += transactionSum;
           if (
             transaction?.transactionType === "WITHDRAW" ||
-            transaction?.transactionType === "SPEND" ||
-            transaction?.action === "SPEND" ||
-            transaction?.action === "WITHDRAW"
+            transaction?.transactionType === "SPEND"
           )
-            expenses =
-              expenses + (transaction?.sum ?? transaction?.amount?.amount);
+            expenses += transactionSum;
+        }
+
+        if ("action" in transaction) {
+          if (transaction.action === "DEPOSIT" || transaction.action === "EARN")
+            income += transactionSum;
+          if (
+            transaction?.action === "WITHDRAW" ||
+            transaction?.action === "SPEND"
+          )
+            expenses += transactionSum;
         }
       });
     });
 
-    return { income, incomeLimit, expenses, expensesLimit };
+    return { income, expenses };
   }
 }

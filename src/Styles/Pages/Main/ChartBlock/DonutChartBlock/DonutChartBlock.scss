@@ -9,7 +9,6 @@
   &-next {
     position: absolute;
     top: 50%;
-    right: 0;
     padding: 0 10px;
     z-index: 9;
     right: -5px;
@@ -38,9 +37,10 @@
     display: grid;
     grid-auto-columns: 1fr;
     grid-template-columns: 1fr;
-    gap: 0px 0px;
+    gap: 0 0;
     justify-items: center;
     align-content: center;
+    pointer-events: none;
 
     &-wrapper {
       width: 100%;
@@ -48,33 +48,48 @@
       display: grid;
       grid-auto-columns: 1fr;
       grid-template-rows: 1fr 1fr;
-      gap: 0px 0px;
+      gap: 0 0;
       justify-items: center;
       align-items: center;
       span {
-        font-family: "Montserrat";
+        font-family: Montserrat, sans-serif;
         font-style: normal;
         font-weight: 500;
-        font-size: 0.8rem;
+        font-size: 1.4rem;
         line-height: 15px;
         color: #333333;
         margin: 5px 25px;
+        user-select: none;
       }
       h4 {
-        font-family: Montserrat;
+        font-family: Montserrat, sans-serif;
         font-style: normal;
         font-weight: 600;
-        font-size: 0.93rem;
+        font-size: 1.1rem;
         line-height: 17px;
         color: #555555;
-        margin: 0px 25px;
+        margin: 0 25px;
+        display: flex;
+        align-items: center;
+        user-select: none;
       }
     }
   }
 }
 
+.center {
+  z-index: 10;
+  position: relative;
+}
+
 .donut {
+  pointer-events: none;
+
   @media screen and (max-width: 320px) {
     width: 225px !important;
   }
+}
+
+.donut path {
+  pointer-events: stroke;
 }

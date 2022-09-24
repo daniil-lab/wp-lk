@@ -1,13 +1,14 @@
-import { UserType } from "Services/Interfaces";
 import {
+  CHANGE_PLANS,
   HIDE_PRELOADER,
   HIDE_TOAST,
+  LINK_GOOGLE,
   LOG_OUT,
   SET_USER,
   SHOW_PRELOADER,
   SHOW_TOAST,
   UPDATE_CATEGORY,
-  UPDATE_OPERATION
+  UPDATE_OPERATION,
 } from "./Constants";
 import {
   IPreloaderHideAction,
@@ -17,9 +18,12 @@ import {
   IUpdateCategory,
   IUserLogoutAction,
   IUserSetAction,
-  IUpdateOperation
+  IUpdateOperation,
+  IUserLinkGoogleAction,
+  IUserChangePlans,
 } from "./Interfaces";
 import { IToast } from "./StateInterface";
+import { UserModel } from "../Models/UserModel";
 
 export const ShowPreloader = (): IPreloaderShowAction => {
   return {
@@ -53,7 +57,7 @@ export const HideToast = (index: number): IToastHideAction => {
   };
 };
 
-export const SetUser = (token: string, user: UserType): IUserSetAction => {
+export const SetUser = (token: string, user: UserModel): IUserSetAction => {
   return {
     type: SET_USER,
     payload: {
@@ -69,6 +73,19 @@ export const Logout = (): IUserLogoutAction => {
     payload: null,
   };
 };
+
+export const LinkGoogle = (toLink: boolean): IUserLinkGoogleAction => ({
+  type: LINK_GOOGLE,
+  payload: { toLink },
+});
+
+export const ChangeUserPlans = (payload: {
+  plannedSpend: number;
+  plannedEarn: number;
+}): IUserChangePlans => ({
+  type: CHANGE_PLANS,
+  payload,
+});
 
 export const UpdateCategory = (): IUpdateCategory => {
   return {

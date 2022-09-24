@@ -9,7 +9,6 @@ import Logo from "Static/Images/Logo.svg";
 import LogoutIcon from "Static/icons/sidebar-logout-icon.svg";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "Redux/Store";
-import { Logout } from "Redux/Actions";
 import Auth from "Services/Auth";
 
 interface Props {

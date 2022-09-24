@@ -18,7 +18,14 @@ const useGetBill = () => {
 
   const generalBalance = useMemo(() => {
     return GeneralBalance(data, tinkoffCards, sberCards, tochkaCards);
-  }, [data.length, sberCards.length, tochkaCards.length]);
+  }, [
+    data,
+    sberCards,
+    tochkaCards,
+    data.length,
+    sberCards.length,
+    tochkaCards.length,
+  ]);
 
   const updateBill = (): void => {
     if (update === null) setUpdate(true);

@@ -1,10 +1,10 @@
+import { useState } from "react";
 import moment from "moment";
-import { useEffect, useState } from "react";
 
 const useCalendar = () => {
-  const [year, setYear] = useState<string>("2020");
-  const [day, setDay] = useState<string>("1");
-  const [month, setMonth] = useState<string>("ЯНВАРЬ");
+  const [year, setYear] = useState("2020");
+  const [day, setDay] = useState("1");
+  const [month, setMonth] = useState("ЯНВАРЬ");
 
   const months = [
     "ЯНВАРЬ",
@@ -22,11 +22,11 @@ const useCalendar = () => {
   ];
 
   const generateArrayOfYears = (): number[] => {
-    var max = new Date().getFullYear();
-    var min = max - 9;
-    var years: number[] = [];
+    const max = new Date().getFullYear();
+    const min = max - 9;
+    const years: number[] = [];
 
-    for (var i = max; i >= min; i--) {
+    for (let i = max; i >= min; i--) {
       years.push(i);
     }
     return years;
@@ -46,13 +46,13 @@ const useCalendar = () => {
   };
 
   const yearHandler = (v: string): void => {
-    if (year != v) setYear(v);
+    if (year !== v) setYear(v);
   };
   const monthHandler = (v: string): void => {
-    if (month != v) setMonth(v);
+    if (month !== v) setMonth(v);
   };
   const dayHandler = (v: string): void => {
-    if (day != v) setDay(v);
+    if (day !== v) setDay(v);
   };
 
   return {

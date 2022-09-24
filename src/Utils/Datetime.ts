@@ -1,12 +1,9 @@
 import moment from "moment";
 
 const getCurrentWeek = () => {
-  let currentDate = moment();
-
-  let weekStart = currentDate.clone().startOf("isoWeek");
-  let weekEnd = currentDate.clone().endOf("isoWeek");
-
-  let days = [];
+  const currentDate = moment();
+  const weekStart = currentDate.clone().startOf("isoWeek");
+  const days: string[] = [];
 
   for (let i = 0; i <= 6; i++) {
     days.push(moment(weekStart).add(i, "days").format("YYYY-MM-DD"));
@@ -15,9 +12,8 @@ const getCurrentWeek = () => {
 };
 
 const getLastWeek = () => {
-  let weekStart = moment().subtract(1, "weeks").startOf("isoWeek");
-  let weekEnd = moment().subtract(1, "weeks").endOf("isoWeek");
-  let days = [];
+  const weekStart = moment().subtract(1, "weeks").startOf("isoWeek");
+  const days: string[] = [];
 
   for (let i = 0; i <= 6; i++) {
     days.push(moment(weekStart).add(i, "days").format("YYYY-MM-DD"));
@@ -45,9 +41,11 @@ const getDaysOfLastMonth = () => {
     );
 };
 
-export default {
+const datetime = {
   getCurrentWeek,
   getLastWeek,
   getDaysOfMonth,
   getDaysOfLastMonth,
 };
+
+export default datetime;

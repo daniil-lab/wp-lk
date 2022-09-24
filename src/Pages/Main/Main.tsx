@@ -1,3 +1,6 @@
+import React, { useState, useMemo } from "react";
+import { useSelector } from "react-redux";
+
 import ContextButton from "Components/ContextButton/ContextButton";
 import Header from "Components/Header/Header";
 import Modal from "Components/Modal/Modal";
@@ -5,10 +8,7 @@ import useAddTransaction from "Hooks/useAddTransaction";
 import useGetBill from "Hooks/useGetBill";
 import useGetCategories from "Hooks/useGetCategories";
 import useGetTransaction from "Hooks/useGetTransaction";
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import PlusCircleFill from "Static/icons/plus-circle-fill.svg";
-import "Styles/Pages/Main/Main.scss";
 import AddBillModal from "./BalanceBlock/AddBillModal/AddBillModal";
 import BalanceBlock from "./BalanceBlock/BalanceBlock";
 import Banner from "./Banner/Banner";
@@ -16,24 +16,51 @@ import CategoryBlock from "./CategoryBlock/CategoryBlock";
 import CategoryConstructor from "./CategoryBlock/CategoryConstructor/CategoryConstructor";
 import AddOperationModal from "./ChartBlock/AddOperationModal/AddOperationModal";
 import ChartBlock from "./ChartBlock/ChartBlock";
+import { ICategoryFilter } from "./types";
+import { useViewportSize } from "../../Utils/Hooks/useViewportSize";
 
-interface Props {}
+import "Styles/Pages/Main/Main.scss";
+import { categoryFiltersData } from "./const";
 
-const Main: React.FunctionComponent<Props> = (props: Props) => {
-  const username = useSelector((state: any) => state?.user?.user?.username);
-  const bills = useGetBill();
-  const categories = useGetCategories();
-  const transaction = useGetTransaction();
-  const addTransaction = useAddTransaction();
-
+const Main: React.FC = () => {
   const [showBillModal, setShowBillModal] = useState<boolean>(false);
+  const [categoryFilters, setCategoryFilters] = useState<ICategoryFilter>({
+    income: false,
+    expense: false,
+    favorite: false,
+  });
+
+  const username = useSelector((state: any) => state?.user?.user?.username);
+  const billsData = useGetBill();
+  const categoriesData = useGetCategories();
+  const transactionsData = useGetTransaction();
+  const addTransaction = useAddTransaction();
+  const { viewportWidth } = useViewportSize();
+
+  const categoryFilterClasses = useMemo(
+    () => ({
+      income: categoryFilters.income ? "app-card__filters_filter-active" : "",
+      expense: categoryFilters.expense ? "app-card__filters_filter-active" : "",
+      favorite: categoryFilters.favorite
+        ? "app-card__filters_filter-active"
+        : "",
+    }),
+    [categoryFilters]
+  );
+
+  const handleToggleCategoryFilters = (filter: keyof ICategoryFilter) => {
+    setCategoryFilters({
+      ...categoryFilters,
+      [filter]: !categoryFilters[filter],
+    });
+  };
 
   const handleAddOperation = () => {
-    if (!!bills.data.length && !!categories.categories.length) {
+    if (!!billsData.data.length && !!categoriesData.categories.length) {
       addTransaction.modal.setShowAddOperationModal(true);
-    } else if (!!bills.data.length) {
+    } else if (!!billsData.data.length) {
       alert("Добавьте категорию!");
-    } else if (!!categories.categories.length) {
+    } else if (!!categoriesData.categories.length) {
       alert("Добавьте счет!");
     } else {
       alert("Добавьте категорию и счет!");
@@ -57,9 +84,9 @@ const Main: React.FunctionComponent<Props> = (props: Props) => {
           </div>
         </div>
         <ChartBlock
-          transaction={transaction}
-          categories={categories}
-          bills={bills}
+          transactionsData={transactionsData}
+          categoriesData={categoriesData}
+          billsData={billsData}
         />
       </div>
       <div className="app-card">
@@ -73,47 +100,77 @@ const Main: React.FunctionComponent<Props> = (props: Props) => {
           </div>
         </div>
         <BalanceBlock
-          data={bills.data}
-          generalBalance={bills.generalBalance}
-          load={bills.load}
-          setBill={transaction.setBill}
-          selected={transaction.bill}
-          billType={transaction.billType}
-          setBillType={transaction.setBillType}
-          updateBill={bills.updateBill}
-          tinkoffCards={bills.tinkoffCards}
-          sberCards={bills.sberCards}
-          tochkaCards={bills.tochkaCards}
-          updateTransactions={transaction.updateTransactions}
+          data={billsData.data}
+          generalBalance={billsData.generalBalance}
+          load={billsData.load}
+          setBill={transactionsData.setBill}
+          selected={transactionsData.bill}
+          billType={transactionsData.billType}
+          setBillType={transactionsData.setBillType}
+          updateBill={billsData.updateBill}
+          tinkoffCards={billsData.tinkoffCards}
+          sberCards={billsData.sberCards}
+          tochkaCards={billsData.tochkaCards}
+          updateTransactions={transactionsData.updateTransactions}
         />
       </div>
       {/* MARK : Category list */}
       <div className="app-card">
         <div className="app-card-header">
-          <div className="content-section-title content-section-category">
-            <h1>Категории</h1>
+          <div className="category-header">
+            <div className="content-section-title content-section-category">
+              <h1>Категории</h1>
+            </div>
+            {viewportWidth >= 700 && (
+              <div className="app-card__filters">
+                {categoryFiltersData.map((filterData, index) => (
+                  <button
+                    key={`${filterData.key}-${index}`}
+                    type="button"
+                    className={categoryFilterClasses[filterData.key]}
+                    onClick={() => handleToggleCategoryFilters(filterData.key)}
+                  >
+                    {filterData.name}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-          <div>
-            <ContextButton
-              button={
-                <div className="content-section-controll">
-                  <span>Добавить категорию</span>
-                  <img src={PlusCircleFill} alt={"Plus icon"} />
-                </div>
-              }
-              content={(params, ctx) => (
-                <CategoryConstructor
-                  updateCategory={categories.updateCategory}
-                  {...{ ...ctx, params }}
-                />
-              )}
-            />
-          </div>
+          <ContextButton
+            button={
+              <div className="content-section-controll">
+                <span>Добавить категорию</span>
+                <img src={PlusCircleFill} alt={"Plus icon"} />
+              </div>
+            }
+            content={(params, ctx) => (
+              <CategoryConstructor
+                updateCategory={categoriesData.updateCategory}
+                {...{ ...ctx, params }}
+              />
+            )}
+          />
         </div>
+        {viewportWidth < 700 && (
+          <div className="app-card__filters">
+            {categoryFiltersData.map((filterData, index) => (
+              <button
+                key={`${filterData.key}-${index}`}
+                type="button"
+                className={categoryFilterClasses[filterData.key]}
+                onClick={() => handleToggleCategoryFilters(filterData.key)}
+              >
+                {filterData.name}
+              </button>
+            ))}
+          </div>
+        )}
         <CategoryBlock
-          categories={categories.categories}
-          load={categories.load}
-          updateCategory={categories.updateCategory}
+          filters={categoryFilters}
+          categories={categoriesData.categories}
+          load={categoriesData.load}
+          updateCategory={categoriesData.updateCategory}
+          modifyCategory={categoriesData.modifyCategory}
         />
       </div>
       <div className="app-card" style={{ minHeight: "200px" }}>
@@ -125,18 +182,18 @@ const Main: React.FunctionComponent<Props> = (props: Props) => {
       >
         <AddOperationModal
           onClose={() => addTransaction.modal.setShowAddOperationModal(false)}
-          updateTransactions={transaction.updateTransactions}
+          updateTransactions={transactionsData.updateTransactions}
           addTransaction={addTransaction.addTransaction}
-          updateBills={bills.updateBill}
-          bills={bills}
-          category={categories}
+          updateBills={billsData.updateBill}
+          billsData={billsData}
+          categoriesData={categoriesData}
         />
       </Modal>
 
       <Modal show={showBillModal} onClose={() => setShowBillModal(false)}>
         <AddBillModal
           onClose={() => setShowBillModal(false)}
-          updateBill={bills.updateBill}
+          updateBill={billsData.updateBill}
         />
       </Modal>
     </div>

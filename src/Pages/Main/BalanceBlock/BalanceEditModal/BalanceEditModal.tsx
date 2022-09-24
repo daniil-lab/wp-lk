@@ -1,6 +1,5 @@
 import React from "react";
-import useEditBill from "Services/Bill/useEditBill";
-import useRemoveTransaction from "Hooks/useRemoveTransaction";
+
 import "Styles/Pages/Main/BalanceBlock/BalanceEditModal/BalanceEditModal.scss";
 
 interface Props {

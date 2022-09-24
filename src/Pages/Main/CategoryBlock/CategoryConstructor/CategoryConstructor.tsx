@@ -114,29 +114,12 @@ const CategoryConstructor: React.FunctionComponent<Props> = (props: Props) => {
           icon={category.icon}
         />
       </div>
-      <div className="category-constructor-row">
+      <div className="category-constructor-row" style={{ marginBottom: 20 }}>
         <span>Цвет</span>
         <ColorsBlock
           colors={colors.colors}
           onColorChange={setColor}
           color={category.color}
-        />
-      </div>
-      <div className="category-constructor-row" style={{ marginBottom: 15 }}>
-        <span>Лимит категории</span>
-        <input
-          type="number"
-          placeholder="Лимит категории"
-          value={category.categoryLimit}
-          onChange={(e) =>
-            setCategory({
-              ...category,
-              categoryLimit: parseInt(e.target.value),
-            })
-          }
-          style={{
-            borderRadius: 15,
-          }}
         />
       </div>
       <div

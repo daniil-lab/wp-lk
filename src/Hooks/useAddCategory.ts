@@ -53,16 +53,6 @@ const useAddCategory = (config) => {
       );
       return;
     }
-    if (params.categoryLimit === 0) {
-      dispatch(
-        ShowToast({
-          title: "Ошибка",
-          text: "Установите лимит для категории",
-          type: "error",
-        })
-      );
-      return;
-    }
     dispatch(ShowPreloader());
     const action = await categoryRepository.addCategory(userId, params);
     dispatch(HidePreloader());

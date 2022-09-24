@@ -1,113 +1,109 @@
 import React, { useEffect, useMemo, useState } from "react";
+
 import ExpenseIncomeBlock from "./ExpenseIncomeBlock/ExpenseIncomeBlock";
 import PlusCircleFill from "Static/icons/plus-circle-fill.svg";
 import Header from "Components/Header/Header";
 import Load from "Components/Load/Load";
 import Dateslider from "Components/DateSlider/Dateslider";
 import { API_URL } from "Utils/Config";
-import CircleChart from "Components/CircleChart/CircleChart";
 import ChartBlockHistory from "Pages/Main/ChartBlock/ChartBlockHistory/ChartBlockHistory";
 import Modal from "Components/Modal/Modal";
 import AddOperationModal from "Pages/Main/ChartBlock/AddOperationModal/AddOperationModal";
 import HexToRgbA from "Utils/HexToRgbA";
-import "Styles/Pages/Budget/Budget.scss";
-import "Styles/Pages/Budget/ExpenseIncomeBlock/ExpenseIncomeBlock.scss";
-// import useCategoryLimit from "Services/Category/useCategoryLimit";
 import Image from "Components/Image/Image";
 import TransactionsIcon from "Static/icons/transaction.svg";
-// import useGetBill from "Services/Bill/useGetBill";
 import useGetTransaction from "Hooks/useGetTransaction";
 import useGetCategories from "Hooks/useGetCategories";
 import useGetBill from "Hooks/useGetBill";
-import moment from "moment";
-import { type } from "os";
-import useCategoryLimit from "Hooks/useCategoryLimit";
 import useAddTransaction from "Hooks/useAddTransaction";
-import NumberWithSpaces from "Utils/NumberWithSpaces";
 import { CategoryModel } from "Models/CategoryModel";
 import CreateBudget from "Utils/CreateBudget";
-import { ExpensesIncome } from "./ExpenseIncomeBlock/ExpenseIncomeBlock";
+import ExpensesIncome from "./ExpensesIncome/ExpensesIncome";
 
-interface Props {}
+import "Styles/Pages/Budget/Budget.scss";
+import "Styles/Pages/Budget/ExpenseIncomeBlock/ExpenseIncomeBlock.scss";
 
-const Budget: React.FunctionComponent<Props> = (props: Props) => {
-  const transactions = useGetTransaction();
+const createBudget = new CreateBudget();
+
+const Budget: React.FC = () => {
+  const transactionsData = useGetTransaction();
   const addTransaction = useAddTransaction();
-  const categories = useGetCategories();
-  const bills = useGetBill();
-  const updateLimit = useCategoryLimit();
-  // const budget = useBudget(categories, transactions);
-
-  const createBudget = new CreateBudget();
+  const categoriesData = useGetCategories();
+  const billsData = useGetBill();
 
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryModel | null>(null);
+  const [showAddOperationModal, setShowAddOperationModal] = useState(false);
 
-  const fillterTransactions = useMemo(() => {
-    if (transactions.load && categories.load) {
-      if (selectedCategory) {
-        return createBudget.fillterTransactions(
-          transactions.transactions,
-          selectedCategory
-        );
-      } else {
-        return [];
-      }
-    } else {
+  const filteredTransactions = useMemo(() => {
+    if (!(transactionsData.load || categoriesData.load) || !selectedCategory)
       return [];
-    }
-  }, [selectedCategory, transactions.load, categories.load]);
 
-  const fillterCategory = useMemo(() => {
-    if (categories.load) {
-      return categories.categories.filter((category) => {
-        if (category.categoryLimit > 0) return category;
-      });
-    } else {
-      return [];
-    }
-  }, [categories.load]);
-
-  const fillterTransactionsByCategories = useMemo(() => {
-    return createBudget.fillterTransactionsByCategories(
-      transactions.transactions,
-      fillterCategory
+    return createBudget.filterTransactions(
+      transactionsData.transactions,
+      selectedCategory
     );
-  }, [transactions.load, categories.load]);
+  }, [
+    selectedCategory,
+    transactionsData.load,
+    categoriesData.load,
+    transactionsData.transactions,
+  ]);
+
+  const filterTransactionsByCategories = useMemo(() => {
+    return createBudget.filterTransactionsByCategories(
+      transactionsData.transactions,
+      categoriesData.categories
+    );
+  }, [
+    categoriesData.categories,
+    categoriesData.load,
+    transactionsData.transactions,
+  ]);
 
   const selectedCategoryBudget = useMemo(() => {
     if (selectedCategory) {
-      return createBudget.getSelectedCategoryBudget(
-        transactions.transactions,
-        fillterCategory,
+      const selectedCatBudget = createBudget.getSelectedCategoryBudget(
+        transactionsData.transactions,
         selectedCategory
       );
+      return {
+        income: selectedCatBudget.income,
+        expenses: selectedCatBudget.expenses,
+        incomeLimit: selectedCategory.earnStatistic,
+        expensesLimit: selectedCategory.spendStatistic,
+      };
     } else {
       return { income: 0, incomeLimit: 0, expenses: 0, expensesLimit: 0 };
     }
-  }, [selectedCategory]);
+  }, [transactionsData.transactions, selectedCategory]);
 
-  useEffect(() => {
-    if (categories.load) setSelectedCategory(fillterCategory[0]);
-  }, [categories.load]);
+  const generalBudget = useMemo(
+    () => createBudget.getGeneralBudget(filterTransactionsByCategories),
+    [filterTransactionsByCategories]
+  );
 
-  const getIncomeCategory = (id: string): number => {
-    return 0; // createBudget.getIncomeCategory(id, fillterTransactions);
-  };
-
-  const [showAddOperationModal, setShowAddOperationModal] = useState(false);
+  const categoriesBudget = useMemo(
+    () =>
+      createBudget.getCategoriesExpensesBudget(filterTransactionsByCategories),
+    [filterTransactionsByCategories]
+  );
 
   const handleAddOperation = () => {
-    if (!!bills.data.length && !!categories.categories.length) {
+    if (!!billsData.data.length && !!categoriesData.categories.length) {
       setShowAddOperationModal(true);
-    } else if (!!bills.data.length) {
+    } else if (!!billsData.data.length) {
       alert("Добавьте категорию!");
-    } else if (!!categories.categories.length) {
+    } else if (!!categoriesData.categories.length) {
       alert("Добавьте счет!");
     } else {
       alert("Добавьте категорию и счет!");
     }
   };
+
+  useEffect(() => {
+    if (categoriesData.load) setSelectedCategory(categoriesData.categories[0]);
+  }, [categoriesData.load]);
 
   return (
     <div className="budget">
@@ -116,22 +112,19 @@ const Budget: React.FunctionComponent<Props> = (props: Props) => {
         <h1 className="main__title budget__title">Бюджет</h1>
         <div className="app-card">
           <ExpenseIncomeBlock
-            updateCategoryLimit={updateLimit}
+            categoriesBudget={categoriesBudget}
             selectCategory={setSelectedCategory}
             selectedCategory={selectedCategory}
-            prev={transactions.date.prevMonth}
-            next={transactions.date.nextMonth}
-            selectedDate={transactions.date.date}
-            categories={fillterCategory}
-            updateCategories={categories.updateCategory}
-            getIncomeCategory={getIncomeCategory}
+            prev={transactionsData.date.prevMonth}
+            next={transactionsData.date.nextMonth}
+            selectedDate={transactionsData.date.date}
+            categories={categoriesData.categories}
             load={
-              transactions.load && categories.load && selectedCategory != null
+              transactionsData.load &&
+              categoriesData.load &&
+              selectedCategory != null
             }
-            generalBudget={createBudget.getGeneralBudget(
-              fillterTransactionsByCategories,
-              fillterCategory
-            )}
+            generalBudget={generalBudget}
           />
         </div>
       </div>
@@ -150,16 +143,16 @@ const Budget: React.FunctionComponent<Props> = (props: Props) => {
           {selectedCategory != null && (
             <Load
               {...{
-                load: categories.load && transactions.load,
+                load: categoriesData.load && transactionsData.load,
               }}
             >
               <div className="operations-block">
                 <div className="operations-info">
                   <div className="operations-item operations-dates">
                     <Dateslider
-                      prev={transactions.date.prevMonth}
-                      next={transactions.date.nextMonth}
-                      selectedDate={transactions.date.date}
+                      prev={transactionsData.date.prevMonth}
+                      next={transactionsData.date.nextMonth}
+                      selectedDate={transactionsData.date.date}
                     />
                   </div>
                   <div className="operations-item operations-categories">
@@ -183,6 +176,9 @@ const Budget: React.FunctionComponent<Props> = (props: Props) => {
                           src={`${API_URL}api/v1/image/content/${
                             selectedCategory!.icon.name
                           }`}
+                          alt={`${
+                            selectedCategory?.icon.name || "Image of"
+                          } category`}
                         />
                       </div>
                     </div>
@@ -199,7 +195,7 @@ const Budget: React.FunctionComponent<Props> = (props: Props) => {
                   </div>
 
                   <div className="operations-transactions">
-                    {fillterTransactions.length === 0 ? (
+                    {filteredTransactions.length === 0 ? (
                       <div className="budget-empty-transactions">
                         <Image
                           src={TransactionsIcon}
@@ -209,14 +205,14 @@ const Budget: React.FunctionComponent<Props> = (props: Props) => {
                       </div>
                     ) : (
                       <ChartBlockHistory
-                        transactions={fillterTransactions}
-                        selectedBill={transactions.bill}
-                        billType={transactions.billType}
-                        categories={categories}
-                        bills={[]}
-                        updateTransactions={transactions.updateTransactions}
+                        transactions={filteredTransactions}
+                        selectedBill={transactionsData.bill}
+                        billType={transactionsData.billType}
+                        categoriesData={categoriesData}
+                        updateTransactions={transactionsData.updateTransactions}
                         budget={true}
-                        filteredCategory={fillterCategory}
+                        categories={categoriesData.categories}
+                        updateBills={billsData.updateBill}
                       />
                     )}
                   </div>
@@ -234,13 +230,13 @@ const Budget: React.FunctionComponent<Props> = (props: Props) => {
         <AddOperationModal
           onClose={() => setShowAddOperationModal(false)}
           updateTransactions={() => {
-            transactions.updateTransactions();
-            categories.updateCategory();
+            transactionsData.updateTransactions();
+            categoriesData.updateCategory();
           }}
           addTransaction={addTransaction.addTransaction}
-          updateBills={bills.updateBill}
-          bills={bills}
-          category={categories}
+          updateBills={billsData.updateBill}
+          billsData={billsData}
+          categoriesData={categoriesData}
         />
       </Modal>
     </div>

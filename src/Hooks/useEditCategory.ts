@@ -5,7 +5,10 @@ import { HidePreloader, ShowPreloader, ShowToast } from "Redux/Actions";
 import { AppDispatch } from "Redux/Store";
 import CategoryRepository from "Repository/CategoryRepository";
 
-const useEditCategory = (categories: CategoryModel[]) => {
+const useEditCategory = (
+  categories: CategoryModel[],
+  modifyCategory: (categoryId: string, categoryData: CategoryModel) => void
+) => {
   const dispatch = useDispatch<AppDispatch>();
 
   const [show, setShow] = useState<boolean>(false);
@@ -16,6 +19,7 @@ const useEditCategory = (categories: CategoryModel[]) => {
   const [categoryLimit, setCategoryLimit] = useState<number>(0);
   const [forEarn, setForEarn] = useState<boolean>(false);
   const [forSpend, setForSpend] = useState<boolean>(false);
+  const [favorite, setFavorite] = useState<boolean>(false);
 
   const __clearState = (): void => {
     setCategoryId(null);
@@ -25,6 +29,7 @@ const useEditCategory = (categories: CategoryModel[]) => {
     setCategoryLimit(0);
     setForEarn(false);
     setForSpend(false);
+    setFavorite(false);
   };
 
   const categoryRepository = new CategoryRepository();
@@ -35,16 +40,6 @@ const useEditCategory = (categories: CategoryModel[]) => {
         ShowToast({
           title: "Ошибка",
           text: "Невозможно добавить категорию без имени",
-          type: "error",
-        })
-      );
-      return;
-    }
-    if (categoryLimit === 0) {
-      dispatch(
-        ShowToast({
-          title: "Ошибка",
-          text: "Установите лимит для категории",
           type: "error",
         })
       );
@@ -84,6 +79,20 @@ const useEditCategory = (categories: CategoryModel[]) => {
     }
   };
 
+  const editFavorite = async (): Promise<boolean | void> => {
+    if (!categoryId) return;
+
+    setFavorite(!favorite);
+    try {
+      const data = await (favorite
+        ? categoryRepository.removeFromFavorite(categoryId)
+        : categoryRepository.makeFavorite(categoryId));
+      modifyCategory(categoryId, "data" in data ? data.data : data);
+    } catch {
+      setFavorite(favorite);
+    }
+  };
+
   const remove = async (): Promise<void> => {
     if (categoryId) {
       dispatch(ShowPreloader());
@@ -118,6 +127,7 @@ const useEditCategory = (categories: CategoryModel[]) => {
       setCategoryLimit(category.categoryLimit);
       setForEarn(category.forEarn);
       setForSpend(category.forSpend);
+      setFavorite(category.favorite);
     }
   }, [categoryId]);
 
@@ -140,6 +150,8 @@ const useEditCategory = (categories: CategoryModel[]) => {
     setForEarn,
     forSpend,
     setForSpend,
+    favorite,
+    editFavorite,
   };
 };
 

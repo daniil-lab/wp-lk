@@ -1,16 +1,16 @@
+import React, { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
+
 import Checkbox from "Components/Checkbox/Checkbox";
 import ContextButton from "Components/ContextButton/ContextButton";
 import DatePicker from "Components/DatePicker/DatePicker";
 import Modal from "Components/Modal/Modal";
 import Select from "Components/Select/Select";
-import useAddTransaction from "Hooks/useAddTransaction";
 import useGetBill from "Hooks/useGetBill";
-import useGetCategories from "Hooks/useGetCategories";
 import { BillModel } from "Models/BillModel";
 import { BaseCategoryModel, CategoryModel } from "Models/CategoryModel";
 import { TransactionType } from "Models/TransactionModel";
-import React, { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import { useGetActiveSubscription } from "Services/Subscription";
 import CalendarDark from "Static/icons/calendar-dark.svg";
 import ScanQr from "Static/icons/scan-qr-nigger.svg";
@@ -19,7 +19,7 @@ import { API_URL } from "Utils/Config";
 import HexToRgbA from "Utils/HexToRgbA";
 import MapModal from "./MapModal/MapModal";
 import { HidePreloader } from "Redux/Actions";
-import { useDispatch } from "react-redux";
+import useGetCategories from "../../../../Hooks/useGetCategories";
 
 interface Props {
   onClose: () => void;
@@ -29,8 +29,8 @@ interface Props {
   updateTransactions: () => void;
   updateBills: () => void;
   addTransaction: (config: any) => Promise<boolean | undefined>;
-  bills: any;
-  category: any;
+  billsData: ReturnType<typeof useGetBill>;
+  categoriesData: ReturnType<typeof useGetCategories>;
 }
 
 const AddOperationModal: React.FC<Props> = ({
@@ -41,13 +41,12 @@ const AddOperationModal: React.FC<Props> = ({
   updateTransactions,
   addTransaction,
   updateBills,
-  bills,
-  category,
+  billsData,
+  categoriesData,
 }) => {
   const { activeSubscription } = useGetActiveSubscription();
 
   const [date, setDate] = useState<null | string[]>(null);
-  const [expand, setExpand] = useState<boolean>(false);
   const [operationType, setOperationType] =
     useState<TransactionType>("WITHDRAW");
   const [selectedCategory, setSelectedCategory] =
@@ -72,7 +71,6 @@ const AddOperationModal: React.FC<Props> = ({
     } else {
       setDate([v]);
     }
-    setExpand(false);
   };
 
   const clearLocation = (
@@ -100,9 +98,9 @@ const AddOperationModal: React.FC<Props> = ({
         updateTransactions();
         updateBills();
       }
-    } catch(ex) {
+    } catch (ex) {
       dispatch(HidePreloader()); // закрываем прелоадер в случае ошибки
-      console.log(ex)
+      console.log(ex);
     }
   };
 
@@ -111,12 +109,12 @@ const AddOperationModal: React.FC<Props> = ({
   }, [initialSum]);
 
   useMemo(() => {
-    if (category.categories) {
+    if (categoriesData.categories) {
       const standartArr: CategoryModel[] = [];
 
       const earnArr: CategoryModel[] = [];
 
-      category.categories.forEach((category) => {
+      categoriesData.categories.forEach((category) => {
         if (category.forEarn) earnArr.push(category);
         if (category.forSpend) standartArr.push(category);
       });
@@ -124,17 +122,17 @@ const AddOperationModal: React.FC<Props> = ({
       setStandartCategories(standartArr);
       setOnlyForEarnCategories(earnArr);
     }
-  }, [category.load, category.categories]);
+  }, [categoriesData.load, categoriesData.categories]);
 
   useMemo(() => {
     if (standartCategories.length != 0 && operationType == "WITHDRAW") {
       setSelectedCategory(standartCategories[0]);
     }
-  }, [category.load, standartCategories]);
+  }, [categoriesData.load, standartCategories]);
 
   useEffect(() => {
-    if (bills.load) setBill(bills.data[0]);
-  }, [bills.load]);
+    if (billsData.load) setBill(billsData.data[0]);
+  }, [billsData.load]);
 
   return (
     <div className="add-operation-modal">
@@ -143,7 +141,7 @@ const AddOperationModal: React.FC<Props> = ({
         <span>{date ?? "Дата и время"}</span>
         <div style={{ position: "relative" }}>
           <ContextButton
-            button={<img src={CalendarDark} />}
+            button={<img src={CalendarDark} alt="Dark calendar button" />}
             content={(_, ctx) => (
               <DatePicker {...ctx} onEnter={onEnter} type="mini" />
             )}
@@ -157,8 +155,9 @@ const AddOperationModal: React.FC<Props> = ({
           <Checkbox
             onChange={() => {
               setOperationType("WITHDRAW");
-              if (standartCategories.length > 0) setSelectedCategory(standartCategories[0]);
-              else setSelectedCategory(null)
+              if (standartCategories.length > 0)
+                setSelectedCategory(standartCategories[0]);
+              else setSelectedCategory(null);
             }}
             value={operationType === "WITHDRAW"}
             lable={"Расход"}
@@ -166,8 +165,9 @@ const AddOperationModal: React.FC<Props> = ({
           <Checkbox
             onChange={() => {
               setOperationType("DEPOSIT");
-              if (onlyForEarnCategories.length > 0) setSelectedCategory(onlyForEarnCategories[0]);
-              else setSelectedCategory(null)
+              if (onlyForEarnCategories.length > 0)
+                setSelectedCategory(onlyForEarnCategories[0]);
+              else setSelectedCategory(null);
             }}
             value={operationType === "DEPOSIT"}
             lable={"Доход"}
@@ -238,10 +238,10 @@ const AddOperationModal: React.FC<Props> = ({
           <span>{bill?.name}</span>
           <Select
             value={bill?.name ?? ""}
-            data={bills.data.map((i) => ({
+            data={billsData.data.map((i) => ({
               label: i.name,
             }))}
-            handler={(index) => setBill(bills.data[index])}
+            handler={(index) => setBill(billsData.data[index])}
           />
         </div>
       </div>

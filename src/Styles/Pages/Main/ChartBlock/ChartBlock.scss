@@ -2,11 +2,11 @@
   display: grid;
   grid-auto-columns: 1fr;
   grid-template-columns: 1fr 1fr;
-  gap: 0px 5px;
+  gap: 0 5px;
   background-color: #fff;
   padding: 15px;
   border-radius: 14px;
-  height: 350px;
+  height: 405px;
   @media screen and (max-width: 945px) {
     grid-template-columns: 1fr;
     height: auto;
@@ -26,4 +26,14 @@
   align-items: center;
   justify-content: center;
   height: 100%;
+}
+
+.chart-block__load {
+  display: flex;
+  flex-direction: column;
+
+  & button {
+    width: 200px;
+    align-self: center;
+  }
 }

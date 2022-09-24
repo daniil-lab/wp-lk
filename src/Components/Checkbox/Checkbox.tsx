@@ -4,16 +4,26 @@ interface Props {
   value: boolean;
   onChange: () => void;
   lable: string;
+  disabled?: boolean;
 }
 
-const Checkbox: React.FC<Props> = ({ value, onChange, lable }: Props) => {
+const Checkbox: React.FC<Props> = ({
+  value,
+  onChange,
+  lable,
+  disabled = false,
+}) => {
+  const handleChange = () => {
+    if (!disabled) onChange();
+  };
+
   return (
     <div
       style={{
         display: "flex",
         alignItems: "center",
       }}
-      onClick={onChange}
+      onClick={handleChange}
     >
       <div
         style={{
@@ -25,6 +35,7 @@ const Checkbox: React.FC<Props> = ({ value, onChange, lable }: Props) => {
           alignItems: "center",
           justifyContent: "center",
           marginRight: 10,
+          opacity: disabled ? 0.5 : 1,
         }}
       >
         {value && (
@@ -34,6 +45,7 @@ const Checkbox: React.FC<Props> = ({ value, onChange, lable }: Props) => {
               height: 17,
               borderRadius: 50,
               background: "#f0187b",
+              opacity: disabled ? 0.5 : 1,
             }}
           />
         )}

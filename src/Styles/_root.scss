@@ -66,9 +66,6 @@ input {
   &:disabled {
     opacity: 0.5;
   }
-  &:disabled {
-    opacity: 0.5;
-  }
 }
 
 .button-info {
@@ -101,7 +98,6 @@ input {
   background-color: #ffffff;
   border: none;
   padding: 14px 26px;
-  color: #fff;
   border-radius: 20px;
   cursor: pointer;
   transition: 0.3s;
@@ -119,11 +115,81 @@ input {
   cursor: pointer;
   transition: 0.3s ease;
   display: inherit;
+
   &-header {
     display: flex;
     justify-content: flex-end;
     color: white;
+    align-items: flex-start;
+
+    & .content-section-category {
+      flex-grow: unset;
+    }
+
+    & .category-header {
+      display: flex;
+      flex-grow: 1;
+      align-items: center;
+    }
   }
+
+  &__filters {
+    display: flex;
+    padding: 0 16px;
+
+    & button {
+      background-color: #8f8b8b;
+      border: none;
+      padding: 10px 20px;
+      color: #fff;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: 0.3s;
+      white-space: nowrap;
+      font-size: 0.9rem;
+      margin: 0 4px;
+      min-width: 60px;
+
+      &:hover {
+        background-color: #777474;
+      }
+    }
+
+    & &_filter-active {
+      background-color: #f0187b;
+
+      &:hover {
+        background-color: #c80d61;
+      }
+    }
+
+    & button:last-child {
+      margin-right: 0;
+    }
+
+    & button:first-child {
+      margin-left: 0;
+    }
+
+    @media screen and (max-width: 700px) {
+      margin: -8px -4px;
+      flex-wrap: wrap;
+      padding-bottom: 16px;
+
+      & button {
+        margin: 8px 4px;
+      }
+
+      & button:last-child {
+        margin-right: 4px;
+      }
+
+      & button:first-child {
+        margin-left: 4px;
+      }
+    }
+  }
+
   @media screen and (max-width: 500px) {
     padding-left: 0;
     padding-right: 0;

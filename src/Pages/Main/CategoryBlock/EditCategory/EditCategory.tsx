@@ -1,13 +1,13 @@
+import React, { useState } from "react";
 import useGetCategoryColors from "Hooks/useGetCategoryColors";
 import useGetCategoryIcons from "Hooks/useGetCategoryIcons";
 import { ColorType, IconType } from "Models/CategoryModel";
-import React, { useEffect } from "react";
 import { API_URL } from "Utils/Config";
 import ColorsBlock from "../CategoryConstructor/ColorsBlock/ColorsBlock";
 import IconsBlock from "../CategoryConstructor/IconsBlock/IconsBlock";
-import "Styles/Pages/Main/CategoryBlock/EditCategory/EditCategory.scss";
-import CategoryConstructor from "../CategoryConstructor/CategoryConstructor";
 import Checkbox from "Components/Checkbox/Checkbox";
+
+import "Styles/Pages/Main/CategoryBlock/EditCategory/EditCategory.scss";
 
 interface Props {
   edit: () => Promise<boolean | undefined>;
@@ -24,6 +24,8 @@ interface Props {
   forSpend: boolean;
   setForSpend: React.Dispatch<React.SetStateAction<boolean>>;
   setForEarn: React.Dispatch<React.SetStateAction<boolean>>;
+  favorite: boolean;
+  editFavorite: () => void;
   onClose: () => void;
   updateCategory: () => void;
   clearState: () => void;
@@ -47,7 +49,11 @@ const EditCategory: React.FunctionComponent<Props> = ({
   forSpend,
   setForSpend,
   setForEarn,
+  favorite,
+  editFavorite,
 }: Props) => {
+  const [favoriteUpdate, setFavoriteUpdate] = useState(false);
+
   const colors = useGetCategoryColors();
   const icons = useGetCategoryIcons();
 
@@ -68,6 +74,12 @@ const EditCategory: React.FunctionComponent<Props> = ({
       onClose();
       clearState();
     }
+  };
+
+  const __editFavorite = async (): Promise<void> => {
+    setFavoriteUpdate(true);
+    await editFavorite();
+    setFavoriteUpdate(false);
   };
 
   const __close = (): void => {
@@ -120,24 +132,12 @@ const EditCategory: React.FunctionComponent<Props> = ({
           <span>Иконка</span>
           <IconsBlock icons={icons.icons} onIconChange={setIcon} icon={icon} />
         </div>
-        <div className="category-constructor-row">
+        <div className="category-constructor-row" style={{ marginBottom: 20 }}>
           <span>Цвет</span>
           <ColorsBlock
             colors={colors.colors}
             onColorChange={setColor}
             color={color}
-          />
-        </div>
-        <div className="category-constructor-row" style={{ marginBottom: 15 }}>
-          <span>Лимит категории</span>
-          <input
-            type="number"
-            placeholder="Лимит категории"
-            value={categoryLimit}
-            onChange={(e) => setCategoryLimit(parseInt(e.target.value))}
-            style={{
-              borderRadius: 15,
-            }}
           />
         </div>
         <div
@@ -156,11 +156,19 @@ const EditCategory: React.FunctionComponent<Props> = ({
               lable="Для доходов"
             />
           </div>
-          <div>
+          <div style={{ marginRight: 20 }}>
             <Checkbox
               value={forSpend}
               onChange={() => setForSpend(!forSpend)}
               lable="Для расходов"
+            />
+          </div>
+          <div>
+            <Checkbox
+              value={favorite}
+              onChange={__editFavorite}
+              lable="Избранное"
+              disabled={favoriteUpdate}
             />
           </div>
         </div>

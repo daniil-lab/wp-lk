@@ -17,10 +17,10 @@ const CardScan: React.FC = () => {
   const [showAddOperationModal, setShowAddOperationModal] = useState(false);
   const [sum, setSum] = useState("");
   const [qr, setQr] = useState<File>();
-  const transaction = useGetTransaction();
+  const transactionsData = useGetTransaction();
   const addTransaction = useAddTransaction();
-  const bills = useGetBill();
-  const categories = useGetCategories();
+  const billsData = useGetBill();
+  const categoriesData = useGetCategories();
 
   const handleOnChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -75,11 +75,11 @@ const CardScan: React.FC = () => {
       >
         <AddOperationModal
           onClose={() => setShowAddOperationModal(false)}
-          updateTransactions={transaction.updateTransactions}
+          updateTransactions={transactionsData.updateTransactions}
           addTransaction={addTransaction.addTransaction}
-          updateBills={bills.updateBill}
-          bills={bills}
-          category={categories}
+          updateBills={billsData.updateBill}
+          billsData={billsData}
+          categoriesData={categoriesData}
           initialSum={sum}
           qr={qr}
           noQrLink

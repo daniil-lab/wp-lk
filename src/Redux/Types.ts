@@ -5,11 +5,17 @@ import {
   IToastShowAction,
   IUpdateCategory,
   IUpdateOperation,
+  IUserChangePlans,
+  IUserLinkGoogleAction,
   IUserLogoutAction,
   IUserSetAction,
 } from "Redux/Interfaces";
 
-export type UserActionType = IUserSetAction | IUserLogoutAction;
+export type UserActionType =
+  | IUserSetAction
+  | IUserLogoutAction
+  | IUserLinkGoogleAction
+  | IUserChangePlans;
 
 export type PreloaderActionType = IPreloaderShowAction | IPreloaderHideAction;
 

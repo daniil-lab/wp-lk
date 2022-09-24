@@ -1,15 +1,15 @@
-import Load from "Components/Load/Load";
 import React, { useMemo } from "react";
+import SwiperCore, { Navigation } from 'swiper';
+import Load from "Components/Load/Load";
 import { useGetSubscriptionGroups } from "Services/Subscription";
 import "Styles/Pages/Settings/SubscriptionBlock/SubscriptionBlock.scss";
 import { Swiper, SwiperSlide } from "swiper/react";
-import SwiperCore, { Navigation } from 'swiper';
-import { updateNonNullChain } from "typescript";
 import SubscriptionPossibilities from "Utils/SubscriptionPossibilities";
 import SubscriptionItem from "./SubscriptionItem/SubscriptionItem";
-import './SubscriptionBlock.css';
-SwiperCore.use([Navigation]);
 
+import './SubscriptionBlock.css';
+
+SwiperCore.use([Navigation]);
 
 const SubscriptionBlock: React.FC = () => {
   const { load: groupLoaded, subscriptionGroups } = useGetSubscriptionGroups();
@@ -51,7 +51,7 @@ const SubscriptionBlock: React.FC = () => {
       {groupLoaded ? (
         <div className="subscription-block">
           {subscriptionGroups.map((subscriptionGroup, index) => (
-            <SwiperSlide>
+            <SwiperSlide key={index}>
               <Load load={true}>
                 <SubscriptionItem
                   key={subscriptionGroup.id}
@@ -66,7 +66,7 @@ const SubscriptionBlock: React.FC = () => {
       ) : (
         <div className="subscription-block">
           {[0, 1, 2].map((subscriptionGroup, index) => (
-            <SwiperSlide>
+            <SwiperSlide key={index}>
               <Load load={false}>
                 <React.Fragment></React.Fragment>
               </Load>

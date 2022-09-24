@@ -1,6 +1,7 @@
+import React, { useMemo } from "react";
+
 import Load from "Components/Load/Load";
 import { BankCardModel, BillModel, BillType } from "Models/BillModel";
-import React, { useMemo } from "react";
 import "Styles/Pages/Main/BalanceBlock/BalanceBlock.scss";
 import BalanceBlockItem from "./BalanceBlockItem/BalanceBlockItem";
 import WalletIcon from "Static/icons/wallet.svg";
@@ -11,10 +12,6 @@ import TinkoffIcon from "Static/Images/tinkoff.png";
 import SberIcon from "Static/Images/sber.png";
 import TochkaIcon from "Static/Images/tochka.svg";
 import useEditBill from "Hooks/useEditBill";
-import BillRepository from "Repository/BillRepository";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "Redux/Store";
-import { HidePreloader, ShowPreloader, ShowToast } from "Redux/Actions";
 import useRemoveIntegration from "Hooks/useRemoveIntegration";
 
 interface Props {
@@ -32,22 +29,20 @@ interface Props {
   updateTransactions: () => void;
 }
 
-const BalanceBlock: React.FC<Props> = (props: Props) => {
-  const dispatch = useDispatch<AppDispatch>();
+const BalanceBlock: React.FC<Props> = ({
+  data,
+  load,
+  selected,
+  setBill,
+  generalBalance,
+  setBillType,
+  updateBill,
+  tinkoffCards,
+  sberCards,
+  tochkaCards,
+  updateTransactions,
+}) => {
   const removeIntegration = useRemoveIntegration();
-  const {
-    data,
-    load,
-    selected,
-    setBill,
-    generalBalance,
-    setBillType,
-    updateBill,
-    tinkoffCards,
-    sberCards,
-    tochkaCards,
-    updateTransactions,
-  } = props;
   const editBill = useEditBill();
 
   const length = useMemo(() => {
@@ -93,7 +88,7 @@ const BalanceBlock: React.FC<Props> = (props: Props) => {
                 }}
                 key={bill.id}
                 title={bill.name}
-                price={bill.balance.amount}
+                price={bill.balance as unknown as number}
                 cents={bill.balance.cents}
                 className={selected == bill.id ? "general" : ""}
               />
@@ -112,7 +107,7 @@ const BalanceBlock: React.FC<Props> = (props: Props) => {
                 key={card.id}
                 icon={TinkoffIcon}
                 title={"Tinkoff"}
-                price={card.balance.amount}
+                price={card.balance as unknown as number}
                 cents={card.balance.cents}
                 className={selected == card.id ? "general" : ""}
               />
@@ -131,7 +126,7 @@ const BalanceBlock: React.FC<Props> = (props: Props) => {
                 key={card.id}
                 icon={SberIcon}
                 title={"Sber"}
-                price={card.balance.amount}
+                price={card.balance as unknown as number}
                 cents={card.balance.cents}
                 className={selected == card.id ? "general" : ""}
               />
@@ -151,7 +146,7 @@ const BalanceBlock: React.FC<Props> = (props: Props) => {
                 icon={TochkaIcon}
                 title={"Tochka"}
                 subtitle={card.cardNumber}
-                price={card.balance.amount}
+                price={card.balance as unknown as number}
                 cents={card.balance.cents}
                 className={selected == card.id ? "general" : ""}
               />

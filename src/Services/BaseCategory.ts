@@ -3,12 +3,12 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { GetUserToken } from "Redux/Selectors";
 import { API_URL } from "Utils/Config";
-import { IBaseCategory } from "./Interfaces";
+import { CategoryModel } from "../Models/CategoryModel";
 
 const useGetBaseCategory = () => {
   const token = useSelector(GetUserToken);
 
-  const [categories, setCategories] = useState<IBaseCategory[]>([]);
+  const [categories, setCategories] = useState<CategoryModel[]>([]);
   const [load, setLoad] = useState<boolean>(false);
 
   const get = async (): Promise<void> => {
@@ -24,8 +24,7 @@ const useGetBaseCategory = () => {
       } else {
         throw new Error(res.data.message);
       }
-    } catch (error: any) {
-    }
+    } catch (error: any) {}
   };
 
   const init = async (): Promise<void> => {

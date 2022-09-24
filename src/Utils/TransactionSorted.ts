@@ -1,14 +1,15 @@
-import {
-  TransactionsSortedModel,
-  TranscationModel,
-} from "Models/TransactionModel";
+import { ITransactionsSorted, TransactionModel } from "Models/TransactionModel";
 import moment from "moment";
 import ArrayGroups from "./ArrayGroups";
 
-export default (array: TranscationModel[]): TransactionsSortedModel[] => {
+const TransactionsSorted = (
+  array: TransactionModel[]
+): ITransactionsSorted[] => {
   return ArrayGroups(array).sort(
     (x, y) =>
-      <any>moment(y?.date ?? y?.createAt).format("L") -
-      <any>moment(x?.date ?? x?.createAt).format("L")
+      (moment(y?.date ?? y?.createAt).format("L") as any) -
+      (moment(x?.date ?? x?.createAt).format("L") as any)
   );
 };
+
+export default TransactionsSorted;

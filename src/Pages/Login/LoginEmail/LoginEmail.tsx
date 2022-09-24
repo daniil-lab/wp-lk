@@ -6,19 +6,14 @@ import Logo from "Static/Images/Logo.svg";
 import "Styles/Pages/Login/LoginEmail/LoginEmail.scss";
 import { LoginSwitcherParams } from "Utils/Hooks/useLoginNavigation";
 
-const LoginEmail: React.FC<LoginSwitcherParams> = ({params, back}) => {
+const LoginEmail: React.FC<LoginSwitcherParams> = ({ params, back }) => {
   const dispatch = useDispatch<AppDispatch>();
 
-  const [email, setemail] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
 
   const _confirm = async (): Promise<void> => {
     const auth = new Auth(dispatch);
-    await auth.CreateUser(
-      params.phone,
-      params.password,
-      email,
-      "SYSTEM"
-    );
+    await auth.CreateUser(params.phone, params.password, email, "SYSTEM");
   };
 
   return (
@@ -27,7 +22,7 @@ const LoginEmail: React.FC<LoginSwitcherParams> = ({params, back}) => {
       <input
         type="text"
         value={email}
-        onChange={(e) => setemail(e.target.value)}
+        onChange={(e) => setEmail(e.target.value)}
         placeholder="Введите Email"
         style={{ textAlign: "center" }}
       />

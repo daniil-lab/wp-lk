@@ -1,9 +1,9 @@
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
+
 import AccessDenied from "Components/AccessDenied/AccessDenied";
 import Modal from "Components/Modal/Modal";
-import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { GetUserId } from "Redux/Selectors";
-import { AppDispatch } from "Redux/Store";
 import BillRepository from "Repository/BillRepository";
 import { useGetActiveSubscription } from "Services/Subscription";
 import CardIcon from "Static/icons/card.svg";
@@ -19,7 +19,6 @@ const AddBillModal: React.FunctionComponent<Props> = ({
   onClose,
   updateBill,
 }: Props) => {
-  const dispatch = useDispatch<AppDispatch>();
   const billRepository = new BillRepository();
 
   const userId = useSelector(GetUserId);
@@ -71,7 +70,7 @@ const AddBillModal: React.FunctionComponent<Props> = ({
       >
         <div className="add-carn-button-wrapper">
           <span>
-            <img src={CardIcon} />
+            <img src={CardIcon} alt="Card icon" />
             Подключить банковский счет
           </span>
         </div>

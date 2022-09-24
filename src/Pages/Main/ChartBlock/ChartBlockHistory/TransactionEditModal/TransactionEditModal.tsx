@@ -1,56 +1,54 @@
+import React, { useState } from "react";
 import ContextButton from "Components/ContextButton/ContextButton";
 import DatePicker from "Components/DatePicker/DatePicker";
 import Modal from "Components/Modal/Modal";
 import Select from "Components/Select/Select";
-import { BillModel } from "Models/BillModel";
-import { BaseCategoryModel, CategoryModel } from "Models/CategoryModel";
-import { TransactionType } from "Models/TransactionModel";
-import React, { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { TransactionsSorted } from "Services/Interfaces";
-import { useGetActiveSubscription } from "Services/Subscription";
 import useEditTransactions from "Hooks/useEditTransactions";
 import CalendarDark from "Static/icons/calendar-dark.svg";
-import ScanQr from "Static/icons/scan-qr-nigger.svg";
-import "Styles/Pages/Main/ChartBlock/AddOperationModal/AddOperationModal.scss";
 import { API_URL } from "Utils/Config";
 import HexToRgbA from "Utils/HexToRgbA";
 import MapModal from "../../AddOperationModal/MapModal/MapModal";
 import useGetBill from "Hooks/useGetBill";
-import useGetCategories from "Hooks/useGetCategories";
 
-const TransactionEditModal: React.FC = (props) => {
-  const {
-    edit,
-    onClose,
-    updateTransactions,
-    setDate,
-    setOperationType,
-    setSelectedCategory,
-    onlyForEarnCategories,
-    setOnlyForEarnCategories,
-    standartCategories,
-    setStandartCategories,
-    setBill,
-    setSumm,
-    setDescription,
-    setPlaceName,
-    setLocation,
-    bill,
-    date,
-    selectedCategory,
-    summ,
-    description,
-    location,
-    operationType,
-    placeName,
-    remove,
-  } = props;
+import "Styles/Pages/Main/ChartBlock/AddOperationModal/AddOperationModal.scss";
+
+type TransactionEditModalProps = {
+  onClose: () => void;
+  updateTransactions: () => void;
+  updateBills: () => void;
+} & Omit<
+  ReturnType<typeof useEditTransactions>,
+  "showEditModal" | "setShowEditModal" | "setTransactionId"
+>;
+
+const TransactionEditModal: React.FC<TransactionEditModalProps> = ({
+  edit,
+  onClose,
+  updateTransactions,
+  setDate,
+  setOperationType,
+  setSelectedCategory,
+  onlyForEarnCategories,
+  standartCategories,
+  setBill,
+  setSumm,
+  setDescription,
+  setPlaceName,
+  setLocation,
+  bill,
+  date,
+  selectedCategory,
+  summ,
+  description,
+  location,
+  operationType,
+  placeName,
+  remove,
+  updateBills,
+}) => {
   const bills = useGetBill();
-  const category = useGetCategories();
 
   const [mapModal, setMapModal] = useState<boolean>(false);
-  const [expand, setExpand] = useState<boolean>(false);
 
   const onEnter = (v: string[]): void => {
     if (Array.isArray(v)) {
@@ -58,7 +56,6 @@ const TransactionEditModal: React.FC = (props) => {
     } else {
       setDate([v]);
     }
-    setExpand(false);
   };
 
   const clearLocation = (
@@ -72,12 +69,14 @@ const TransactionEditModal: React.FC = (props) => {
     await edit();
     onClose();
     updateTransactions();
+    updateBills();
   };
 
   const _removeTransaction = async (): Promise<void> => {
     await remove();
     onClose();
     updateTransactions();
+    updateBills();
   };
 
   return (
@@ -87,7 +86,7 @@ const TransactionEditModal: React.FC = (props) => {
         <span>{date ?? "Дата и время"}</span>
         <div style={{ position: "relative" }}>
           <ContextButton
-            button={<img src={CalendarDark} />}
+            button={<img src={CalendarDark} alt="Dark calendar" />}
             content={(_, ctx) => (
               <DatePicker {...ctx} onEnter={onEnter} type="mini" />
             )}
@@ -103,7 +102,7 @@ const TransactionEditModal: React.FC = (props) => {
               type="radio"
               name="radio"
               checked={operationType === "WITHDRAW"}
-              onChange={(e) => {
+              onChange={() => {
                 if (operationType != "WITHDRAW") {
                   setOperationType("WITHDRAW");
                   setSelectedCategory(null);
@@ -117,7 +116,7 @@ const TransactionEditModal: React.FC = (props) => {
               type="radio"
               name="radio"
               checked={operationType === "DEPOSIT"}
-              onChange={(e) => {
+              onChange={() => {
                 if (operationType != "DEPOSIT") {
                   setOperationType("DEPOSIT");
                   setSelectedCategory(null);

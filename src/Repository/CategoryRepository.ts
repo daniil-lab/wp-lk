@@ -2,6 +2,8 @@ import axios from "Utils/Axios";
 import { API_URL } from "Utils/Config";
 import { CategoryModel, ColorType, IconType } from "Models/CategoryModel";
 
+const SOMETHING_WENT_WRONG = "Что-то пошло не так";
+
 export default class CategoryRepository {
   constructor() {}
 
@@ -118,6 +120,40 @@ export default class CategoryRepository {
       if (res.status === 200) return true;
     } catch (error: any) {
       throw new Error();
+    }
+  }
+
+  async makeFavorite(categoryId: string): Promise<CategoryModel> {
+    try {
+      const res = await axios({
+        method: "patch",
+        url: `${API_URL}api/v1/category/favorite`,
+        data: { categoryId },
+      });
+      if (res.status !== 200) throw new Error(SOMETHING_WENT_WRONG);
+      return res.data;
+    } catch (error: unknown) {
+      throw error instanceof Error ? error : new Error(SOMETHING_WENT_WRONG);
+    }
+  }
+
+  async removeFromFavorite(
+    categoryId: string
+  ): Promise<{
+    data: CategoryModel;
+    message: string;
+    status: number;
+    advices: Array<string>;
+  }> {
+    try {
+      const res = await axios({
+        method: "delete",
+        url: `${API_URL}api/v1/category/favorite/${categoryId}`,
+      });
+      if (res.status !== 200) throw new Error(SOMETHING_WENT_WRONG);
+      return res.data;
+    } catch (error) {
+      throw error instanceof Error ? error : new Error(SOMETHING_WENT_WRONG);
     }
   }
 }

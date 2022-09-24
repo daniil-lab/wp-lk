@@ -13,7 +13,6 @@ import {
 import { Buffer } from "buffer";
 
 import { API_URL } from "Utils/Config";
-import { base64encode } from "nodejs-base64";
 
 class Auth {
   dispatch: AppDispatch | undefined;

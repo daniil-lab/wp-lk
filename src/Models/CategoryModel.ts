@@ -1,4 +1,5 @@
 import { UserModel } from "./UserModel";
+import { BillLogModel } from "./BillModel";
 
 export type ColorType = {
   name: string;
@@ -11,6 +12,7 @@ export type IconType = {
   name: string;
   path: string;
   tag: string;
+  contentType?: string;
 };
 
 export interface BaseCategoryModel {
@@ -30,8 +32,14 @@ export interface CategoryModel {
   forSpend: boolean;
   color: ColorType;
   icon: IconType;
+  favorite: boolean;
   description: string;
   categoryLimit: number;
   user: UserModel;
   percentsFromLimit: number;
+  spendStatistic: number;
+  earnStatistic: number;
+  resetDataDate?: string;
+
+  billLogs?: Array<BillLogModel>;
 }

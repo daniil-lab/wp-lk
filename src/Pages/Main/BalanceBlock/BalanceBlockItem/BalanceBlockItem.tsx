@@ -9,7 +9,6 @@ import WalletBalanceIcon from "Static/icons/wallet-balance-icon.svg";
 import "Styles/Pages/Main/BalanceBlock/BalanceBlockItem/BalanceBlockItem.scss";
 import GetCurrencySymbol from "Utils/GetCurrencyIcon";
 import NumberWithSpaces from "Utils/NumberWithSpaces";
-import WalletCourse from "Utils/WalletCourse";
 
 interface Props {
   title: string;
@@ -33,7 +32,7 @@ const BalanceBlockItem: React.FunctionComponent<Props> = ({
   cents,
 }: Props) => {
   const wallet = useSelector(GetUserWallet);
-  const courses = useGetCourse();
+
   return (
     <div className={`balance-block-item ${className || ""}`} onClick={onClick}>
       <div className="balance-block-item-title">

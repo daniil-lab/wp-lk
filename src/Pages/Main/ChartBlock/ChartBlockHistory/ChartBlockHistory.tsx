@@ -1,9 +1,8 @@
-import React, { useState } from "react";
-import { TransactionsSorted } from "Services/Interfaces";
+import React from "react";
+import moment from "moment";
+
 import ChartBlockHistoryWrapper from "./ChartBlockHistoryWrapper/ChartBlockHistoryWrapper";
 import ChartBlockHistoryItem from "./ChartBlockHistoryItem/ChartBlockHistoryItem";
-import "Styles/Pages/Main/ChartBlock/ChartBlockHistory/ChartBlockHistory.scss";
-import moment from "moment";
 import Modal from "Components/Modal/Modal";
 import useEditTransactions from "Hooks/useEditTransactions";
 import useAddCategoryTransaction from "Hooks/useAddCategoryTransaction";
@@ -11,42 +10,49 @@ import BankAddCategoryModal from "./BankAddCategoryModal/BankAddCategoryModal";
 import { BillType } from "Models/BillModel";
 import TransactionEditModal from "./TransactionEditModal/TransactionEditModal";
 import { CategoryModel } from "Models/CategoryModel";
+import { ITransactionsSorted } from "Models/TransactionModel";
+import { ChartMode } from "../types";
+import useGetBill from "../../../../Hooks/useGetBill";
+import useGetCategories from "../../../../Hooks/useGetCategories";
 
-interface Props {
-  transactions: TransactionsSorted[];
+import "Styles/Pages/Main/ChartBlock/ChartBlockHistory/ChartBlockHistory.scss";
+
+interface ChartBlockHistoryProps {
+  transactions: ITransactionsSorted[];
   selectedBill: string | null;
   billType: BillType;
+  categoriesData: ReturnType<typeof useGetCategories>;
+  billsData?: ReturnType<typeof useGetBill>;
+  updateBills: () => void;
   updateTransactions: () => void;
-  categories: any;
-  bills: any;
   budget?: boolean;
-  filteredCategory?: CategoryModel[];
+  categories?: CategoryModel[];
+  mode?: ChartMode;
 }
 
 const sortByDate = (a, b) => (moment(a.date).isAfter(moment(b.date)) ? -1 : 1);
 
-const ChartBlockHistory: React.FunctionComponent<Props> = (props: Props) => {
-  const {
-    transactions,
-    bills,
-    updateTransactions,
-    categories,
-    budget,
-    filteredCategory,
-  } = props;
+const ChartBlockHistory: React.FunctionComponent<ChartBlockHistoryProps> = ({
+  transactions,
+  billsData,
+  updateTransactions,
+  categoriesData,
+  budget,
+  categories,
+  updateBills,
+}) => {
   const {
     showEditModal,
     setShowEditModal,
     setTransactionId,
     ...editTransaction
-  } = useEditTransactions(categories, bills, transactions);
+  } = useEditTransactions(categoriesData, transactions, billsData);
 
   const addCategoryTransaction = useAddCategoryTransaction();
 
   const existsCategory = (id: string): boolean => {
-    let arr = budget ? filteredCategory : categories.categories;
-    if (arr.find((c) => c.id === id)) return true;
-    else return false;
+    let arr = budget && categories ? categories : categoriesData.categories;
+    return !!arr.find((c) => c.id === id);
   };
 
   const bankCategories = () => {
@@ -54,13 +60,13 @@ const ChartBlockHistory: React.FunctionComponent<Props> = (props: Props) => {
       addCategoryTransaction.transactionType === "SPEND" ||
       addCategoryTransaction.transactionType === "WIDTHDRAW"
     ) {
-      return categories.categories.filter((c) => c.forSpend && !c.forEarn);
+      return categoriesData.categories.filter((c) => c.forSpend && !c.forEarn);
     }
     if (
       addCategoryTransaction.transactionType === "EARN" ||
       addCategoryTransaction.transactionType === "DEPOSIT"
     ) {
-      let arr = budget ? filteredCategory : categories.categories;
+      let arr = budget && categories ? categories : categoriesData.categories;
       return arr.filter((c) => !c.forSpend && c.forEarn);
     }
     return [];
@@ -77,14 +83,16 @@ const ChartBlockHistory: React.FunctionComponent<Props> = (props: Props) => {
                   <ChartBlockHistoryItem
                     key={k}
                     transactionType={
-                      transaction?.transactionType ?? transaction?.action
+                      "transactionType" in transaction
+                        ? transaction.transactionType
+                        : transaction.action
                     }
                     icon={
                       transaction?.category
-                        ? existsCategory(transaction?.category?.id)
+                        ? existsCategory(transaction.category.id)
                           ? {
-                              color: transaction?.category?.color.hex ?? "",
-                              path: transaction?.category?.icon.name ?? "",
+                              color: transaction.category.color.hex ?? "",
+                              path: transaction.category.icon.name ?? "",
                             }
                           : null
                         : null
@@ -92,8 +100,18 @@ const ChartBlockHistory: React.FunctionComponent<Props> = (props: Props) => {
                     title={
                       transaction?.category?.name ?? transaction?.description
                     }
-                    subtitle={transaction?.bill?.name ?? transaction?.billName}
-                    price={transaction?.amount?.amount ?? transaction?.sum}
+                    subtitle={
+                      "bill" in transaction
+                        ? transaction.bill.name
+                        : "billName" in transaction
+                        ? transaction.billName
+                        : ""
+                    }
+                    price={
+                      "sum" in transaction
+                        ? transaction.sum
+                        : transaction.amount
+                    }
                     currency={transaction.currency}
                     onClick={() => {}}
                   />
@@ -116,7 +134,9 @@ const ChartBlockHistory: React.FunctionComponent<Props> = (props: Props) => {
                 <ChartBlockHistoryItem
                   key={k}
                   transactionType={
-                    transaction?.transactionType ?? transaction?.action
+                    "action" in transaction
+                      ? transaction.action
+                      : transaction.transactionType
                   }
                   icon={
                     transaction?.category
@@ -131,44 +151,64 @@ const ChartBlockHistory: React.FunctionComponent<Props> = (props: Props) => {
                   title={
                     transaction?.category?.name ?? transaction?.description
                   }
-                  subtitle={transaction?.bill?.name ?? transaction?.billName}
-                  price={transaction?.amount?.amount ?? transaction?.sum}
+                  subtitle={
+                    "bill" in transaction
+                      ? transaction.bill.name
+                      : "billName" in transaction
+                      ? transaction.billName
+                      : ""
+                  }
+                  price={
+                    "sum" in transaction ? transaction.sum : transaction.amount
+                  }
                   currency={transaction.currency}
                   onClick={() => {
-                    if (transaction?.type === "TINKOFF") {
-                      addCategoryTransaction.setTransactionId(transaction.id);
-                      addCategoryTransaction.setTransactionType(
-                        transaction.transactionType
-                      );
-                      addCategoryTransaction.modal.setShow(true);
-                      if (transaction?.category)
-                        addCategoryTransaction.setSelectedCategory(
-                          transaction?.category
-                        );
-                    } else if (transaction?.type === "SBER") {
-                      addCategoryTransaction.setTransactionId(transaction.id);
-                      addCategoryTransaction.setTransactionType(
-                        transaction.transactionType
-                      );
-                      addCategoryTransaction.modal.setShow(true);
-                      if (transaction?.category)
-                        addCategoryTransaction.setSelectedCategory(
-                          transaction?.category
-                        );
-                    } else if (transaction?.type === "TOCHKA") {
-                      addCategoryTransaction.setTransactionId(transaction.id);
-                      addCategoryTransaction.setTransactionType(
-                        transaction.transactionType
-                      );
-                      addCategoryTransaction.modal.setShow(true);
-                      if (transaction?.category)
-                        addCategoryTransaction.setSelectedCategory(
-                          transaction?.category
-                        );
-                    } else {
-                      setTransactionId(transaction.id);
-                      setShowEditModal(true);
+                    if ("type" in transaction) {
+                      switch (transaction.type) {
+                        case "TINKOFF":
+                          addCategoryTransaction.setTransactionId(
+                            transaction.id
+                          );
+                          addCategoryTransaction.setTransactionType(
+                            transaction.transactionType
+                          );
+                          addCategoryTransaction.modal.setShow(true);
+                          if (transaction?.category)
+                            addCategoryTransaction.setSelectedCategory(
+                              transaction?.category
+                            );
+                          return;
+                        case "SBER":
+                          addCategoryTransaction.setTransactionId(
+                            transaction.id
+                          );
+                          addCategoryTransaction.setTransactionType(
+                            transaction.transactionType
+                          );
+                          addCategoryTransaction.modal.setShow(true);
+                          if (transaction?.category)
+                            addCategoryTransaction.setSelectedCategory(
+                              transaction?.category
+                            );
+                          return;
+                        case "TOCHKA":
+                          addCategoryTransaction.setTransactionId(
+                            transaction.id
+                          );
+                          addCategoryTransaction.setTransactionType(
+                            transaction.transactionType
+                          );
+                          addCategoryTransaction.modal.setShow(true);
+                          if (transaction.category)
+                            addCategoryTransaction.setSelectedCategory(
+                              transaction.category
+                            );
+                          return;
+                      }
                     }
+
+                    setTransactionId(transaction.id);
+                    setShowEditModal(true);
                   }}
                 />
               );
@@ -181,6 +221,7 @@ const ChartBlockHistory: React.FunctionComponent<Props> = (props: Props) => {
         <TransactionEditModal
           onClose={() => setShowEditModal(false)}
           updateTransactions={updateTransactions}
+          updateBills={updateBills}
           {...editTransaction}
         />
       </Modal>

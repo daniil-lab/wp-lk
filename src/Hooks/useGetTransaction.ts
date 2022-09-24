@@ -1,4 +1,8 @@
-import { TransactionsSortedModel } from "Models/TransactionModel";
+import {
+  ITransactionBase,
+  ITransactionsSorted,
+  TransactionModel,
+} from "Models/TransactionModel";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "Redux/Store";
@@ -18,7 +22,7 @@ const useGetTransaction = () => {
 
   const [bill, setBill] = useState<string | null>(null);
   const [billType, setBillType] = useState<BillType>("general");
-  const [data, setData] = useState<TransactionsSortedModel[]>([]);
+  const [data, setData] = useState<ITransactionsSorted[]>([]);
   const [startDate, setStartDate] = useState<string>(
     `${moment().startOf("month").format("YYYY-MM-DD")}T00:00:00Z`
   );
@@ -65,14 +69,17 @@ const useGetTransaction = () => {
     if (load) {
       return [...transactions.map((t) => t.transactions)]
         .flat(1)
-        .filter(
-          (el) =>
-            el?.action === "DEPOSIT" ||
-            el?.action === "EARN" ||
-            el?.transactionType === "DEPOSIT" ||
-            el?.transactionType === "EARN"
-        )
-        .map((el) => el?.sum ?? el?.amount?.amount)
+        .filter((el) => {
+          if ("action" in el)
+            return el.action === "WITHDRAW" || el.action === "SPEND";
+          if ("transactionType" in el)
+            return (
+              el.transactionType === "WITHDRAW" ||
+              el.transactionType === "SPEND"
+            );
+          return false;
+        })
+        .map((el) => ("sum" in el ? el.sum : el.amount))
         .reduce((b, a) => <number>b + <number>a, 0) as number;
     } else {
       return 0 as number;
@@ -83,14 +90,17 @@ const useGetTransaction = () => {
     if (load) {
       let arr = [...transactions.map((t) => t.transactions)].flat(1);
       return arr
-        .filter(
-          (el) =>
-            el?.action === "WITHDRAW" ||
-            el?.action === "SPEND" ||
-            el?.transactionType === "SPEND" ||
-            el?.transactionType === "WITHDRAW"
-        )
-        .map((el) => el?.sum ?? el?.amount?.amount)
+        .filter((el) => {
+          if ("action" in el)
+            return el.action === "WITHDRAW" || el.action === "SPEND";
+          if ("transactionType" in el)
+            return (
+              el.transactionType === "WITHDRAW" ||
+              el.transactionType === "SPEND"
+            );
+          return false;
+        })
+        .map((el) => ("sum" in el ? el.sum : el.amount))
         .reduce((b, a) => <number>b + <number>a, 0) as number;
     } else {
       return 0 as number;
@@ -102,11 +112,13 @@ const useGetTransaction = () => {
       let res = {};
       const arr = [...transactions.map((t) => t.transactions)]
         .flat(1)
-        .map((el) => ({
-          sum: el?.sum ?? el?.amount?.amount,
-          value: el.category?.name,
-          color: el.category?.color.hex,
-        }));
+        .map((el) => {
+          return {
+            sum: "sum" in el ? el.sum : el?.amount,
+            value: el.category?.name,
+            color: el.category?.color.hex,
+          };
+        });
       arr.forEach((el) => {
         if (el.value) {
           if (res[el.value]) {
@@ -134,14 +146,10 @@ const useGetTransaction = () => {
   }, [load, category.load, data, startDate, endDate, bill]);
 
   const isLastMonth = useMemo(() => {
-    if (
-      `${moment(startDate).startOf("month").format("YYYY-MM-DD")}T00:00:00Z` ===
+    return (
+      `${moment(startDate).startOf("month").format("YYYY-MM-DD")}T00:00:00Z` !==
       `${moment().startOf("month").format("YYYY-MM-DD")}T00:00:00Z`
-    ) {
-      return false;
-    } else {
-      return true;
-    }
+    );
   }, [startDate, endDate]);
 
   const setStart = (date: string): void =>
@@ -181,90 +189,69 @@ const useGetTransaction = () => {
     );
   };
 
-  const asyncEffect = async (): Promise<void> => {
-    if (billType === "general") {
-      const action = await transactionRepository.getGeneralTransactions(
-        startDate,
-        endDate
+  const asyncEffect = async () => {
+    try {
+      let transactions: Array<TransactionModel> | null = null;
+      switch (billType) {
+        case "general":
+          transactions = (
+            await transactionRepository.getGeneralTransactions({
+              pageSize: 10000,
+              startDate,
+              endDate,
+            })
+          ).data.page;
+          break;
+        case "bill":
+          transactions = (
+            await transactionRepository.getBillTransactions(bill!, {
+              pageSize: 10000,
+              startDate,
+              endDate,
+            })
+          ).data.page;
+          break;
+        case "sber":
+          transactions = (
+            await transactionRepository.getTinkoffTransactions(bill!, {
+              pageSize: 10000,
+              startDate,
+              endDate,
+            })
+          ).data.page;
+          break;
+        case "tinkoff":
+          transactions = (
+            await transactionRepository.getSberTransactions(bill!, {
+              pageSize: 10000,
+              startDate,
+              endDate,
+            })
+          ).data.page;
+          break;
+        case "tochka":
+          transactions = (
+            await transactionRepository.getTinkoffTransactions(bill!, {
+              pageSize: 10000,
+              startDate,
+              endDate,
+            })
+          ).data.page;
+          break;
+      }
+      if (!transactions) throw new Error("Ошибка при получении тразакций");
+      setData([...TransactionSorted(transactions)]);
+    } catch (error) {
+      dispatch(
+        ShowToast({
+          type: "error",
+          title: "Ошибка",
+          text: "Ошибка при получении транзакций",
+        })
       );
-      console.log(action);
-      if (action) setData([...TransactionSorted(action)]);
-      else
-        dispatch(
-          ShowToast({
-            type: "error",
-            title: "Ошибка",
-            text: "Ошибка при получении транзакций",
-          })
-        );
+    } finally {
+      setLoad(true);
     }
-    if (billType === "bill") {
-      const action = await transactionRepository.getBillTransactions(
-        bill!,
-        startDate,
-        endDate
-      );
-      if (action) setData([...TransactionSorted(action)]);
-      else
-        dispatch(
-          ShowToast({
-            type: "error",
-            title: "Ошибка",
-            text: "Ошибка при получении транзакций",
-          })
-        );
-    }
-
-    if (billType === "tinkoff") {
-      const action = await transactionRepository.getTinkoffransactions(
-        bill!,
-        startDate,
-        endDate
-      );
-      if (action) setData([...TransactionSorted(action)]);
-      else
-        dispatch(
-          ShowToast({
-            type: "error",
-            title: "Ошибка",
-            text: "Ошибка при получении транзакций",
-          })
-        );
-    }
-    if (billType === "sber") {
-      const action = await transactionRepository.getSberTransactions(
-        bill!,
-        startDate,
-        endDate
-      );
-
-      if (action) setData([...TransactionSorted(action)]);
-      else
-        dispatch(
-          ShowToast({
-            type: "error",
-            title: "Ошибка",
-            text: "Ошибка при получении транзакций",
-          })
-        );
-    }
-    if (billType === "tochka") {
-      const action = await transactionRepository.getTinkoffransactions(
-        bill!,
-        startDate,
-        endDate
-      );
-      if (action) setData([...TransactionSorted(action)]);
-      else
-        dispatch(
-          ShowToast({
-            type: "error",
-            title: "Ошибка",
-            text: "Ошибка при получении транзакций",
-          })
-        );
-    }
-    setLoad(true);
   };
 
   useEffect(() => {

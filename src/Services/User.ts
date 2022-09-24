@@ -12,7 +12,6 @@ import { IWallet } from "./Interfaces";
 
 const useEditEmail = (email: string) => {
   const dispatch = useDispatch<AppDispatch>();
-  const userId = useSelector(GetUserId);
 
   const setEditableEmail = async (): Promise<void> => {
     try {
@@ -242,7 +241,7 @@ export const useEditPassword = () => {
   };
 };
 
-export const useEditUserСurrency = () => {
+export const useEditUserCurrency = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [wallet, setWallet] = useState<IWallet>();
 
@@ -281,10 +280,12 @@ export const useEditUserСurrency = () => {
   return { wallet, setWallet, updateUserCurrency };
 };
 
-export default {
+const userHooks = {
   useEditEmail,
   useEditPhone,
   useExportData,
   useRemoveData,
-  useEditUserСurrency,
+  useEditUserCurrency,
 };
+
+export default userHooks;

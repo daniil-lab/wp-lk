@@ -1,7 +1,7 @@
 import { UserModel } from "Models/UserModel";
 
 export interface IUserState {
-  token: null | string;
+  token: string | null;
   user: UserModel | null;
 }
 

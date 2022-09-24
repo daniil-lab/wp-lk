@@ -1,22 +1,28 @@
-import CircleChart from "Components/CircleChart/CircleChart";
+import React, { useState, useMemo, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+
 import Dateslider from "Components/DateSlider/Dateslider";
-import LineChart from "Components/LineChart/LineChart";
 import Load from "Components/Load/Load";
 import { CategoryModel } from "Models/CategoryModel";
-import { TransactionsSortedModel } from "Models/TransactionModel";
-import React, { useMemo, useState } from "react";
-import { useDispatch } from "react-redux";
-import { ShowToast } from "Redux/Actions";
+import { ChangeUserPlans, ShowToast } from "Redux/Actions";
 import { AppDispatch } from "Redux/Store";
-import { GeneralBudget } from "Services/Budget/Models";
-import "Styles/Pages/Budget/ExpenseIncomeBlock/ExpenseIncomeBlock.scss";
-import { API_URL } from "Utils/Config";
 import CategoriesEmpty from "Static/icons/categories-empty.svg";
 import Image from "Components/Image/Image";
-import NumberWithSpaces from "Utils/NumberWithSpaces";
 import { GeneralBudgetType } from "Utils/CreateBudget";
+import UserRepository from "../../../Repository/UserRepository";
+import {
+  GetUserPlannedEarn,
+  GetUserPlannedSpend,
+} from "../../../Redux/Selectors";
+import ExpensesIncome from "../ExpensesIncome/ExpensesIncome";
+import CategoryItem from "../CategoryItem/CategoryItem";
+import { CategoryBudgetType } from "../../../Utils/calculateCategoriesBudget";
 
-interface Props {
+import "Styles/Pages/Budget/ExpenseIncomeBlock/ExpenseIncomeBlock.scss";
+
+const userRepository = new UserRepository();
+
+interface ExpenseIncomeBlockProps {
   prev: () => void;
   next: () => void;
   selectedCategory: CategoryModel | null;
@@ -24,59 +30,87 @@ interface Props {
   load: boolean;
   categories: CategoryModel[];
   selectCategory: React.Dispatch<React.SetStateAction<CategoryModel | null>>;
-  updateCategoryLimit: (config) => Promise<void>;
-  updateCategories: () => void;
-  getIncomeCategory: (id: string) => number;
   generalBudget: GeneralBudgetType;
+  categoriesBudget: CategoryBudgetType[];
 }
 
-const ExpenseIncomeBlock: React.FunctionComponent<Props> = (props: Props) => {
-  const {
-    prev,
-    next,
-    selectedCategory,
-    selectedDate,
-    load,
-    categories,
-    selectCategory,
-    updateCategories,
-    updateCategoryLimit,
-    getIncomeCategory,
-    generalBudget,
-  } = props;
+const ExpenseIncomeBlock: React.FC<ExpenseIncomeBlockProps> = ({
+  prev,
+  next,
+  selectedCategory,
+  selectedDate,
+  load,
+  categories,
+  selectCategory,
+  generalBudget,
+  categoriesBudget,
+}) => {
+  const [plannedBudget, setPlannedBudget] = useState({
+    plannedEarn: 0,
+    plannedSpend: 0,
+  });
+  const [isChangingBudgetPlans, setChangingBudgetPlans] = useState(false);
+
+  const plannedSpend = useSelector(GetUserPlannedSpend);
+  const plannedEarn = useSelector(GetUserPlannedEarn);
+
   const dispatch = useDispatch<AppDispatch>();
 
-  const [categoryLimit, setCategoryLimit] = useState<number>(0);
-  useMemo(() => {
-    if (selectedCategory) {
-      if (selectedCategory.categoryLimit != 0)
-        setCategoryLimit(selectedCategory.categoryLimit);
-    }
-  }, [selectedCategory]);
+  const calculatedSpendCategories = useMemo(
+    () =>
+      categories.map((categoryModel) => {
+        const foundCategory = categoriesBudget.find(
+          (category) => category.id === categoryModel.id
+        );
+        return {
+          category: categoryModel,
+          sum: foundCategory ? foundCategory.sum : 0,
+        };
+      }),
+    [categories, categoriesBudget]
+  );
 
-  const setLimit = async () => {
-    const limit = categoryLimit;
+  const changePlannedBudget = async () => {
+    if (isChangingBudgetPlans) return;
 
-    if (limit < 0 || limit > 1000000) {
+    try {
+      setChangingBudgetPlans(true);
+      if (
+        plannedSpend < 0 ||
+        plannedSpend > 1000000 ||
+        plannedEarn < 0 ||
+        plannedEarn > 1000000
+      ) {
+        dispatch(
+          ShowToast({
+            type: "error",
+            title: "Ошибка",
+            text: "Неверный бюджет",
+          })
+        );
+
+        return;
+      }
+
+      await userRepository.changeUserPlans(plannedBudget);
+      dispatch(ChangeUserPlans(plannedBudget));
+    } catch (error) {
       dispatch(
         ShowToast({
           type: "error",
           title: "Ошибка",
-          text: "Неверный лимит",
+          text: "Не удалось изменить данные бюджета",
         })
       );
-
-      return;
-    }
-    if (selectedCategory) {
-      await updateCategoryLimit({
-        categoryId: selectedCategory.id,
-        categoryLimit: limit,
-      });
-      updateCategories();
-      setCategoryLimit(selectedCategory.categoryLimit);
+      setPlannedBudget({ plannedEarn, plannedSpend });
+    } finally {
+      setChangingBudgetPlans(false);
     }
   };
+
+  useEffect(() => {
+    setPlannedBudget({ plannedSpend, plannedEarn });
+  }, [plannedSpend, plannedEarn]);
 
   return (
     <div className="expense-income-block">
@@ -86,28 +120,52 @@ const ExpenseIncomeBlock: React.FunctionComponent<Props> = (props: Props) => {
           <ExpensesIncome
             type="expenses"
             value={generalBudget.expenses}
-            limit={generalBudget.expensesLimit}
+            limit={plannedSpend}
           />
           <ExpensesIncome
             type="income"
             value={generalBudget.income}
-            limit={generalBudget.incomeLimit}
+            limit={plannedEarn}
           />
+
           <div className="add-operation-modal-block">
             <span className="add-operation-modal-block-title">
-              Управление лимитом для категории
+              Управление запланированным расходом
             </span>
             <input
               type="number"
-              value={categoryLimit}
-              onChange={(e) => setCategoryLimit(parseInt(e.target.value))}
-              placeholder="Установить лимит на категорию"
+              value={plannedBudget.plannedSpend}
+              onChange={(e) =>
+                setPlannedBudget({
+                  ...plannedBudget,
+                  plannedSpend: parseInt(e.target.value),
+                })
+              }
+              placeholder="Установить запланированный расход"
+              className="add-operation-modal-input"
+            />
+          </div>
+
+          <div className="add-operation-modal-block">
+            <span className="add-operation-modal-block-title">
+              Управление запланированным доходом
+            </span>
+            <input
+              type="number"
+              value={plannedBudget.plannedEarn}
+              onChange={(e) =>
+                setPlannedBudget({
+                  ...plannedBudget,
+                  plannedEarn: parseInt(e.target.value),
+                })
+              }
+              placeholder="Установить запланировнный доход"
               className="add-operation-modal-input"
             />
           </div>
 
           <button
-            onClick={setLimit}
+            onClick={changePlannedBudget}
             style={{
               width: "100%",
             }}
@@ -131,17 +189,17 @@ const ExpenseIncomeBlock: React.FunctionComponent<Props> = (props: Props) => {
               frame={{ width: 100, height: 100 }}
             />
           ) : (
-            categories
-              .sort((a, b) => b.categorySpend - a.categorySpend)
+            calculatedSpendCategories
+              .sort(
+                (a, b) => b.category.categorySpend - a.category.categorySpend
+              )
               .map((data, i) => {
-                console.log(data);
                 return (
                   <CategoryItem
                     key={i}
                     selectedCategory={selectedCategory}
                     selectCategory={selectCategory}
                     data={data}
-                    getIncomeCategory={getIncomeCategory}
                   />
                 );
               })
@@ -153,138 +211,3 @@ const ExpenseIncomeBlock: React.FunctionComponent<Props> = (props: Props) => {
 };
 
 export default ExpenseIncomeBlock;
-
-interface CategoryItemProps {
-  selectedCategory: CategoryModel;
-  selectCategory: (data: CategoryModel) => void;
-  data: CategoryModel;
-}
-
-const CategoryItem = (props: CategoryItemProps) => {
-  const { selectedCategory, selectCategory, data } = props;
-  const getCurrentAmount = (): number => {
-    let res = 0;
-    if (data.forEarn) res = res + data.categoryEarn;
-    if (data.forSpend) res = res + data.categorySpend;
-    return res;
-  };
-  return (
-    <div
-      className={`expense-income-history-row ${
-        selectedCategory.id === data.id && "expense-income-history-row-active"
-      }`}
-      onClick={() => {
-        selectCategory(data);
-      }}
-    >
-      <div className="expense-income-history-icon-wrapper">
-        <div
-          className="expense-income-history-icon"
-          style={{
-            backgroundColor: data.color.hex,
-          }}
-        >
-          <img
-            src={`${API_URL}api/v1/image/content/${data.icon.name}`}
-            alt=""
-          />
-        </div>
-      </div>
-      <div className="expense-income-history-row-info">
-        <div>
-          <span className="expense-income-history-row-info-title">
-            {data.name}
-          </span>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            {data.forSpend && (
-              <svg
-                width="11"
-                height="11"
-                viewBox="0 0 11 11"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                style={{ marginRight: 5 }}
-              >
-                <path
-                  d="M4.86743 8.20775C5.1954 8.59742 5.8046 8.59742 6.13257 8.20775L10.311 3.24335C10.7522 2.71926 10.3717 1.92857 9.67846 1.92857H1.32154C0.628273 1.92857 0.247849 2.71926 0.688962 3.24335L4.86743 8.20775Z"
-                  fill="#F0187B"
-                />
-              </svg>
-            )}
-
-            {data.forEarn && (
-              <svg
-                width="11"
-                height="11"
-                viewBox="0 0 11 11"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M4.86743 2.22083C5.1954 1.83116 5.8046 1.83116 6.13257 2.22083L10.311 7.18524C10.7522 7.70932 10.3717 8.50001 9.67846 8.50001H1.32154C0.628273 8.50001 0.247849 7.70932 0.688962 7.18523L4.86743 2.22083Z"
-                  fill="#6A82FB"
-                />
-              </svg>
-            )}
-          </div>
-        </div>
-        <React.Fragment>
-          <span className="expense-income-history-row-info-amount">
-            {NumberWithSpaces(getCurrentAmount())} из{" "}
-            {NumberWithSpaces(data?.categoryLimit ?? 0)} ₽
-          </span>
-          <LineChart
-            value={data?.percentsFromLimit ?? 0}
-            color={(data?.percentsFromLimit ?? 0) < 100 ? "#6A82FB" : "red"}
-          />
-        </React.Fragment>
-      </div>
-    </div>
-  );
-};
-
-interface ExpensesBlockProps {
-  type: "income" | "expenses";
-  value: number;
-  limit: number;
-}
-export const ExpensesIncome = (props: ExpensesBlockProps) => {
-  const { type, value, limit } = props;
-  return (
-    <React.Fragment>
-      <div className="expense-income-card expense-income-wrapper">
-        <div className="expense-income-card-content">
-          <span>{type === "income" ? "Доход" : "Расход"}</span>
-          <span className="expense-income-card-content-title">Сейчас</span>
-          <span>{NumberWithSpaces(value)} ₽</span>
-          <span className="expense-income-card-content-title">
-            Запланировано
-          </span>
-          <span>{NumberWithSpaces(limit)} ₽</span>
-        </div>
-        <div className="expense-income-card-bar">
-          <CircleChart
-            strokeDashoffset={
-              100 -
-              (isNaN(Math.floor((value / limit) * 100))
-                ? 0
-                : Math.floor((value / limit) * 100))
-            }
-            color={type === "expenses" ? "#F0187B" : "#6A82FB"}
-          />
-          <div className="expense-income-card-bar-value">
-            {isNaN(Math.floor((value / limit) * 100))
-              ? 0
-              : ((value / limit) * 100).toFixed(1)}
-            %
-          </div>
-        </div>
-      </div>
-    </React.Fragment>
-  );
-};

@@ -67,7 +67,6 @@ export default class BillRepository {
         userId,
         name,
         balance,
-        cents: 0,
       });
       if (res.data.status === 201) {
         return true;

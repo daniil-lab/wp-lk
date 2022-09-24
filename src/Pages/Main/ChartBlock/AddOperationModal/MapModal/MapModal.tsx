@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef } from "react";
 import { YMaps, Map, Placemark } from "react-yandex-maps";
 
 import "Styles/Pages/Main/ChartBlock/AddOperationModal/MapModal/MapModal.scss";
@@ -8,15 +8,19 @@ interface Props {
 }
 
 const MapModal: React.FunctionComponent<Props> = (props: Props) => {
-  const ref = useState(null);
   const [selectCoords, setSelectCoords] = useState<number[] | null>(null);
+
+  useMemo(() => {
+    props.onEnter(selectCoords);
+  }, [selectCoords]);
+
+  const ref = useRef(null);
+
   const onMapClick = (e) => {
     const coords = e.get("coords");
     setSelectCoords(coords);
   };
-  useMemo(() => {
-    props.onEnter(selectCoords);
-  }, [selectCoords]);
+
   return (
     <div className="map-modal">
       <YMaps ref={ref}>

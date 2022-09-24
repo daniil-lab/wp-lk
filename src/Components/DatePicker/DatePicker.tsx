@@ -68,17 +68,18 @@ const DatePicker: React.FunctionComponent<Props> = (props: Props) => {
   };
 
   useMemo(() => {
-    let d = day.toLocaleString("en-US", {
+    // @ts-ignore
+    const d = day.toLocaleString("en-US", {
       minimumIntegerDigits: 2,
       useGrouping: false,
     });
 
-    let m = (months.indexOf(month) + 1).toLocaleString("en-US", {
+    const m = (months.indexOf(month) + 1).toLocaleString("en-US", {
       minimumIntegerDigits: 2,
       useGrouping: false,
     });
 
-    let y = year;
+    const y = year;
 
     let date = moment(`${y}-${m}-${d}`).format("YYYY-MM-DD");
 
